@@ -39,25 +39,25 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 backdrop-blur-xl bg-white/70 border-r border-white/20 pt-16">
-      <nav className="p-4">
-        <div className="mb-4">
-          <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+    <aside className="fixed left-0 top-0 h-full w-48 backdrop-blur-xl bg-white/70 border-r border-white/20 pt-16">
+      <nav className="p-3">
+        <div className="mb-3">
+          <h2 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
             Components
           </h2>
         </div>
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {menuItems.map((item, index) => (
             <li key={index}>
               <button 
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300
+                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-300
                   ${currentPath === item.path
                     ? 'bg-white/80 text-blue-600 shadow-sm border border-white/50' 
                     : 'text-gray-700 hover:bg-white/50'}`}
                 onClick={() => handleNavigation(item.path)}
               >
-                <item.icon className={`w-5 h-5 ${currentPath === item.path ? 'text-blue-600' : ''}`} />
-                <span className="font-medium">{item.label}</span>
+                <item.icon className={`w-4 h-4 ${currentPath === item.path ? 'text-blue-600' : ''}`} />
+                <span className="font-medium text-sm">{item.label}</span>
               </button>
             </li>
           ))}
