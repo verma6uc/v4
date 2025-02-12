@@ -1,7 +1,7 @@
 import React from 'react';
 import { RecentActivityList } from '../components/lists/RecentActivityList';
 import { NotificationList } from '../components/lists/NotificationList';
-import { TaskList } from '../components/lists/TaskList';
+import { KanbanBoard } from '../components/KanbanBoard';
 import { Tabs } from '../components/Tabs';
 
 // Sample data for RecentActivityList
@@ -114,7 +114,7 @@ const notifications = [
   }
 ];
 
-// Sample data for TaskList
+// Sample data for Tasks
 const tasks = [
   {
     id: '1',
@@ -225,11 +225,10 @@ export function ListsPage() {
               Manage and track tasks
             </p>
           </div>
-          <TaskList 
+          <KanbanBoard 
             tasks={tasks}
-            className="bg-white rounded-lg shadow-sm border border-gray-200"
-            onStatusChange={(taskId, newStatus) => {
-              console.log(`Task ${taskId} status changed to ${newStatus}`);
+            onTaskMove={(taskId, newStatus) => {
+              console.log(`Task ${taskId} moved to ${newStatus}`);
             }}
             onTaskClick={(task) => console.log('Task clicked:', task)}
           />
