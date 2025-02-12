@@ -1,241 +1,250 @@
-# Company Object
+# Company Business Object Specification
 
-## Overview
-The Company object is a foundational, first‑class business entity within our platform. It represents an individual organization that uses the platform and serves as the parent entity for other related objects (such as Spaces, Users, and Applications). The Company object encapsulates both data (attributes) and behaviors (methods and business rules) essential for managing an organization's lifecycle—from creation and configuration to billing and reporting.
+## 1. Overview
+The Company object represents an individual organization using the platform. It is the top-level tenant entity that contains all other objects (Spaces, Users, Applications).
 
-This document covers two main flows for creating a Company:
-- SuperAdmin Company Creation – A process initiated by a SuperAdmin that provisions a new Company and subsequently sets up administrative access.
-- Self Signup – A process that allows prospective companies to onboard themselves through an interactive, guided self‑service experience.
+## 2. Attributes
 
-## Attributes
-
-### Company ID
-- **Type**: UUID (string)
-- **Description**: A unique identifier automatically assigned to each Company.
-- **Example**: "123e4567-e89b-12d3-a456-426614174000"
-
-### Name
-- **Type**: String
-- **Description**: The legal or trading name of the Company. Must be unique across the platform.
-- **Example**: "Example Corp"
+### Core Attributes
+- **id**: UUID (Primary Key, System Generated)
+- **name**: String (Required, Unique across platform)
+  - Validation: 3-100 characters, alphanumeric with spaces
+  - Used in: CPOV.COCR.US1
+- **identifier**: String (Required, Unique across platform)
+  - Validation: 3-50 characters, alphanumeric only, no spaces
+  - Used in: CPOV.COCR.US1, CPOV.COCR.US2
+- **status**: CompanyStatus (Enum, Required)
+  - Values: DRAFT, ACTIVE, SUSPENDED, ARCHIVED, DELETED
+  - Used in: COMM.COSM.US1, COMM.COSM.US3, COMM.COSM.US5
 
 ### Contact Information
-- **Type**: Object (JSON)
-- **Attributes**:
-  - Email: Primary contact email.
-  - Phone: Contact phone number.
-  - Address: Physical or mailing address.
-- **Example**:
-```json
-{
-  "email": "contact@example.com",
-  "phone": "123-456-7890",
-  "address": "123 Main St, Anytown, Country"
-}
-```
+- **primaryEmail**: String (Required)
+  - Validation: Valid email format
+  - Used in: CPOV.COCR.US1
+- **primaryPhone**: String
+  - Validation: Valid international phone format
+  - Used in: CPOV.ACAT.US1
+- **website**: String
+  - Validation: Valid URL format
+- **physicalAddress**: Object
+  - street: String
+  - city: String
+  - state: String
+  - country: String
+  - postalCode: String
+  - Used in: CPOV.ACAT.US1
 
-### Industry
-- **Type**: Enum (String)
-- **Description**: The sector in which the Company operates.
-- **Possible Values**:
-  - TECHNOLOGY
-  - FINANCE
-  - HEALTHCARE
-  - MANUFACTURING
-  - RETAIL
-  - EDUCATION
-  - GOVERNMENT
-  - ENERGY
-  - LOGISTICS
-- **Example**: "TECHNOLOGY"
+### Branding
+- **logo**: Object
+  - url: String
+  - metadata: {
+    originalName: String,
+    mimeType: String,
+    size: Number
+  }
+  - Used in: CPOV.COCR.US1, CCMT.CPMT.US2
 
-### Configuration Settings
-- **Type**: Object (JSON)
-- **Description**: Customizable parameters that determine how the Company operates (e.g., theme, timezone, security policies).
-- **Example**:
-```json
-{
-  "theme": "corporate",
-  "timezone": "UTC",
-  "securityPolicy": "standard"
-}
-```
+### System Fields
+- **createdAt**: DateTime (System Generated)
+- **createdBy**: UUID (Reference to User)
+- **updatedAt**: DateTime (System Generated)
+- **updatedBy**: UUID (Reference to User)
+- **activatedAt**: DateTime (When company becomes ACTIVE)
+- **suspendedAt**: DateTime
+- **suspendedReason**: String
+- **archivedAt**: DateTime
+- **archivedReason**: String
 
-### Status
-- **Type**: Enum (String)
-- **Description**: Represents the lifecycle state of the Company.
-- **Possible Values**:
-  - ONBOARDING
-  - ACTIVE
-  - SUSPENDED
-  - ARCHIVED
-- **Example**: "ACTIVE"
+### Configuration
+- **defaultLocale**: String (Required)
+  - Default: "en-US"
+  - Used in: CCMT.DLOC.US1
+- **timezone**: String (Required)
+  - Default: "UTC"
+  - Used in: CCMT.DLOC.US1
+- **securitySettings**: Object
+  - passwordPolicy: {
+    minLength: Number,
+    requireSpecialChar: Boolean,
+    requireNumber: Boolean,
+    requireUppercase: Boolean,
+    expiryDays: Number
+  }
+  - sessionTimeout: Number (minutes)
+  - maxLoginAttempts: Number
+  - Used in: CCMT.SECF.US1, CCMT.SECF.US2
 
-## Behaviors & Methods
+## 3. State Machine
 
-### Provisioning
-- **SuperAdmin Flow**: A SuperAdmin creates a new Company by providing required details through a dedicated process.
-- **Self Signup Flow**: A prospective Company Admin enters company details via a self‑service form.
-- **Common Behavior**: Initialize default configuration settings and assign a unique Company ID.
+### States
+1. **DRAFT**
+   - Initial state during company creation
+   - Limited access to setup functions only
+   - User Story: CPOV.COCR.US1
 
-### Configuration Management
-- Update contact details, industry classification, and configuration settings.
-- Enforce validations and uniqueness (e.g., unique Company Name, valid Industry enum).
+2. **ACTIVE**
+   - Normal operating state
+   - Full platform access
+   - User Story: CPOV.ACAT.US1
 
-### Lifecycle Management
-- Transition through states (e.g., from ONBOARDING to ACTIVE, from ACTIVE to SUSPENDED or ARCHIVED).
-- Ensure proper verification before transitions (e.g., activation requires successful account setup).
+3. **SUSPENDED**
+   - Temporarily disabled
+   - Read-only access
+   - No new user activations
+   - User Story: COMM.COSM.US1
 
-### Integration
-- Link related objects such as Spaces, Users, and Applications.
-- Drive billing, reporting, and access control based on Company configurations.
+4. **ARCHIVED**
+   - Permanently disabled
+   - Read-only access for audit purposes
+   - No user access
+   - User Story: COMM.COSM.US5
 
-### Audit Logging
-- Record every action and state transition with exact audit log messages for security, compliance, and debugging.
+5. **DELETED**
+   - Marked for deletion
+   - No access
+   - Data retained per retention policy
+   - User Story: COMM.COSM.US6
 
-## Creation Flows
+### State Transitions
 
-### 1. SuperAdmin Company Creation
+1. **DRAFT → ACTIVE**
+   - Trigger: Company Admin completes activation
+   - Validation: Required fields completed
+   - User Story: CPOV.ACAT.US1
+   - Audit Log: "Company {name} activated by {actor}"
+   - Notification: "Company {name} is now active"
 
-#### Process Overview
-1. **Initiation**:
-   - A SuperAdmin accesses the company provisioning module and manually enters the necessary details for a new Company (name, contact info, industry, configuration settings, etc.).
+2. **ACTIVE → SUSPENDED**
+   - Trigger: Super Admin suspends company
+   - Required: Suspension reason
+   - User Story: COMM.COSM.US1
+   - Audit Log: "Company {name} suspended by {actor}. Reason: {reason}"
+   - Notifications:
+     - To Super Admin: "Company {name} has been suspended"
+     - To Company Admin: "Your company access has been suspended"
+     - To All Users: "Company access is currently suspended"
 
-2. **Data Input & Validation**:
-   - The system validates the inputs—ensuring the Company Name is unique, the Industry field is selected from the enum, and all required fields are complete.
+3. **SUSPENDED → ACTIVE**
+   - Trigger: Super Admin reactivates company
+   - Required: Reactivation reason
+   - User Story: COMM.COSM.US3
+   - Audit Log: "Company {name} reactivated by {actor}. Reason: {reason}"
+   - Notifications:
+     - To Super Admin: "Company {name} has been reactivated"
+     - To Company Admin: "Your company access has been restored"
+     - To All Users: "Company access has been restored"
 
-3. **Invitation & Activation**:
-   - After the company record is created, the system automatically generates an invitation for the Company Admin.
-   - An email is sent with an activation link.
-   - Once activated, the Company's status transitions from ONBOARDING to ACTIVE.
+4. **ACTIVE/SUSPENDED → ARCHIVED**
+   - Trigger: Super Admin archives company
+   - Required: Archival reason
+   - User Story: COMM.COSM.US5
+   - Audit Log: "Company {name} archived by {actor}. Reason: {reason}"
+   - Notifications:
+     - To Super Admin: "Company {name} has been archived"
+     - To Company Admin: "Your company has been archived"
 
-#### Audit & Notifications (SuperAdmin)
-- **Audit Log Example**:
-  - On creation: "Company {companyId} created by SuperAdmin {username}."
-  - On activation: "Company {companyId} activated by Company Admin {username}."
-- **Notification**:
-  - SuperAdmins receive in-app confirmations
-  - Activation email is sent to the designated contact
+5. **ARCHIVED → DELETED**
+   - Trigger: Super Admin initiates deletion
+   - Required: Deletion reason, Secondary verification
+   - User Story: COMM.COSM.US6
+   - Audit Log: "Company {name} marked for deletion by {actor}. Reason: {reason}"
+   - Notifications:
+     - To Super Admin: "Company {name} has been marked for deletion"
+     - To Company Admin: "Your company has been scheduled for deletion"
 
-### 2. Self Signup
+## 4. Actions/Methods
 
-#### Process Overview
-1. **Initiation**:
-   - A prospective Company Admin clicks the "Self Signup" button on the public landing page (e.g., https://app.example.com/self-signup).
-   - User is directed to a dedicated Self Signup page.
+### Creation and Setup
+1. **createCompany(name, identifier, email)**
+   - Actor: Super Admin
+   - User Story: CPOV.COCR.US1
+   - Validation:
+     - Unique company name and identifier
+     - Valid email format
+   - Creates company in DRAFT state
+   - Audit Log: "New company {name} created by {actor}"
 
-2. **Data Input**:
-   - The user interacts with a concierge bot that prompts for:
-     - Application Title: (Unique string)
-     - Description: (Multi-line text up to 300 characters)
-     - Target Audience: (Text or dropdown)
-     - Industry: (Dropdown selection from predefined enum values)
-     - Contact Information: (JSON object including email, phone, address)
-     - Initial Configuration Parameters: (JSON object for theme, timezone, etc.)
+2. **updateCompanyDetails(companyId, details)**
+   - Actor: Super Admin, Company Admin
+   - User Story: CPOV.COCR.US2, CCMT.CPMT.US1
+   - Validation:
+     - Company in DRAFT or ACTIVE state
+     - Required fields present
+   - Audit Log: "Company {name} details updated by {actor}"
 
-3. **Processing & Animation**:
-   - After submission, the system displays an AI-induced animated GIF (2–5 seconds) to indicate processing.
+### State Management
+1. **activateCompany(companyId)**
+   - Actor: Company Admin
+   - User Story: CPOV.ACAT.US1
+   - Validation:
+     - All required fields completed
+     - Admin account activated
+   - Changes state to ACTIVE
+   - Audit Log: "Company {name} activated by {actor}"
 
-4. **Provisional Company Creation & Invitation**:
-   - The system creates a provisional Company object with status PENDING_ACTIVATION
-   - Sends an activation email (with a secure, time-limited token) to the provided contact email.
+2. **suspendCompany(companyId, reason)**
+   - Actor: Super Admin
+   - User Story: COMM.COSM.US1
+   - Validation:
+     - Valid suspension reason
+     - Company in ACTIVE state
+   - Changes state to SUSPENDED
+   - Audit Log: "Company {name} suspended by {actor}. Reason: {reason}"
 
-5. **Account Activation**:
-   - The prospective Company Admin clicks the activation link
-   - Completes account activation
-   - Company's status transitions to ACTIVE
+### Configuration
+1. **updateSecuritySettings(companyId, settings)**
+   - Actor: Company Admin
+   - User Story: CCMT.SECF.US1, CCMT.SECF.US2
+   - Validation:
+     - Company in ACTIVE state
+     - Valid security parameters
+   - Audit Log: "Security settings updated for company {name} by {actor}"
 
-#### Audit & Notifications (Self Signup)
-- **Audit Log Example**:
-  - On provisional creation: "Self Signup: Provisional Company {companyId} created; activation email sent to {email}."
-  - On activation: "Self Signup: Company {companyId} activated by {username}."
-- **Notification**:
-  - System displays in-app messages such as "Your company has been successfully created" and "Your company is now active"
+2. **updateLocalization(companyId, locale, timezone)**
+   - Actor: Company Admin
+   - User Story: CCMT.DLOC.US1
+   - Validation:
+     - Valid locale and timezone
+     - Company in ACTIVE state
+   - Audit Log: "Localization settings updated for company {name} by {actor}"
 
-## State Transitions & Business Rules
+## 5. Relationships
 
-### Industry Enum Business Rule
-- **Rule**: The Industry field must be one of the predefined enum values
-- **Validation**: If an invalid industry is provided, the input is rejected
+1. **Users (One-to-Many)**
+   - Company has multiple users
+   - Cascade suspend/archive operations
 
-### Lifecycle State Transitions
-1. **Onboarding → Active**:
-   - **Condition**: For both SuperAdmin creation and Self Signup, a Company transitions from ONBOARDING (or PENDING_ACTIVATION for self signup) to ACTIVE only after successful verification and account activation.
-   - **Audit Log**: "Company {companyId} activated by {username}."
+2. **Spaces (One-to-Many)**
+   - Company contains multiple spaces
+   - Hierarchical organization structure
 
-2. **Active → Suspended/Archived**:
-   - **Condition**: A Company may be suspended or archived by a SuperAdmin if compliance issues, payment failures, or inactivity is detected.
-   - **Audit Log**: "Company {companyId} suspended/archived by {username}."
+3. **Applications (One-to-Many)**
+   - Company owns multiple applications
+   - Deployment managed through spaces
 
-3. **Security & Notifications**:
-   - All transitions trigger appropriate notifications (e.g., in-app and email)
-   - All transitions are recorded in the Audit Log
+4. **SpaceTypes (One-to-Many)**
+   - Company defines multiple space types
+   - Used for space creation templates
 
-## Input and Output Formats
+## 6. Monitoring & Metrics
 
-### Input
-1. **Text Fields**:
-   - Company Name and Description are entered as strings
-   - Validations enforce length and format (e.g., unique Company Name)
+1. **Health Metrics**
+   - User Story: COMM.COMN.US1
+   - System uptime
+   - Error rates
+   - Resource consumption
+   - Critical incidents
 
-2. **Dropdowns**:
-   - Industry is selected from a dropdown containing enum values
+2. **Usage Metrics**
+   - User Story: COMM.COMN.US2
+   - Active user count
+   - Feature utilization
+   - API consumption
+   - Storage usage
 
-3. **JSON Objects**:
-   - Contact Information and Configuration Settings are submitted as JSON objects
-
-### Output
-1. **API Responses**:
-   - Data is returned as JSON for backend processes and validations
-
-2. **User Interface**:
-   - Forms, status messages, and dynamic content are rendered in the UI using tables, cards, and notifications
-
-3. **Audit Logs**:
-   - Audit log entries include timestamps, actor names, and action details in a structured log format
-
-## Integration Points
-1. **Spaces, Users, and Applications**:
-   - Changes to the Company object affect all related objects
-   - Updating Company configuration may propagate to Spaces and Users
-
-2. **Billing & Reporting**:
-   - The Company object is central to billing processes
-   - Used to generate reports
-
-3. **Audit Logging**:
-   - Every significant action is logged
-   - Integrated with the Audit Log module for security and compliance
-
-4. **Activation & Onboarding**:
-   - Self Signup and SuperAdmin creation flows feed directly into the Company object's lifecycle
-   - Transitions from provisional state to active state
-
-## Example JSON for a Provisional Company (Self Signup)
-```json
-{
-  "companyId": "123e4567-e89b-12d3-a456-426614174000",
-  "name": "Example Startup",
-  "contact": {
-    "email": "admin@examplestartup.com",
-    "phone": "987-654-3210",
-    "address": "456 Startup Ave, Innovation City, Country"
-  },
-  "industry": "TECHNOLOGY",
-  "settings": {
-    "theme": "modern",
-    "timezone": "UTC",
-    "securityPolicy": "enhanced"
-  },
-  "status": "PENDING_ACTIVATION"
-}
-```
-
-## Summary
-The Company object is a central first‑class business object that represents an organization on our platform. It is created either via a SuperAdmin-driven company creation process or through a Self Signup flow. In both cases, the Company object captures essential attributes like Company ID, Name, Contact Information, Industry (as an enum), Configuration Settings, and Status.
-
-- SuperAdmin Company Creation involves a manual provisioning process where a SuperAdmin enters the company details, which are then validated and confirmed via an invitation process.
-- Self Signup allows prospective Company Admins to onboard themselves by entering their details into a guided form, viewing processing animations, and completing account activation through a secure email link.
-- State transitions are strictly governed by business rules—ensuring that a Company moves from ONBOARDING or PENDING_ACTIVATION to ACTIVE only after proper verification, and that further transitions (such as SUSPENDED or ARCHIVED) are managed by authorized roles with appropriate audit logging and notifications.
-
-By integrating robust input validations, clearly defined output formats, and comprehensive audit logging, the Company object and its associated processes ensure that every organization is uniquely identifiable, securely managed, and fully integrated into the platform's multi‑tenant ecosystem.
+3. **Growth Metrics**
+   - User Story: COMM.COMN.US3
+   - User growth rate
+   - Application creation rate
+   - Space utilization trends
+   - Resource usage trends
