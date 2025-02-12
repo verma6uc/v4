@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Base styles */
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-gray-50;
+  }
+
+  /* Select option styles */
+  option {
+    @apply bg-white text-gray-900;
+  }
+
+  option:checked {
+    @apply bg-blue-50;
+  }
+
+  option:hover {
+    @apply bg-gray-50;
+  }
+
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full hover:bg-gray-400 transition-colors;
+  }
+
+  /* Form element focus styles */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-blue-100;
+  }
+
+  /* Disabled state styles */
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    @apply cursor-not-allowed opacity-50 bg-gray-50;
+  }
+}
+
+@layer components {
+  /* Motion-safe animations */
+  .motion-safe\:animate-fade-in {
+    @apply motion-safe:animate-[fade-in_0.3s_ease-out];
+  }
+
+  .motion-safe\:animate-scale-in {
+    @apply motion-safe:animate-[scale-in_0.2s_ease-out];
+  }
+
+  .motion-safe\:animate-enter-from-right {
+    @apply motion-safe:animate-[enter-from-right_0.25s_ease-out];
+  }
+
+  .motion-safe\:animate-enter-from-left {
+    @apply motion-safe:animate-[enter-from-left_0.25s_ease-out];
+  }
+
+  .motion-safe\:animate-enter-from-top {
+    @apply motion-safe:animate-[enter-from-top_0.25s_ease-out];
+  }
+
+  .motion-safe\:animate-enter-from-bottom {
+    @apply motion-safe:animate-[enter-from-bottom_0.25s_ease-out];
+  }
+}
