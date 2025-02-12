@@ -26,7 +26,7 @@ const menuItems = [
   { icon: MousePointer, label: 'Buttons', path: 'buttons' },
   { icon: Maximize2, label: 'Modals', path: 'modals' },
   { icon: Component, label: 'Components', path: 'components' },
-  { icon: Settings, label: 'Settings', path: 'settings' },
+  { icon: Settings, label: 'Settings', path: 'settings' }
 ]
 
 export function Sidebar() {

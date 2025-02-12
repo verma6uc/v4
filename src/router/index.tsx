@@ -11,7 +11,6 @@ import { BadgesPage } from '../pages/BadgesPage';
 import { MetricCardsPage } from '../pages/MetricCardsPage';
 import { ModalsPage } from '../pages/ModalsPage';
 import { ActivityComponentsPage } from '../pages/ActivityComponentsPage';
-import { ListsPage } from '../pages/ListsPage';
 import { TabsPage } from '../pages/TabsPage';
 
 export const router = createBrowserRouter([
@@ -54,10 +53,6 @@ export const router = createBrowserRouter([
       {
         path: 'activity',
         element: <ActivityComponentsPage />
-      },
-      {
-        path: 'lists',
-        element: <ListsPage />
       },
       {
         path: 'tabs',
