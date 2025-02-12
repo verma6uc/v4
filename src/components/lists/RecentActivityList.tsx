@@ -6,7 +6,11 @@ import {
   Settings, 
   Mail, 
   Shield,
-  LucideIcon
+  LucideIcon,
+  ArrowRight,
+  Check,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 
 interface Activity {
@@ -20,6 +24,10 @@ interface Activity {
     name: string;
     avatar?: string;
   };
+  link?: {
+    text: string;
+    url: string;
+  };
 }
 
 interface RecentActivityListProps {
@@ -27,6 +35,7 @@ interface RecentActivityListProps {
   maxItems?: number;
   showTimestamp?: boolean;
   className?: string;
+  onActivityClick?: (activity: Activity) => void;
 }
 
 const activityIcons: Record<Activity['type'], LucideIcon> = {
@@ -37,18 +46,46 @@ const activityIcons: Record<Activity['type'], LucideIcon> = {
   security: Shield
 };
 
-const statusColors = {
-  success: 'bg-green-50 text-green-700 ring-green-600/20',
-  warning: 'bg-yellow-50 text-yellow-700 ring-yellow-600/20',
-  error: 'bg-red-50 text-red-700 ring-red-600/20',
-  info: 'bg-blue-50 text-blue-700 ring-blue-600/20'
+const statusIcons: Record<string, LucideIcon> = {
+  success: Check,
+  warning: AlertTriangle,
+  error: AlertTriangle,
+  info: Info
+};
+
+const statusStyles: Record<string, { icon: string; bg: string; text: string; ring: string }> = {
+  success: {
+    icon: 'text-green-500',
+    bg: 'bg-green-50',
+    text: 'text-green-700',
+    ring: 'ring-green-600/20'
+  },
+  warning: {
+    icon: 'text-yellow-500',
+    bg: 'bg-yellow-50',
+    text: 'text-yellow-700',
+    ring: 'ring-yellow-600/20'
+  },
+  error: {
+    icon: 'text-red-500',
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    ring: 'ring-red-600/20'
+  },
+  info: {
+    icon: 'text-blue-500',
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    ring: 'ring-blue-600/20'
+  }
 };
 
 export function RecentActivityList({
   activities,
   maxItems,
   showTimestamp = true,
-  className = ''
+  className = '',
+  onActivityClick
 }: RecentActivityListProps) {
   const displayedActivities = maxItems ? activities.slice(0, maxItems) : activities;
 
@@ -76,27 +113,46 @@ export function RecentActivityList({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {displayedActivities.map((activity) => {
+      {displayedActivities.map((activity, index) => {
         const Icon = activityIcons[activity.type];
+        const styles = activity.status ? statusStyles[activity.status] : null;
+        const isLast = index === displayedActivities.length - 1;
         
         return (
-          <div key={activity.id} className="relative flex gap-4">
+          <div 
+            key={activity.id}
+            className={`relative flex gap-4 ${
+              onActivityClick ? 'cursor-pointer hover:bg-gray-50 rounded-lg transition-colors duration-200' : ''
+            }`}
+            onClick={() => onActivityClick?.(activity)}
+          >
             {/* Timeline line */}
-            <div className="absolute left-[19px] top-10 -bottom-10 w-px bg-gray-200 last:hidden" />
+            {!isLast && (
+              <div className="absolute left-5 top-10 -bottom-14 w-px bg-gray-200" />
+            )}
             
             {/* Icon */}
-            <div className="relative mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full bg-white shadow ring-1 ring-gray-200">
-              <Icon className="h-5 w-5 text-gray-500" />
+            <div className={`relative mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full bg-white shadow-md ring-1 ring-gray-200/50 ${
+              styles?.bg || 'bg-gray-50'
+            }`}>
+              <Icon className={`h-5 w-5 ${styles?.icon || 'text-gray-500'}`} />
             </div>
 
             <div className="flex-auto">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-gray-900">
+                  <h3 className="font-medium text-gray-900">
                     {activity.title}
-                  </p>
+                  </h3>
                   {activity.status && (
-                    <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColors[activity.status]}`}>
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                      styles?.bg
+                    } ${styles?.text} ${styles?.ring}`}>
+                      {activity.status && statusIcons[activity.status] && (
+                        React.createElement(statusIcons[activity.status], {
+                          className: 'h-3 w-3'
+                        })
+                      )}
                       {activity.status}
                     </span>
                   )}
@@ -109,7 +165,7 @@ export function RecentActivityList({
               </div>
               
               {activity.description && (
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-600">
                   {activity.description}
                 </p>
               )}
@@ -127,10 +183,21 @@ export function RecentActivityList({
                       <User className="h-4 w-4 text-gray-500" />
                     </div>
                   )}
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-600">
                     {activity.user.name}
                   </span>
                 </div>
+              )}
+
+              {activity.link && (
+                <a
+                  href={activity.link.url}
+                  className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {activity.link.text}
+                  <ArrowRight className="h-4 w-4" />
+                </a>
               )}
             </div>
           </div>

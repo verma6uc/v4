@@ -15,6 +15,10 @@ const activities = [
     status: 'success' as const,
     user: {
       name: 'John Doe'
+    },
+    link: {
+      text: 'View Profile',
+      url: '#'
     }
   },
   {
@@ -25,6 +29,10 @@ const activities = [
     type: 'document' as const,
     user: {
       name: 'Jane Smith'
+    },
+    link: {
+      text: 'View Document',
+      url: '#'
     }
   },
   {
@@ -34,6 +42,28 @@ const activities = [
     timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
     type: 'security' as const,
     status: 'warning' as const
+  },
+  {
+    id: '4',
+    title: 'Email campaign sent',
+    description: 'Monthly newsletter was sent to 2,500 subscribers',
+    timestamp: new Date(Date.now() - 4 * 3600000).toISOString(),
+    type: 'email' as const,
+    status: 'success' as const,
+    user: {
+      name: 'Marketing Team'
+    }
+  },
+  {
+    id: '5',
+    title: 'System settings updated',
+    description: 'Security policies were modified',
+    timestamp: new Date(Date.now() - 5 * 3600000).toISOString(),
+    type: 'settings' as const,
+    status: 'info' as const,
+    user: {
+      name: 'Admin'
+    }
   }
 ];
 
@@ -45,7 +75,8 @@ const notifications = [
     message: 'A new version is available. Please update your system.',
     type: 'info' as const,
     timestamp: new Date(Date.now() - 10 * 60000).toISOString(),
-    actionLabel: 'Update Now'
+    actionLabel: 'Update Now',
+    onAction: () => console.log('Update action clicked')
   },
   {
     id: '2',
@@ -62,6 +93,24 @@ const notifications = [
     type: 'success' as const,
     timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
     read: true
+  },
+  {
+    id: '4',
+    title: 'Security Alert',
+    message: 'Unusual login activity detected from a new device',
+    type: 'error' as const,
+    timestamp: new Date(Date.now() - 1 * 3600000).toISOString(),
+    read: false,
+    actionLabel: 'View Details'
+  },
+  {
+    id: '5',
+    title: 'Task Assigned',
+    message: 'You have been assigned a new task by Alice Johnson',
+    type: 'info' as const,
+    timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
+    read: false,
+    actionLabel: 'View Task'
   }
 ];
 
@@ -98,6 +147,30 @@ const tasks = [
       name: 'Bob Wilson'
     },
     tags: ['deployment', 'production']
+  },
+  {
+    id: '4',
+    title: 'Security Audit',
+    description: 'Perform monthly security audit',
+    status: 'blocked' as const,
+    priority: 'high' as const,
+    dueDate: new Date(Date.now() + 1 * 24 * 3600000).toISOString(),
+    assignee: {
+      name: 'Security Team'
+    },
+    tags: ['security', 'audit']
+  },
+  {
+    id: '5',
+    title: 'Customer Feedback Review',
+    description: 'Analyze and categorize recent customer feedback',
+    status: 'todo' as const,
+    priority: 'medium' as const,
+    dueDate: new Date(Date.now() + 3 * 24 * 3600000).toISOString(),
+    assignee: {
+      name: 'Product Team'
+    },
+    tags: ['feedback', 'customer']
   }
 ];
 
@@ -107,11 +180,17 @@ export function ListsPage() {
       id: 'activity',
       label: 'Recent Activity',
       content: (
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
+        <div className="p-6">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Track all recent activities and events
+            </p>
+          </div>
           <RecentActivityList 
             activities={activities}
-            className="bg-white rounded-lg shadow p-4"
+            className="bg-white rounded-lg shadow-sm border border-gray-200"
+            onActivityClick={(activity) => console.log('Activity clicked:', activity)}
           />
         </div>
       )
@@ -120,11 +199,17 @@ export function ListsPage() {
       id: 'notifications',
       label: 'Notifications',
       content: (
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Notifications</h2>
+        <div className="p-6">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              System notifications and alerts
+            </p>
+          </div>
           <NotificationList 
             notifications={notifications}
-            className="bg-white rounded-lg shadow p-4"
+            className="bg-white rounded-lg shadow-sm border border-gray-200"
+            onNotificationClick={(notification) => console.log('Notification clicked:', notification)}
           />
         </div>
       )
@@ -133,14 +218,20 @@ export function ListsPage() {
       id: 'tasks',
       label: 'Tasks',
       content: (
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Tasks</h2>
+        <div className="p-6">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Tasks</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage and track tasks
+            </p>
+          </div>
           <TaskList 
             tasks={tasks}
-            className="bg-white rounded-lg shadow"
+            className="bg-white rounded-lg shadow-sm border border-gray-200"
             onStatusChange={(taskId, newStatus) => {
               console.log(`Task ${taskId} status changed to ${newStatus}`);
             }}
+            onTaskClick={(task) => console.log('Task clicked:', task)}
           />
         </div>
       )
