@@ -1,41 +1,66 @@
 import React from 'react';
 import { MetricCard } from '../../components/MetricCard';
 import { Chart } from '../../components/Chart';
-import { SimpleTable } from '../../components/SimpleTable';
-import { Badge } from '../../components/Badge';
-import { Activity, Users, Building2, AlertTriangle } from 'lucide-react';
+import { ActivityFeed, Activity } from '../../components/ActivityFeed';
+import { SystemEventsList, SystemEvent } from '../../components/SystemEventsList';
+import { Activity as ActivityIcon, Users, Building2, AlertTriangle } from 'lucide-react';
 
 export function SuperAdminDashboardPage() {
-  const alertsData = [
-    { 
-      time: '2 mins ago', 
-      type: 'Security', 
-      status: <Badge variant="error" dot>{`Critical`}</Badge>, 
-      message: 'Multiple failed login attempts detected' 
+  const recentActivities: Activity[] = [
+    {
+      id: '1',
+      user: { name: 'John Doe' },
+      action: 'created a new',
+      target: 'company',
+      timestamp: '2 minutes ago',
+      type: 'create'
     },
-    { 
-      time: '15 mins ago', 
-      type: 'Performance', 
-      status: <Badge variant="warning" dot>{`Warning`}</Badge>, 
-      message: 'High memory usage on primary database' 
+    {
+      id: '2',
+      user: { name: 'Jane Smith' },
+      action: 'updated',
+      target: 'billing settings',
+      timestamp: '10 minutes ago',
+      type: 'update'
     },
-    { 
-      time: '1 hour ago', 
-      type: 'System', 
-      status: <Badge variant="success" dot>{`Resolved`}</Badge>, 
-      message: 'Automated backup completed successfully' 
+    {
+      id: '3',
+      user: { name: 'Admin' },
+      action: 'modified',
+      target: 'security settings',
+      timestamp: '30 minutes ago',
+      type: 'security'
     }
   ];
 
-  const alertColumns = [
-    { key: 'time', label: 'Time', sortable: true },
-    { key: 'type', label: 'Type', sortable: true },
-    { key: 'status', label: 'Status', sortable: false },
-    { key: 'message', label: 'Message', sortable: true }
+  const systemEvents: SystemEvent[] = [
+    {
+      id: '1',
+      type: 'error',
+      category: 'database',
+      message: 'Database connection timeout',
+      timestamp: '2 minutes ago',
+      details: 'Connection to primary database failed after 30s'
+    },
+    {
+      id: '2',
+      type: 'warning',
+      category: 'system',
+      message: 'High CPU usage detected',
+      timestamp: '10 minutes ago',
+      details: 'System CPU usage exceeded 80% threshold'
+    },
+    {
+      id: '3',
+      type: 'success',
+      category: 'security',
+      message: 'SSL certificates renewed',
+      timestamp: '1 hour ago'
+    }
   ];
 
   return (
-    <div>
+    <>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">System Overview</h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -62,7 +87,7 @@ export function SuperAdminDashboardPage() {
           title="System Load"
           value="67%"
           change={-3}
-          icon={Activity}
+          icon={ActivityIcon}
           status="warning"
         />
         <MetricCard
@@ -107,12 +132,19 @@ export function SuperAdminDashboardPage() {
         />
       </div>
 
-      <SimpleTable 
-        title="Recent System Alerts"
-        description="Latest system events and notifications"
-        columns={alertColumns}
-        data={alertsData}
-      />
-    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ActivityFeed 
+          activities={recentActivities}
+          title="Recent Activity"
+          description="Latest user actions and updates"
+        />
+
+        <SystemEventsList 
+          events={systemEvents}
+          title="System Events"
+          description="Recent system events and notifications"
+        />
+      </div>
+    </>
   );
 }
