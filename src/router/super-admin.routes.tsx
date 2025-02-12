@@ -6,6 +6,7 @@ import { CompaniesPage } from '../pages/super-admin/CompaniesPage';
 import { UsersPage } from '../pages/super-admin/UsersPage';
 import { BillingPage } from '../pages/super-admin/BillingPage';
 import { AuditLogsPage } from '../pages/super-admin/AuditLogsPage';
+import { SecurityPage } from '../pages/super-admin/SecurityPage';
 
 export const superAdminRoutes: RouteObject[] = [
   {
@@ -31,6 +32,10 @@ export const superAdminRoutes: RouteObject[] = [
       {
         path: 'audit',
         element: <AuditLogsPage />
+      },
+      {
+        path: 'security',
+        element: <SecurityPage />
       }
     ]
   }
