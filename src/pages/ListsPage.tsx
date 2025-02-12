@@ -1,8 +1,25 @@
 import React from 'react';
 import { RecentActivityList } from '../components/lists/RecentActivityList';
-import { NotificationList } from '../components/lists/NotificationList';
-import { KanbanBoard } from '../components/KanbanBoard';
 import { Tabs } from '../components/Tabs';
+import { 
+  AlertTriangle,
+  Clock
+} from 'lucide-react';
+
+type TabBadgeVariant = 'primary' | 'success' | 'warning' | 'error';
+
+interface TabBadge {
+  text: string;
+  variant: TabBadgeVariant;
+}
+
+interface TabItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  content: React.ReactNode;
+  badge?: TabBadge;
+}
 
 // Sample data for RecentActivityList
 const activities = [
@@ -67,118 +84,56 @@ const activities = [
   }
 ];
 
-// Sample data for NotificationList
-const notifications = [
+// Sample data for System Events
+const systemEvents = [
   {
     id: '1',
-    title: 'System Update',
-    message: 'A new version is available. Please update your system.',
-    type: 'info' as const,
-    timestamp: new Date(Date.now() - 10 * 60000).toISOString(),
-    actionLabel: 'Update Now',
-    onAction: () => console.log('Update action clicked')
-  },
-  {
-    id: '2',
-    title: 'Storage Warning',
-    message: 'You are approaching your storage limit (85% used)',
-    type: 'warning' as const,
-    timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
-    read: false
-  },
-  {
-    id: '3',
-    title: 'Backup Complete',
-    message: 'Your system backup was completed successfully',
-    type: 'success' as const,
-    timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
-    read: true
-  },
-  {
-    id: '4',
-    title: 'Security Alert',
-    message: 'Unusual login activity detected from a new device',
-    type: 'error' as const,
-    timestamp: new Date(Date.now() - 1 * 3600000).toISOString(),
-    read: false,
-    actionLabel: 'View Details'
-  },
-  {
-    id: '5',
-    title: 'Task Assigned',
-    message: 'You have been assigned a new task by Alice Johnson',
-    type: 'info' as const,
+    title: 'Multiple Failed Login Attempts',
+    description: '10 failed login attempts detected from IP 192.168.1.100',
     timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
-    read: false,
-    actionLabel: 'View Task'
-  }
-];
-
-// Sample data for Tasks
-const tasks = [
-  {
-    id: '1',
-    title: 'Review Q4 Reports',
-    description: 'Review and approve quarterly financial reports',
-    status: 'in_progress' as const,
-    priority: 'high' as const,
-    dueDate: new Date(Date.now() + 2 * 24 * 3600000).toISOString(),
-    assignee: {
-      name: 'Alice Johnson'
-    },
-    tags: ['finance', 'quarterly']
+    type: 'security' as const,
+    status: 'error' as const
   },
   {
     id: '2',
-    title: 'Update Documentation',
-    description: 'Update API documentation with new endpoints',
-    status: 'todo' as const,
-    priority: 'medium' as const,
-    dueDate: new Date(Date.now() + 5 * 24 * 3600000).toISOString(),
-    tags: ['documentation', 'api']
+    title: 'Unusual Access Pattern',
+    description: 'Unusual access pattern detected for user john.doe@example.com',
+    timestamp: new Date(Date.now() - 5 * 3600000).toISOString(),
+    type: 'security' as const,
+    status: 'warning' as const
   },
   {
     id: '3',
-    title: 'Deploy New Features',
-    description: 'Deploy latest features to production',
-    status: 'completed' as const,
-    priority: 'high' as const,
-    assignee: {
-      name: 'Bob Wilson'
-    },
-    tags: ['deployment', 'production']
+    title: 'System Backup Completed',
+    description: 'Daily system backup completed successfully',
+    timestamp: new Date(Date.now() - 6 * 3600000).toISOString(),
+    type: 'system' as const,
+    status: 'success' as const
   },
   {
     id: '4',
-    title: 'Security Audit',
-    description: 'Perform monthly security audit',
-    status: 'blocked' as const,
-    priority: 'high' as const,
-    dueDate: new Date(Date.now() + 1 * 24 * 3600000).toISOString(),
-    assignee: {
-      name: 'Security Team'
-    },
-    tags: ['security', 'audit']
+    title: 'Database Migration',
+    description: 'Database schema migration completed',
+    timestamp: new Date(Date.now() - 8 * 3600000).toISOString(),
+    type: 'system' as const,
+    status: 'info' as const
   },
   {
     id: '5',
-    title: 'Customer Feedback Review',
-    description: 'Analyze and categorize recent customer feedback',
-    status: 'todo' as const,
-    priority: 'medium' as const,
-    dueDate: new Date(Date.now() + 3 * 24 * 3600000).toISOString(),
-    assignee: {
-      name: 'Product Team'
-    },
-    tags: ['feedback', 'customer']
+    title: 'API Rate Limit Exceeded',
+    description: 'Rate limit exceeded for /api/users endpoint',
+    timestamp: new Date(Date.now() - 10 * 3600000).toISOString(),
+    type: 'api' as const,
+    status: 'warning' as const
   }
 ];
 
 export function ListsPage() {
-  const tabs = [
+  const tabs: TabItem[] = [
     {
       id: 'activity',
       label: 'Recent Activity',
+      icon: Clock,
       content: (
         <div className="p-6">
           <div className="mb-6">
@@ -196,41 +151,25 @@ export function ListsPage() {
       )
     },
     {
-      id: 'notifications',
-      label: 'Notifications',
+      id: 'system-events',
+      label: 'System Events',
+      icon: AlertTriangle,
+      badge: {
+        text: '2',
+        variant: 'error' as const
+      },
       content: (
         <div className="p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+            <h2 className="text-lg font-semibold text-gray-900">System Events</h2>
             <p className="mt-1 text-sm text-gray-500">
-              System notifications and alerts
+              Monitor system events and alerts
             </p>
           </div>
-          <NotificationList 
-            notifications={notifications}
+          <RecentActivityList 
+            activities={systemEvents}
             className="bg-white rounded-lg shadow-sm border border-gray-200"
-            onNotificationClick={(notification) => console.log('Notification clicked:', notification)}
-          />
-        </div>
-      )
-    },
-    {
-      id: 'tasks',
-      label: 'Tasks',
-      content: (
-        <div className="p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Tasks</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage and track tasks
-            </p>
-          </div>
-          <KanbanBoard 
-            tasks={tasks}
-            onTaskMove={(taskId, newStatus) => {
-              console.log(`Task ${taskId} moved to ${newStatus}`);
-            }}
-            onTaskClick={(task) => console.log('Task clicked:', task)}
+            onActivityClick={(activity) => console.log('System event clicked:', activity)}
           />
         </div>
       )

@@ -10,7 +10,9 @@ import {
   ArrowRight,
   Check,
   AlertTriangle,
-  Info
+  Info,
+  Database,
+  Globe
 } from 'lucide-react';
 
 interface Activity {
@@ -18,7 +20,7 @@ interface Activity {
   title: string;
   description?: string;
   timestamp: string;
-  type: 'user' | 'document' | 'settings' | 'email' | 'security';
+  type: 'user' | 'document' | 'settings' | 'email' | 'security' | 'system' | 'api';
   status?: 'success' | 'warning' | 'error' | 'info';
   user?: {
     name: string;
@@ -43,7 +45,9 @@ const activityIcons: Record<Activity['type'], LucideIcon> = {
   document: FileText,
   settings: Settings,
   email: Mail,
-  security: Shield
+  security: Shield,
+  system: Database,
+  api: Globe
 };
 
 const statusIcons: Record<string, LucideIcon> = {
@@ -148,11 +152,6 @@ export function RecentActivityList({
                     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${
                       styles?.bg
                     } ${styles?.text} ${styles?.ring}`}>
-                      {activity.status && statusIcons[activity.status] && (
-                        React.createElement(statusIcons[activity.status], {
-                          className: 'h-3 w-3'
-                        })
-                      )}
                       {activity.status}
                     </span>
                   )}
