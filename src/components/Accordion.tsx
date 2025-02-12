@@ -64,15 +64,15 @@ export function Accordion({
   };
 
   const getItemStyles = () => {
-    const baseStyles = 'transition-all duration-200';
+    const baseStyles = 'transition-all duration-200 bg-white';
     
     switch (variant) {
       case 'bordered':
         return `${baseStyles} border border-gray-200 rounded-lg mb-2`;
       case 'contained':
-        return `${baseStyles} bg-gray-50 rounded-lg mb-2`;
+        return `${baseStyles} shadow-sm rounded-lg mb-2`;
       case 'ghost':
-        return `${baseStyles} bg-transparent`;
+        return `${baseStyles}`;
       default:
         return `${baseStyles} border-b border-gray-200`;
     }
