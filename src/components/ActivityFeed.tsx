@@ -55,30 +55,26 @@ const statusIcons: Record<string, LucideIcon> = {
   info: Info
 };
 
-const statusStyles: Record<string, { icon: string; bg: string; text: string; ring: string }> = {
+const statusStyles: Record<string, { icon: string; bg: string; text: string }> = {
   success: {
     icon: 'text-green-500',
     bg: 'bg-green-50',
-    text: 'text-green-700',
-    ring: 'ring-green-600/20'
+    text: 'text-green-700'
   },
   warning: {
     icon: 'text-yellow-500',
     bg: 'bg-yellow-50',
-    text: 'text-yellow-700',
-    ring: 'ring-yellow-600/20'
+    text: 'text-yellow-700'
   },
   error: {
     icon: 'text-red-500',
     bg: 'bg-red-50',
-    text: 'text-red-700',
-    ring: 'ring-red-600/20'
+    text: 'text-red-700'
   },
   info: {
     icon: 'text-blue-500',
     bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    ring: 'ring-blue-600/20'
+    text: 'text-blue-700'
   }
 };
 
@@ -124,7 +120,7 @@ export function ActivityFeed({
           <div 
             key={activity.id}
             className={`relative flex gap-4 ${
-              onActivityClick ? 'cursor-pointer hover:bg-gray-50 rounded-lg transition-colors duration-200' : ''
+              onActivityClick ? 'cursor-pointer hover:bg-gray-50 transition-colors duration-200' : ''
             }`}
             onClick={() => onActivityClick?.(activity)}
           >
@@ -134,7 +130,7 @@ export function ActivityFeed({
             )}
             
             {/* Icon */}
-            <div className={`relative mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full bg-white shadow-md ring-1 ring-gray-200/50 ${
+            <div className={`relative mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full ${
               styles?.bg || 'bg-gray-50'
             }`}>
               <Icon className={`h-5 w-5 ${styles?.icon || 'text-gray-500'}`} />
@@ -147,9 +143,9 @@ export function ActivityFeed({
                     {activity.title}
                   </h3>
                   {activity.status && (
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
                       styles?.bg
-                    } ${styles?.text} ${styles?.ring}`}>
+                    } ${styles?.text}`}>
                       {activity.status}
                     </span>
                   )}

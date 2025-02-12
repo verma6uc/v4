@@ -137,15 +137,8 @@ export function ActivityComponentsPage() {
       label: 'Activity Feed',
       content: (
         <div className="p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Track all recent activities and events
-            </p>
-          </div>
           <ActivityFeed 
             activities={activities}
-            className="bg-white rounded-lg shadow-sm border border-gray-200"
             onActivityClick={(activity) => console.log('Activity clicked:', activity)}
           />
         </div>
@@ -160,15 +153,8 @@ export function ActivityComponentsPage() {
       },
       content: (
         <div className="p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">System Events</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Monitor system events and alerts
-            </p>
-          </div>
           <SystemEventsList 
             events={systemEvents}
-            className="bg-white rounded-lg shadow-sm border border-gray-200"
             onEventClick={(event) => console.log('System event clicked:', event)}
           />
         </div>
@@ -189,7 +175,6 @@ export function ActivityComponentsPage() {
         <Tabs 
           tabs={tabs}
           variant="underline"
-          className="bg-white rounded-lg shadow-sm p-4"
         />
       </div>
     </div>
