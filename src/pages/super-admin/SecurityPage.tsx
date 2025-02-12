@@ -3,7 +3,18 @@ import { AdvancedTable, Column } from '../../components/AdvancedTable';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { MetricCard } from '../../components/MetricCard';
-import { Shield, Lock, UserCheck, AlertTriangle } from 'lucide-react';
+import { Tabs } from '../../components/Tabs';
+import { Accordion } from '../../components/Accordion';
+import { 
+  Shield, 
+  Lock, 
+  UserCheck, 
+  AlertTriangle,
+  Key,
+  UserCog,
+  Network,
+  History
+} from 'lucide-react';
 
 type SecurityEvent = {
   id: string;
@@ -139,6 +150,175 @@ export function SecurityPage() {
     }
   ];
 
+  const securityPolicies = [
+    {
+      id: 'password',
+      title: 'Password Policy',
+      icon: Lock,
+      content: (
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium">Minimum Requirements:</h4>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li>At least 8 characters long</li>
+              <li>Must contain uppercase and lowercase letters</li>
+              <li>Must contain at least one number</li>
+              <li>Must contain at least one special character</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium">Additional Settings:</h4>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li>Password expires every 90 days</li>
+              <li>Cannot reuse last 5 passwords</li>
+              <li>Account locks after 5 failed attempts</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'mfa',
+      title: 'Multi-Factor Authentication',
+      icon: UserCheck,
+      content: (
+        <div className="space-y-4">
+          <p>MFA is required for all users. Supported methods:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Authenticator apps (Google Authenticator, Microsoft Authenticator)</li>
+            <li>SMS verification</li>
+            <li>Email verification</li>
+            <li>Security keys (YubiKey)</li>
+          </ul>
+        </div>
+      )
+    },
+    {
+      id: 'api',
+      title: 'API Security',
+      icon: Key,
+      content: (
+        <div className="space-y-4">
+          <p>API access is secured through:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>JWT-based authentication</li>
+            <li>Rate limiting: 1000 requests per minute</li>
+            <li>IP whitelisting available</li>
+            <li>Automatic key rotation every 30 days</li>
+          </ul>
+        </div>
+      )
+    }
+  ];
+
+  const tabs = [
+    {
+      id: 'overview',
+      label: 'Overview',
+      icon: Shield,
+      content: (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <MetricCard
+              title="Security Score"
+              value="85%"
+              change={5}
+              icon={Shield}
+              status="success"
+            />
+            <MetricCard
+              title="Active Sessions"
+              value="156"
+              change={-3}
+              icon={UserCheck}
+              status="info"
+            />
+            <MetricCard
+              title="Failed Attempts"
+              value="23"
+              change={12}
+              icon={AlertTriangle}
+              status="warning"
+            />
+            <MetricCard
+              title="MFA Enabled"
+              value="92%"
+              change={8}
+              icon={Lock}
+              status="success"
+            />
+          </div>
+
+          <Accordion
+            items={securityPolicies}
+            variant="bordered"
+            className="mt-6"
+          />
+        </div>
+      )
+    },
+    {
+      id: 'events',
+      label: 'Security Events',
+      icon: History,
+      content: (
+        <AdvancedTable<SecurityEvent>
+          items={securityEvents}
+          columns={columns}
+          itemsPerPage={10}
+          enableSearch
+          enableExport
+        />
+      )
+    },
+    {
+      id: 'access',
+      label: 'Access Control',
+      icon: UserCog,
+      content: (
+        <div className="space-y-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
+            <h3 className="text-lg font-semibold mb-4">Role-Based Access Control</h3>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Access control is managed through a hierarchical role system:
+              </p>
+              <ul className="list-disc list-inside space-y-2">
+                <li>Super Admin: Full system access</li>
+                <li>Company Admin: Company-wide access</li>
+                <li>Space Admin: Space-level access</li>
+                <li>User: Basic access</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'network',
+      label: 'Network',
+      icon: Network,
+      content: (
+        <div className="space-y-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
+            <h3 className="text-lg font-semibold mb-4">Network Security</h3>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Network security measures in place:
+              </p>
+              <ul className="list-disc list-inside space-y-2">
+                <li>SSL/TLS encryption for all traffic</li>
+                <li>DDoS protection</li>
+                <li>Web Application Firewall (WAF)</li>
+                <li>Regular security scans</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  ];
+
   return (
     <>
       <div className="mb-6">
@@ -151,48 +331,13 @@ export function SecurityPage() {
           </div>
           <Button>Security Settings</Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Security Score"
-            value="85%"
-            change={5}
-            icon={Shield}
-            status="success"
-          />
-          <MetricCard
-            title="Active Sessions"
-            value="156"
-            change={-3}
-            icon={UserCheck}
-            status="info"
-          />
-          <MetricCard
-            title="Failed Attempts"
-            value="23"
-            change={12}
-            icon={AlertTriangle}
-            status="warning"
-          />
-          <MetricCard
-            title="MFA Enabled"
-            value="92%"
-            change={8}
-            icon={Lock}
-            status="success"
-          />
-        </div>
       </div>
 
-      <div className="space-y-6">
-        <AdvancedTable<SecurityEvent>
-          items={securityEvents}
-          columns={columns}
-          itemsPerPage={10}
-          enableSearch
-          enableExport
-        />
-      </div>
+      <Tabs 
+        tabs={tabs}
+        variant="pills"
+        className="mt-6"
+      />
     </>
   );
 }
