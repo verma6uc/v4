@@ -1,45 +1,38 @@
 import React from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, Download } from 'lucide-react'
 
-interface AdvancedTableProps {
-  title: string
+export interface Column<T> {
+  key: keyof T | string
+  label: string
+  sortable?: boolean
+  cell?: (item: T) => React.ReactNode
+}
+
+export interface AdvancedTableProps<T> {
+  title?: string
   description?: string
+  items: T[]
+  columns: Column<T>[]
+  itemsPerPage?: number
+  enableSearch?: boolean
+  enableExport?: boolean
 }
 
-interface User {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: 'Active' | 'Inactive'
-  lastActive: string
-}
-
-const mockData: User[] = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active', lastActive: '2 hours ago' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Inactive', lastActive: '1 day ago' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'Active', lastActive: '5 minutes ago' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Editor', status: 'Active', lastActive: '1 hour ago' },
-  { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'User', status: 'Inactive', lastActive: '3 days ago' },
-  { id: 6, name: 'Eva Davis', email: 'eva@example.com', role: 'Admin', status: 'Active', lastActive: '30 minutes ago' },
-]
-
-const columns = [
-  { key: 'name', label: 'Name', sortable: true },
-  { key: 'email', label: 'Email', sortable: true },
-  { key: 'role', label: 'Role', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'lastActive', label: 'Last Active', sortable: true }
-]
-
-export function AdvancedTable({ title, description }: AdvancedTableProps) {
-  const [sortField, setSortField] = React.useState<keyof User>('name')
+export function AdvancedTable<T extends { id: string | number }>({ 
+  title,
+  description,
+  items,
+  columns,
+  itemsPerPage = 5,
+  enableSearch = true,
+  enableExport = true
+}: AdvancedTableProps<T>) {
+  const [sortField, setSortField] = React.useState<keyof T>(columns[0].key as keyof T)
   const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('asc')
   const [currentPage, setCurrentPage] = React.useState(1)
   const [searchValue, setSearchValue] = React.useState('')
-  const itemsPerPage = 5
 
-  const handleSort = (field: keyof User) => {
+  const handleSort = (field: keyof T) => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
@@ -57,7 +50,7 @@ export function AdvancedTable({ title, description }: AdvancedTableProps) {
     const csvContent = [
       columns.map(col => col.label),
       ...filteredData.map(row => 
-        columns.map(col => row[col.key as keyof User])
+        columns.map(col => String(row[col.key as keyof T]))
       )
     ].map(row => row.join(',')).join('\n')
 
@@ -70,17 +63,20 @@ export function AdvancedTable({ title, description }: AdvancedTableProps) {
     window.URL.revokeObjectURL(url)
   }
 
-  const filteredData = mockData.filter(item =>
+  const filteredData = items.filter(item =>
     Object.values(item).some(value =>
-      value.toString().toLowerCase().includes(searchValue.toLowerCase())
+      String(value).toLowerCase().includes(searchValue.toLowerCase())
     )
   )
 
   const sortedData = [...filteredData].sort((a, b) => {
+    const aValue = a[sortField]
+    const bValue = b[sortField]
+    
     if (sortDirection === 'asc') {
-      return a[sortField] > b[sortField] ? 1 : -1
+      return aValue > bValue ? 1 : -1
     }
-    return a[sortField] < b[sortField] ? 1 : -1
+    return aValue < bValue ? 1 : -1
   })
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage)
@@ -89,32 +85,38 @@ export function AdvancedTable({ title, description }: AdvancedTableProps) {
 
   return (
     <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-        {description && (
-          <p className="mt-1 text-sm text-gray-500">{description}</p>
-        )}
-      </div>
+      {(title || description) && (
+        <div className="mb-6">
+          {title && <h3 className="text-xl font-semibold text-gray-900">{title}</h3>}
+          {description && (
+            <p className="mt-1 text-sm text-gray-500">{description}</p>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center justify-between mb-4">
-        <div className="relative max-w-xs">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchValue}
-            onChange={handleSearch}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-          />
-        </div>
+        {enableSearch && (
+          <div className="relative max-w-xs">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchValue}
+              onChange={handleSearch}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            />
+          </div>
+        )}
 
-        <button
-          onClick={exportData}
-          className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-200"
-        >
-          <Download className="w-4 h-4" />
-          Export CSV
-        </button>
+        {enableExport && (
+          <button
+            onClick={exportData}
+            className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-200"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto">
@@ -123,12 +125,12 @@ export function AdvancedTable({ title, description }: AdvancedTableProps) {
             <tr className="border-b border-gray-200">
               {columns.map((column) => (
                 <th
-                  key={column.key}
+                  key={column.key as string}
                   className="px-4 py-3 text-left text-sm font-medium text-gray-600"
                 >
                   <button
                     className="flex items-center gap-1 hover:text-gray-900"
-                    onClick={() => column.sortable && handleSort(column.key as keyof User)}
+                    onClick={() => column.sortable && handleSort(column.key as keyof T)}
                   >
                     {column.label}
                     {sortField === column.key && (
@@ -142,18 +144,11 @@ export function AdvancedTable({ title, description }: AdvancedTableProps) {
           <tbody>
             {paginatedData.map((item) => (
               <tr key={item.id} className="border-b border-gray-100 hover:bg-white/50">
-                <td className="px-4 py-3 text-sm text-gray-900">{item.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{item.email}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{item.role}</td>
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                    ${item.status === 'Active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">{item.lastActive}</td>
+                {columns.map((column) => (
+                  <td key={column.key as string} className="px-4 py-3">
+                    {column.cell ? column.cell(item) : String(item[column.key as keyof T])}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
