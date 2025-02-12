@@ -249,7 +249,7 @@ export function ListsPage() {
 
         <Tabs 
           tabs={tabs}
-          variant="pills"
+          variant="underline"
           className="bg-white rounded-lg shadow-sm p-4"
         />
       </div>
