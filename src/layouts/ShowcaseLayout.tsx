@@ -15,7 +15,7 @@ export function ShowcaseLayout({ children, title, description }: ShowcaseLayoutP
       <Sidebar />
       
       <main className="pl-48 pt-16">
-        <div style={{ maxWidth: 'calc(90vw - 12rem)' }} className="mx-auto py-6 px-4">
+        <div style={{ maxWidth: 'calc(97vw - 12rem)' }} className="mx-auto py-6 px-4">
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
             <p className="mt-1 text-gray-500">{description}</p>
