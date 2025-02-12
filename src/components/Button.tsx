@@ -112,7 +112,7 @@ export function Button({
   const gaps = {
     sm: 'gap-1.5',
     md: 'gap-2',
-    lg: 'gap-2.5'
+    lg: 'gap-2'
   }
 
   const roundedStyles = {
@@ -154,7 +154,7 @@ export function Button({
         focus:outline-none focus:ring-2 focus:ring-offset-1
         disabled:opacity-40 disabled:cursor-not-allowed
         disabled:hover:bg-opacity-100 disabled:shadow-none
-        overflow-hidden
+        overflow-hidden leading-none
         ${variants[variant]}
         ${sizes[size]}
         ${gaps[size]}
@@ -170,19 +170,21 @@ export function Button({
       ))}
 
       {loading && (
-        <Loader2 className={`${iconSizes[size]} animate-spin opacity-70`} />
+        <Loader2 className={`${iconSizes[size]} animate-spin opacity-70 -translate-y-[0.5px]`} />
       )}
       
       {!loading && icon && iconPosition === 'left' && (
-        <span className={`inline-flex text-current opacity-70 ${iconSizes[size]}`}>
+        <span className={`shrink-0 inline-flex items-center justify-center text-current opacity-70 ${iconSizes[size]} -translate-y-[0.5px]`}>
           {icon}
         </span>
       )}
       
-      {children}
+      <span className="inline-flex items-center justify-center">
+        {children}
+      </span>
       
       {!loading && icon && iconPosition === 'right' && (
-        <span className={`inline-flex text-current opacity-70 ${iconSizes[size]}`}>
+        <span className={`shrink-0 inline-flex items-center justify-center text-current opacity-70 ${iconSizes[size]} -translate-y-[0.5px]`}>
           {icon}
         </span>
       )}
@@ -195,14 +197,38 @@ interface ButtonGroupProps {
   children: React.ReactNode
   vertical?: boolean
   fullWidth?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning' | 'primary-dark' | 'secondary-dark'
+  spacing?: 'none' | 'sm' | 'md'
 }
 
-export function ButtonGroup({ children, vertical = false, fullWidth = false }: ButtonGroupProps) {
+export function ButtonGroup({ 
+  children, 
+  vertical = false, 
+  fullWidth = false,
+  size = 'md',
+  variant = 'primary',
+  spacing = 'none'
+}: ButtonGroupProps) {
+  const spacingStyles = {
+    none: '',
+    sm: vertical ? 'space-y-1' : 'space-x-1',
+    md: vertical ? 'space-y-2' : 'space-x-2'
+  }
+
+  const borderStyles = spacing === 'none' ? {
+    horizontal: 'first:rounded-r-none last:rounded-l-none not-last:border-r-0',
+    vertical: 'first:rounded-b-none last:rounded-t-none not-last:border-b-0'
+  } : {
+    horizontal: 'rounded-md',
+    vertical: 'rounded-md'
+  }
+
   return (
     <div className={`
       inline-flex ${vertical ? 'flex-col' : 'flex-row'}
       ${fullWidth ? 'w-full' : ''}
-      overflow-hidden rounded-md shadow-sm
+      ${spacingStyles[spacing]}
     `}>
       {React.Children.map(children, (child) => {
         if (!React.isValidElement(child)) return null
@@ -210,13 +236,15 @@ export function ButtonGroup({ children, vertical = false, fullWidth = false }: B
         // Get existing className from child props
         const existingClassName = child.props.className || ''
         
-        // Create new props with modified className
+        // Create new props with modified className and consistent size/variant
         const newProps = {
           ...child.props,
+          size: child.props.size || size,
+          variant: child.props.variant || variant,
           className: `
             ${existingClassName}
-            ${vertical ? 'first:rounded-b-none last:rounded-t-none not-last:border-b-0' : 'first:rounded-r-none last:rounded-l-none not-last:border-r-0'}
-            shadow-none
+            ${spacing === 'none' ? (vertical ? borderStyles.vertical : borderStyles.horizontal) : ''}
+            ${spacing === 'none' ? 'shadow-none' : ''}
           `
         }
 
@@ -265,18 +293,16 @@ export function SplitButton({
 
   return (
     <div className="relative inline-flex" ref={menuRef}>
-      <ButtonGroup>
-        <Button variant={variant} size={size} {...props}>
+      <ButtonGroup size={size} variant={variant}>
+        <Button {...props}>
           {mainText}
         </Button>
         <Button 
-          variant={variant} 
-          size={size}
           className="px-1.5"
           onClick={() => setMenuOpen(!menuOpen)}
           {...props}
         >
-          <ChevronDown className={iconSizes[size]} />
+          <ChevronDown className={`${iconSizes[size]} -translate-y-[0.5px]`} />
         </Button>
       </ButtonGroup>
 
@@ -292,7 +318,7 @@ export function SplitButton({
               className="w-full px-3 py-1.5 text-sm text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             >
               {item.icon && (
-                <span className={`opacity-70 ${iconSizes[size]}`}>
+                <span className={`shrink-0 inline-flex items-center justify-center opacity-70 ${iconSizes[size]} -translate-y-[0.5px]`}>
                   {item.icon}
                 </span>
               )}
@@ -318,9 +344,9 @@ export function IconButton({
   ...props 
 }: IconButtonProps) {
   const sizes = {
-    sm: 'p-1',
-    md: 'p-1.5',
-    lg: 'p-2'
+    sm: 'p-1.5',
+    md: 'p-2',
+    lg: 'p-2.5'
   }
 
   const iconSizes = {
@@ -336,7 +362,7 @@ export function IconButton({
       className={`${sizes[size]} ${className}`}
       tooltip={tooltip}
     >
-      <span className={`opacity-80 ${iconSizes[size]}`}>
+      <span className={`shrink-0 inline-flex items-center justify-center opacity-80 ${iconSizes[size]} -translate-y-[0.5px]`}>
         {icon}
       </span>
     </Button>
