@@ -9,7 +9,8 @@ import {
   LayoutDashboard,
   Activity,
   PanelLeftClose,
-  LayoutList
+  LayoutList,
+  CreditCard
 } from 'lucide-react';
 
 const menuItems = [
@@ -21,7 +22,8 @@ const menuItems = [
   { path: '/showcase/metric-cards', label: 'Metric Cards', icon: LayoutDashboard },
   { path: '/showcase/modals', label: 'Modals', icon: PanelLeftClose },
   { path: '/showcase/activity', label: 'Activity', icon: Activity },
-  { path: '/showcase/tabs', label: 'Tabs', icon: LayoutList }
+  { path: '/showcase/tabs', label: 'Tabs', icon: LayoutList },
+  { path: '/showcase/cards', label: 'Cards', icon: CreditCard }
 ];
 
 export function ShowcaseLayout() {

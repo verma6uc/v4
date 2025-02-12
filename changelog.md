@@ -17,6 +17,15 @@
   - Radio buttons with better hover/focus states
   - Checkboxes with improved visual feedback
   - Multi-select component with tag-based selection
+- Card components for business objects:
+  - Mini and Macro card variants for:
+    - Users
+    - Companies
+    - Spaces
+    - Applications
+    - Invoices
+    - Subscription Plans
+  - Modular organization with separate example data and sections
 
 ### Todo
 - Create schema.sql file to define database structure

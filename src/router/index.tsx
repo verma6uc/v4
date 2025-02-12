@@ -12,6 +12,7 @@ import { MetricCardsPage } from '../pages/MetricCardsPage';
 import { ModalsPage } from '../pages/ModalsPage';
 import { ActivityComponentsPage } from '../pages/ActivityComponentsPage';
 import { TabsPage } from '../pages/TabsPage';
+import { CardsShowcasePage } from '../pages/CardsShowcasePage';
 
 export const router = createBrowserRouter([
   {
@@ -57,6 +58,10 @@ export const router = createBrowserRouter([
       {
         path: 'tabs',
         element: <TabsPage />
+      },
+      {
+        path: 'cards',
+        element: <CardsShowcasePage />
       }
     ]
   },

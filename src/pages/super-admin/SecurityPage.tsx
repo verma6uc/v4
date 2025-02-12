@@ -29,7 +29,7 @@ export function SecurityPage() {
       label: 'Overview',
       icon: Shield,
       content: (
-        <div className="p-4">
+        <div className="p-3">
           <h2 className="text-lg font-medium mb-4">Security Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Security Score */}
@@ -117,7 +117,7 @@ export function SecurityPage() {
         variant: 'error' as const
       },
       content: (
-        <div className="p-4">
+        <div className="p-3">
           <h2 className="text-lg font-medium mb-4">Security Events</h2>
           <div className="bg-white rounded-lg shadow-sm divide-y">
             <div className="p-4">
@@ -157,7 +157,7 @@ export function SecurityPage() {
       label: 'Access Control',
       icon: Users,
       content: (
-        <div className="p-4">
+        <div className="p-3">
           <h2 className="text-lg font-medium mb-4">Access Control</h2>
           <div className="bg-white rounded-lg shadow-sm divide-y">
             <div className="p-4">
@@ -186,7 +186,7 @@ export function SecurityPage() {
       label: 'Network',
       icon: Globe,
       content: (
-        <div className="p-4">
+        <div className="p-3">
           <h2 className="text-lg font-medium mb-4">Network Security</h2>
           <div className="bg-white rounded-lg shadow-sm divide-y">
             <div className="p-4">
@@ -213,21 +213,19 @@ export function SecurityPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Security</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage security settings and monitor security events
-          </p>
-        </div>
-
-        <Tabs 
-          tabs={tabs}
-          variant="underline"
-          className="bg-white rounded-lg shadow-sm"
-        />
+    <>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">Security</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Manage security settings and monitor security events
+        </p>
       </div>
-    </div>
+
+      <Tabs 
+        tabs={tabs}
+        variant="underline"
+        className="bg-white rounded-lg shadow-sm overflow-hidden"
+      />
+    </>
   );
 }
