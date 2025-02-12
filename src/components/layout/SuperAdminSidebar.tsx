@@ -7,8 +7,7 @@ import {
   CreditCard, 
   ScrollText,
   Settings,
-  Shield,
-  Bell
+  Shield
 } from 'lucide-react';
 
 const menuItems = [
@@ -23,8 +22,7 @@ const menuItems = [
   {
     section: 'Management',
     items: [
-      { icon: CreditCard, label: 'Billing', path: '/super-admin/billing' },
-      { icon: Bell, label: 'Notifications', path: '/super-admin/notifications' }
+      { icon: CreditCard, label: 'Billing', path: '/super-admin/billing' }
     ]
   },
   {
