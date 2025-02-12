@@ -10,10 +10,8 @@ export function SuperAdminLayout() {
       <SuperAdminSidebar />
       
       <main className="pl-64 pt-16">
-        <div style={{ maxWidth: 'calc(97vw - 16rem)' }} className="mx-auto py-6 px-4">
-          <div className="space-y-6">
-            <Outlet />
-          </div>
+        <div style={{ maxWidth: 'calc(97vw - 16rem)' }} className="mx-auto p-6">
+          <Outlet />
         </div>
       </main>
     </div>
