@@ -1,38 +1,24 @@
 import React from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
+interface Column {
+  key: string
+  label: string
+  sortable?: boolean
+}
+
 interface SimpleTableProps {
   title: string
   description?: string
+  columns: Column[]
+  data: any[]
 }
 
-interface User {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: 'Active' | 'Inactive'
-}
-
-const mockData: User[] = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Inactive' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'Active' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Editor', status: 'Active' },
-]
-
-const columns = [
-  { key: 'name', label: 'Name', sortable: true },
-  { key: 'email', label: 'Email', sortable: true },
-  { key: 'role', label: 'Role', sortable: true },
-  { key: 'status', label: 'Status', sortable: true }
-]
-
-export function SimpleTable({ title, description }: SimpleTableProps) {
-  const [sortField, setSortField] = React.useState<keyof User>('name')
+export function SimpleTable({ title, description, columns, data }: SimpleTableProps) {
+  const [sortField, setSortField] = React.useState<string>(columns[0]?.key || '')
   const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('asc')
 
-  const handleSort = (field: keyof User) => {
+  const handleSort = (field: string) => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
@@ -41,12 +27,14 @@ export function SimpleTable({ title, description }: SimpleTableProps) {
     }
   }
 
-  const sortedData = [...mockData].sort((a, b) => {
-    if (sortDirection === 'asc') {
-      return a[sortField] > b[sortField] ? 1 : -1
-    }
-    return a[sortField] < b[sortField] ? 1 : -1
-  })
+  const sortedData = React.useMemo(() => {
+    return [...data].sort((a, b) => {
+      if (sortDirection === 'asc') {
+        return a[sortField] > b[sortField] ? 1 : -1
+      }
+      return a[sortField] < b[sortField] ? 1 : -1
+    })
+  }, [data, sortField, sortDirection])
 
   return (
     <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
@@ -68,7 +56,7 @@ export function SimpleTable({ title, description }: SimpleTableProps) {
                 >
                   <button
                     className="flex items-center gap-1 hover:text-gray-900"
-                    onClick={() => column.sortable && handleSort(column.key as keyof User)}
+                    onClick={() => column.sortable && handleSort(column.key)}
                   >
                     {column.label}
                     {sortField === column.key && (
@@ -80,19 +68,13 @@ export function SimpleTable({ title, description }: SimpleTableProps) {
             </tr>
           </thead>
           <tbody>
-            {sortedData.map((item) => (
-              <tr key={item.id} className="border-b border-gray-100 hover:bg-white/50">
-                <td className="px-4 py-3 text-sm text-gray-900">{item.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{item.email}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{item.role}</td>
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                    ${item.status === 'Active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'}`}>
-                    {item.status}
-                  </span>
-                </td>
+            {sortedData.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-white/50">
+                {columns.map(column => (
+                  <td key={column.key} className="px-4 py-3 text-sm text-gray-600">
+                    {item[column.key]}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>

@@ -7,6 +7,34 @@ import { Badge } from '../../components/Badge';
 import { Activity, Users, Building2, AlertTriangle } from 'lucide-react';
 
 export function SuperAdminDashboardPage() {
+  const alertsData = [
+    { 
+      time: '2 mins ago', 
+      type: 'Security', 
+      status: <Badge variant="error" dot>{`Critical`}</Badge>, 
+      message: 'Multiple failed login attempts detected' 
+    },
+    { 
+      time: '15 mins ago', 
+      type: 'Performance', 
+      status: <Badge variant="warning" dot>{`Warning`}</Badge>, 
+      message: 'High memory usage on primary database' 
+    },
+    { 
+      time: '1 hour ago', 
+      type: 'System', 
+      status: <Badge variant="success" dot>{`Resolved`}</Badge>, 
+      message: 'Automated backup completed successfully' 
+    }
+  ];
+
+  const alertColumns = [
+    { key: 'time', label: 'Time', sortable: true },
+    { key: 'type', label: 'Type', sortable: true },
+    { key: 'status', label: 'Status', sortable: false },
+    { key: 'message', label: 'Message', sortable: true }
+  ];
+
   return (
     <ShowcaseLayout 
       title="System Overview" 
@@ -79,6 +107,8 @@ export function SuperAdminDashboardPage() {
       <SimpleTable 
         title="Recent System Alerts"
         description="Latest system events and notifications"
+        columns={alertColumns}
+        data={alertsData}
       />
     </ShowcaseLayout>
   );
