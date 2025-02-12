@@ -6,7 +6,6 @@ import {
   Users,
   CreditCard, 
   ScrollText,
-  Settings,
   Shield
 } from 'lucide-react';
 
@@ -29,8 +28,7 @@ const menuItems = [
     section: 'System',
     items: [
       { icon: Shield, label: 'Security', path: '/super-admin/security' },
-      { icon: ScrollText, label: 'Audit Logs', path: '/super-admin/audit' },
-      { icon: Settings, label: 'Settings', path: '/super-admin/settings' }
+      { icon: ScrollText, label: 'Audit Logs', path: '/super-admin/audit' }
     ]
   }
 ];

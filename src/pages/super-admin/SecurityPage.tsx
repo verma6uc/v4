@@ -185,21 +185,6 @@ export function SecurityPage() {
       </div>
 
       <div className="space-y-6">
-        <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="w-full">
-              Configure MFA
-            </Button>
-            <Button variant="outline" className="w-full">
-              API Keys
-            </Button>
-            <Button variant="outline" className="w-full">
-              Access Logs
-            </Button>
-          </div>
-        </div>
-
         <AdvancedTable<SecurityEvent>
           items={securityEvents}
           columns={columns}
