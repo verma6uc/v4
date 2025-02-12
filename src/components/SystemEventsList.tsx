@@ -1,139 +1,164 @@
 import React from 'react';
-import { Badge } from './Badge';
 import { 
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle,
-  Info,
-  Server,
   Shield,
   Database,
-  Wifi,
-  HardDrive
+  Globe,
+  AlertTriangle,
+  Check,
+  Info,
+  LucideIcon
 } from 'lucide-react';
 
 export interface SystemEvent {
   id: string;
-  type: 'security' | 'performance' | 'error' | 'warning' | 'info' | 'success';
-  category: 'system' | 'database' | 'network' | 'security' | 'storage';
-  message: string;
+  title: string;
+  description: string;
   timestamp: string;
-  details?: string;
-  metadata?: Record<string, any>;
+  type: 'security' | 'system' | 'api';
+  status: 'success' | 'warning' | 'error' | 'info';
+  category: string;
+  message: string;
 }
 
 interface SystemEventsListProps {
   events: SystemEvent[];
   maxItems?: number;
-  showHeader?: boolean;
-  title?: string;
-  description?: string;
+  showTimestamp?: boolean;
+  className?: string;
+  onEventClick?: (event: SystemEvent) => void;
 }
 
-const eventIcons = {
+const eventIcons: Record<SystemEvent['type'], LucideIcon> = {
   security: Shield,
-  database: Database,
-  network: Wifi,
-  system: Server,
-  storage: HardDrive
+  system: Database,
+  api: Globe
 };
 
-const statusIcons = {
-  error: AlertCircle,
+const statusIcons: Record<string, LucideIcon> = {
+  success: Check,
   warning: AlertTriangle,
-  info: Info,
-  success: CheckCircle,
-  security: Shield,
-  performance: Server
+  error: AlertTriangle,
+  info: Info
 };
 
-const statusColors: Record<SystemEvent['type'], 'error' | 'warning' | 'info' | 'success' | 'primary'> = {
-  error: 'error',
-  warning: 'warning',
-  info: 'info',
-  success: 'success',
-  security: 'primary',
-  performance: 'info'
+const statusStyles: Record<string, { icon: string; bg: string; text: string; ring: string }> = {
+  success: {
+    icon: 'text-green-500',
+    bg: 'bg-green-50',
+    text: 'text-green-700',
+    ring: 'ring-green-600/20'
+  },
+  warning: {
+    icon: 'text-yellow-500',
+    bg: 'bg-yellow-50',
+    text: 'text-yellow-700',
+    ring: 'ring-yellow-600/20'
+  },
+  error: {
+    icon: 'text-red-500',
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    ring: 'ring-red-600/20'
+  },
+  info: {
+    icon: 'text-blue-500',
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    ring: 'ring-blue-600/20'
+  }
 };
 
 export function SystemEventsList({
   events,
-  maxItems = 5,
-  showHeader = true,
-  title = "System Events",
-  description = "Recent system events and notifications"
+  maxItems,
+  showTimestamp = true,
+  className = '',
+  onEventClick
 }: SystemEventsListProps) {
-  const displayedEvents = events.slice(0, maxItems);
+  const displayedEvents = maxItems ? events.slice(0, maxItems) : events;
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  };
 
   return (
-    <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/20 overflow-hidden">
-      {showHeader && (
-        <div className="p-4 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <p className="mt-1 text-sm text-gray-500">{description}</p>
-        </div>
-      )}
+    <div className={`space-y-6 ${className}`}>
+      {displayedEvents.map((event, index) => {
+        const Icon = eventIcons[event.type];
+        const styles = statusStyles[event.status];
+        const isLast = index === displayedEvents.length - 1;
+        
+        return (
+          <div 
+            key={event.id}
+            className={`relative flex gap-4 ${
+              onEventClick ? 'cursor-pointer hover:bg-gray-50 rounded-lg transition-colors duration-200' : ''
+            }`}
+            onClick={() => onEventClick?.(event)}
+          >
+            {/* Timeline line */}
+            {!isLast && (
+              <div className="absolute left-5 top-10 -bottom-14 w-px bg-gray-200" />
+            )}
+            
+            {/* Icon */}
+            <div className={`relative mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full bg-white shadow-md ring-1 ring-gray-200/50 ${styles.bg}`}>
+              <Icon className={`h-5 w-5 ${styles.icon}`} />
+            </div>
 
-      <div className="divide-y divide-gray-100">
-        {displayedEvents.map((event) => {
-          const StatusIcon = statusIcons[event.type];
-          const CategoryIcon = eventIcons[event.category];
-          
-          return (
-            <div key={event.id} className="p-4 hover:bg-gray-50 transition-colors duration-200">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center
-                    ${event.type === 'error' ? 'bg-red-50' :
-                      event.type === 'warning' ? 'bg-yellow-50' :
-                      event.type === 'success' ? 'bg-green-50' :
-                      'bg-blue-50'}`}>
-                    <StatusIcon className={`w-5 h-5
-                      ${event.type === 'error' ? 'text-red-600' :
-                        event.type === 'warning' ? 'text-yellow-600' :
-                        event.type === 'success' ? 'text-green-600' :
-                        'text-blue-600'}`} />
-                  </div>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Badge variant={statusColors[event.type]} size="sm">
-                      {event.type}
-                    </Badge>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      <CategoryIcon className="w-4 h-4" />
-                      <span>{event.category}</span>
-                    </div>
-                  </div>
-
-                  <p className="mt-1 text-sm text-gray-900">
-                    {event.message}
-                  </p>
-
-                  {event.details && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      {event.details}
-                    </p>
-                  )}
-
-                  <span className="mt-1 text-xs text-gray-500 block">
-                    {event.timestamp}
+            <div className="flex-auto">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium text-gray-900">
+                    {event.title}
+                  </h3>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${styles.bg} ${styles.text} ${styles.ring}`}>
+                    {event.status}
                   </span>
                 </div>
+                {showTimestamp && (
+                  <time className="flex-none text-xs text-gray-500">
+                    {formatTimestamp(event.timestamp)}
+                  </time>
+                )}
+              </div>
+              
+              <p className="mt-1 text-sm text-gray-600">
+                {event.description}
+              </p>
+
+              <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+                <span className="inline-flex items-center gap-1">
+                  <span className="font-medium">Category:</span>
+                  {event.category}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="font-medium">Message:</span>
+                  {event.message}
+                </span>
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      {events.length > maxItems && (
-        <div className="p-3 bg-gray-50 border-t border-gray-100">
-          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium w-full text-center">
-            View all events
-          </button>
-        </div>
-      )}
+          </div>
+        );
+      })}
     </div>
   );
 }

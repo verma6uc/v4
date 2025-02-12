@@ -1,143 +1,197 @@
 import React from 'react';
-import { ShowcaseLayout } from '../layouts/ShowcaseLayout';
 import { ActivityFeed, Activity } from '../components/ActivityFeed';
 import { SystemEventsList, SystemEvent } from '../components/SystemEventsList';
+import { Tabs } from '../components/Tabs';
 
-const mockActivities: Activity[] = [
+// Sample data for Activity Feed
+const activities: Activity[] = [
   {
     id: '1',
-    user: { name: 'John Doe' },
-    action: 'created a new',
-    target: 'company',
-    timestamp: '2 minutes ago',
-    type: 'create'
+    title: 'New user registered',
+    description: 'John Doe created a new account',
+    timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+    type: 'user',
+    status: 'success',
+    action: 'registered',
+    target: 'platform',
+    user: {
+      name: 'John Doe'
+    },
+    link: {
+      text: 'View Profile',
+      url: '#'
+    }
   },
   {
     id: '2',
-    user: { name: 'Jane Smith' },
+    title: 'Document updated',
+    description: 'Sales report Q4 2024 was modified',
+    timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
+    type: 'document',
     action: 'updated',
-    target: 'billing settings',
-    timestamp: '10 minutes ago',
-    type: 'update'
+    target: 'sales-report',
+    user: {
+      name: 'Jane Smith'
+    },
+    link: {
+      text: 'View Document',
+      url: '#'
+    }
   },
   {
     id: '3',
-    user: { name: 'Mike Johnson' },
-    action: 'deleted',
-    target: 'user account',
-    timestamp: '1 hour ago',
-    type: 'delete'
+    title: 'Security alert',
+    description: 'Multiple failed login attempts detected',
+    timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
+    type: 'security',
+    status: 'warning',
+    action: 'detected',
+    target: 'login-attempts'
   },
   {
     id: '4',
-    user: { name: 'Sarah Wilson' },
-    action: 'uploaded',
-    target: 'company logo',
-    timestamp: '2 hours ago',
-    type: 'upload'
+    title: 'Email campaign sent',
+    description: 'Monthly newsletter was sent to 2,500 subscribers',
+    timestamp: new Date(Date.now() - 4 * 3600000).toISOString(),
+    type: 'email',
+    status: 'success',
+    action: 'sent',
+    target: 'subscribers',
+    user: {
+      name: 'Marketing Team'
+    }
   },
   {
     id: '5',
-    user: { name: 'Admin' },
+    title: 'System settings updated',
+    description: 'Security policies were modified',
+    timestamp: new Date(Date.now() - 5 * 3600000).toISOString(),
+    type: 'settings',
+    status: 'info',
     action: 'modified',
-    target: 'security settings',
-    timestamp: '3 hours ago',
-    type: 'security'
+    target: 'security-policies',
+    user: {
+      name: 'Admin'
+    }
   }
 ];
 
-const mockSystemEvents: SystemEvent[] = [
+// Sample data for System Events
+const systemEvents: SystemEvent[] = [
   {
     id: '1',
-    type: 'error',
-    category: 'database',
-    message: 'Database connection timeout',
-    timestamp: '2 minutes ago',
-    details: 'Connection to primary database failed after 30s'
+    title: 'Multiple Failed Login Attempts',
+    description: '10 failed login attempts detected from IP 192.168.1.100',
+    timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
+    type: 'security',
+    status: 'error',
+    category: 'Authentication',
+    message: 'Potential brute force attack detected'
   },
   {
     id: '2',
-    type: 'warning',
-    category: 'system',
-    message: 'High CPU usage detected',
-    timestamp: '10 minutes ago',
-    details: 'System CPU usage exceeded 80% threshold'
+    title: 'Unusual Access Pattern',
+    description: 'Unusual access pattern detected for user john.doe@example.com',
+    timestamp: new Date(Date.now() - 5 * 3600000).toISOString(),
+    type: 'security',
+    status: 'warning',
+    category: 'Access Control',
+    message: 'User behavior analysis flagged suspicious activity'
   },
   {
     id: '3',
-    type: 'success',
-    category: 'security',
-    message: 'SSL certificates renewed',
-    timestamp: '1 hour ago'
+    title: 'System Backup Completed',
+    description: 'Daily system backup completed successfully',
+    timestamp: new Date(Date.now() - 6 * 3600000).toISOString(),
+    type: 'system',
+    status: 'success',
+    category: 'Maintenance',
+    message: 'All databases and files backed up'
   },
   {
     id: '4',
-    type: 'info',
-    category: 'network',
-    message: 'CDN cache cleared',
-    timestamp: '2 hours ago'
+    title: 'Database Migration',
+    description: 'Database schema migration completed',
+    timestamp: new Date(Date.now() - 8 * 3600000).toISOString(),
+    type: 'system',
+    status: 'info',
+    category: 'Database',
+    message: 'Schema version updated to v2.5.0'
   },
   {
     id: '5',
-    type: 'performance',
-    category: 'storage',
-    message: 'Disk cleanup completed',
-    timestamp: '3 hours ago',
-    details: 'Freed up 2.5GB of storage space'
+    title: 'API Rate Limit Exceeded',
+    description: 'Rate limit exceeded for /api/users endpoint',
+    timestamp: new Date(Date.now() - 10 * 3600000).toISOString(),
+    type: 'api',
+    status: 'warning',
+    category: 'API Gateway',
+    message: 'Client exceeded 1000 requests per minute limit'
   }
 ];
 
 export function ActivityComponentsPage() {
-  return (
-    <ShowcaseLayout
-      title="Activity Components"
-      description="Components for displaying activity feeds and system events"
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
+  const tabs = [
+    {
+      id: 'activity',
+      label: 'Activity Feed',
+      content: (
+        <div className="p-6">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Track all recent activities and events
+            </p>
+          </div>
           <ActivityFeed 
-            activities={mockActivities}
-            title="Recent Activities"
-            description="Latest user actions and updates"
+            activities={activities}
+            className="bg-white rounded-lg shadow-sm border border-gray-200"
+            onActivityClick={(activity) => console.log('Activity clicked:', activity)}
           />
-
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Usage</h3>
-            <pre className="text-sm text-gray-600 bg-white p-3 rounded border">
-{`<ActivityFeed
-  activities={activities}
-  maxItems={5}
-  showHeader={true}
-  title="Recent Activity"
-  description="Latest actions"
-/>`}
-            </pre>
-          </div>
         </div>
-
-        <div className="space-y-6">
-          <h2 className="text-lg font-semibold text-gray-900">System Events</h2>
+      )
+    },
+    {
+      id: 'system-events',
+      label: 'System Events',
+      badge: {
+        text: '2',
+        variant: 'error' as const
+      },
+      content: (
+        <div className="p-6">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">System Events</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Monitor system events and alerts
+            </p>
+          </div>
           <SystemEventsList 
-            events={mockSystemEvents}
-            title="System Events"
-            description="Recent system events and notifications"
+            events={systemEvents}
+            className="bg-white rounded-lg shadow-sm border border-gray-200"
+            onEventClick={(event) => console.log('System event clicked:', event)}
           />
-
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Usage</h3>
-            <pre className="text-sm text-gray-600 bg-white p-3 rounded border">
-{`<SystemEventsList
-  events={events}
-  maxItems={5}
-  showHeader={true}
-  title="System Events"
-  description="Recent events"
-/>`}
-            </pre>
-          </div>
         </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900">Activity Components</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Different types of activity and event lists
+          </p>
+        </div>
+
+        <Tabs 
+          tabs={tabs}
+          variant="underline"
+          className="bg-white rounded-lg shadow-sm p-4"
+        />
       </div>
-    </ShowcaseLayout>
+    </div>
   );
 }
