@@ -1,168 +1,265 @@
-# User Object
+# User Business Object Specification
 
-## Overview
-The User object represents an individual interacting with our platform. It is a first‑class business object that encapsulates personal details, roles, permissions, and the current operational status of a user. Our system supports various user roles—such as CREATOR, COMPANY_ADMIN, and SPACE_ADMIN—and the User object is central to enforcing security, managing access rights, and driving interactions across the platform. In addition to standard attributes, the User object includes a Status field that reflects the full lifecycle of a user account, based on our behavior-driven user stories.
+## 1. Overview
+The User object represents individuals who interact with the platform. It manages authentication, authorization, and maintains the user's relationship with companies, spaces, and applications.
 
-## Attributes
+## 2. Attributes
 
-### User ID
-- **Type**: UUID (string)
-- **Description**: A unique identifier for the user.
-- **Example**: "a1b2c3d4-e89b-12d3-a456-426614174001"
+### Core Attributes
+- **id**: UUID (Primary Key, System Generated)
+- **companyId**: UUID (Reference to Company)
+- **email**: String (Required, Unique across platform)
+  - Validation: Valid email format
+  - Used in: USPM.UINV.US1
+- **firstName**: String (Required)
+  - Validation: 1-50 characters
+  - Used in: USPM.UAMG.US1
+- **lastName**: String (Required)  
+  - Validation: 1-50 characters
+  - Used in: USPM.UAMG.US1
+- **designationId**: UUID (Reference to Designation)
+  - Used in: USPM.UINV.US1
+- **status**: UserStatus (Enum, Required)
+  - Values: INVITED, ACTIVE, SUSPENDED, BLOCKED, ARCHIVED
+  - Used in: USPM.USTM.US1, USPM.USTM.US2
 
-### Name
-- **Type**: String
-- **Description**: The full name of the user.
-- **Example**: "John Doe"
-
-### Email
-- **Type**: String
-- **Description**: The primary email address, which must be unique and follow standard email formatting.
-- **Example**: "john.doe@example.com"
-
-### Role
-- **Type**: Enum (String)
-- **Description**: The role assigned to the user, which determines access levels and permissions.
-- **Possible Values**:
-  - CREATOR
-  - COMPANY_ADMIN
-  - SPACE_ADMIN
-- **Example**: "CREATOR"
-
-### Permissions
-- **Type**: Array of Strings (or a JSON object)
-- **Description**: A list of permissions associated with the user, typically derived from their role.
-- **Example**: ["CREATE_APP", "VIEW_BACKLOG", "UPDATE_PROFILE"]
-
-### Status
-- **Type**: Enum (String)
-- **Description**: The current operational state of the user account. In our system, the status reflects a range of states to capture the complete lifecycle of a user.
-- **Possible Values**:
-  - PENDING – When a user has registered (e.g., via self-signup) but not yet verified their account.
-  - ACTIVE – When the user account is fully activated and operational.
-  - SUSPENDED – When the user account is temporarily disabled due to compliance, security issues, or inactivity.
-  - BLOCKED – When the user account is blocked due to policy violations or security risks.
-  - ARCHIVED – When the user account is no longer active (e.g., the user has left the organization) but the record is preserved for historical purposes.
-- **Example**: "ACTIVE"
-
-### Last Login
-- **Type**: DateTime
-- **Description**: The timestamp of the user's most recent successful login.
-- **Example**: "2025-01-20T14:45:00Z"
-
-## Behaviors / Methods
-The User object includes several behaviors that encapsulate its lifecycle and role-based interactions:
-
-### Create User
-- **Method**: Register a new user via self-signup or by an administrator.
-- **Behavior**: Validate input fields (name, email, role) and ensure the email is unique; assign a unique User ID and set the initial status to PENDING.
-- **Audit Log**: "User {userId} created by Self Signup/Admin {username}."
-
-### Update User Details
-- **Method**: Modify the user's name, email, or role.
-- **Behavior**: Validate changes (e.g., email format, required fields) and update the user record.
-- **Audit Log**: "User {userId} details updated by {adminUsername}."
-
-### Activate User Account
-- **Method**: Transition a new user from PENDING to ACTIVE after verification (e.g., via email confirmation).
-- **Behavior**: Verify the activation token, enforce password rules, and update the status.
-- **Audit Log**: "User {userId} activated by {username}."
-- **Notification**: "Your account is now active."
-
-### Suspend/Block User
-- **Method**: Change the user's status to SUSPENDED or BLOCKED in response to security or compliance issues.
-- **Behavior**: Enforce suspension or blocking rules, log the action, and restrict user access accordingly.
-- **Audit Log**: "User {userId} suspended/blocked by {adminUsername}."
-
-### Archive User Account
-- **Method**: Archive the user record when the account is no longer active.
-- **Behavior**: Transition the status to ARCHIVED while preserving historical data.
-- **Audit Log**: "User {userId} archived by {adminUsername}."
-
-### Role & Permission Management
-- **Method**: Update the user's role and permissions dynamically if changes are required.
-- **Behavior**: Validate role changes and adjust permissions accordingly, ensuring consistency with business rules.
-- **Audit Log**: "User {userId} role changed from {oldRole} to {newRole} by {adminUsername}."
-
-## Business Rules
-
-### Input Validation
-1. **Name**: Must be non-empty and not exceed 100 characters.
-2. **Email**: Must be unique and conform to standard email format.
-3. **Role**: Must be one of the predefined enum values (CREATOR, COMPANY_ADMIN, SPACE_ADMIN).
-4. **Status**: Must be a valid status value (e.g., PENDING, ACTIVE, SUSPENDED, BLOCKED, or ARCHIVED).
-
-### Role-Based Access
-1. **Creators**:
-   - Can create and update applications.
-   - Have limited administrative functions.
-
-2. **Company Admins**:
-   - Can manage user accounts across the company.
-   - Have permissions to update user details and enforce account policies.
-
-3. **SpaceAdmins**:
-   - Manage users within specific Spaces.
-   - Can update access rights for users in their Spaces.
-
-### State Transition Rules
-1. **PENDING → ACTIVE**:
-   - Transition occurs upon successful verification of the user account (e.g., email confirmation).
-
-2. **ACTIVE → SUSPENDED/BLOCKED**:
-   - Transition occurs if a user violates policies or poses security risks.
-
-3. **ACTIVE/SUSPENDED/BLOCKED → ARCHIVED**:
-   - Transition occurs when the user is no longer active, preserving historical data.
-   - All state transitions trigger appropriate audit log entries and notifications.
-
-## Audit Logging and Notifications
-Every significant action performed on the User object is logged with detailed messages and timestamps. For example:
-
-1. **User Creation**:
-   - Audit Log: "User {userId} created by Self Signup/Admin {username}."
-
-2. **User Update**:
-   - Audit Log: "User {userId} details updated by {adminUsername}."
-
-3. **User Activation**:
-   - Audit Log: "User {userId} activated by {username}."
-
-4. **Role Change**:
-   - Audit Log: "User {userId} role changed from {oldRole} to {newRole} by {adminUsername}."
-
-Notifications are displayed in-app and may also be sent via email to confirm actions (e.g., "Your account is now active" or "Your role has been updated").
-
-## Data Format Examples
-
-### Example JSON Representation
-```json
-{
-  "userId": "a1b2c3d4-e89b-12d3-a456-426614174001",
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "role": "CREATOR",
-  "permissions": ["CREATE_APP", "VIEW_BACKLOG", "UPDATE_PROFILE"],
-  "status": "ACTIVE",
-  "lastLogin": "2025-01-20T14:45:00Z"
+### Authentication
+- **passwordHash**: String
+- **passwordLastChanged**: DateTime
+- **failedLoginAttempts**: Integer
+- **lastLoginAt**: DateTime
+- **mfaEnabled**: Boolean
+- **mfaMethods**: Array of {
+  - type: Enum (EMAIL, AUTHENTICATOR),
+  - verified: Boolean,
+  - lastVerifiedAt: DateTime
 }
-```
+- Used in: CCMT.SECF.US2, CCMT.SECF.US6
 
-## Integration Points
-1. **Company Object**:
-   - Each User is associated with a Company
-   - Changes to user roles or details may affect Company-level access and configurations
+### Contact & Profile
+- **phone**: String
+- **profilePicture**: Object {
+  - url: String,
+  - metadata: Object
+}
+- **locale**: String
+- **timezone**: String
+- Used in: USPM.UAMG.US3
 
-2. **Spaces**:
-   - Users, particularly SpaceAdmins, are linked to specific Spaces
-   - Manage access within those Spaces
+### System Fields
+- **createdAt**: DateTime
+- **createdBy**: UUID (Reference to User)
+- **updatedAt**: DateTime
+- **updatedBy**: UUID (Reference to User)
+- **activatedAt**: DateTime
+- **suspendedAt**: DateTime
+- **suspendedReason**: String
+- **blockedAt**: DateTime
+- **blockedReason**: String
+- **archivedAt**: DateTime
+- **archivedReason**: String
 
-3. **Applications**:
-   - The User's role determines the operations they can perform on Applications
-   - Example: a Creator can create Applications, while a Company Admin can publish them
+### Security & Preferences
+- **sessionTimeout**: Integer (minutes)
+- **ipAccessList**: Array of {
+  - ip: String,
+  - allowedUntil: DateTime,
+  - description: String
+}
+- **notificationPreferences**: Object {
+  - email: Boolean,
+  - inPlatform: Boolean,
+  - digest: Boolean
+}
+- Used in: CCMT.SECF.US4, USPM.UAMG.US5
 
-4. **Audit Logging System**:
-   - All user-related actions are captured in the Audit Log for security and compliance purposes
+## 3. State Machine
 
-## Summary
-The User object is a core first‑class business entity that encapsulates all critical details about an individual interacting with the platform. It includes attributes such as User ID, Name, Email, Role, Permissions, and an expanded Status that covers multiple lifecycle states (PENDING, ACTIVE, SUSPENDED, BLOCKED, ARCHIVED). The object supports behaviors for creation, updating, activation, suspension, role changes, and archiving, each governed by rigorous input validations and role-based access controls. State transitions are enforced through clear business rules, and every action is recorded in the Audit Log with precise messages and notifications. This comprehensive design ensures that the User object is robust, secure, and seamlessly integrated with other first‑class objects in our multi‑tenant platform.
+### States
+1. **INVITED**
+   - Initial state after invitation
+   - Limited access to activation only
+   - User Story: USPM.UINV.US1
+
+2. **ACTIVE**
+   - Normal operating state
+   - Full access based on roles
+   - User Story: USPM.UINV.US2
+
+3. **SUSPENDED**
+   - Administratively suspended
+   - No access allowed
+   - User Story: USPM.USTM.US2
+
+4. **BLOCKED**
+   - Automatically blocked (security)
+   - No access allowed
+   - User Story: USPM.STAT.US3
+
+5. **ARCHIVED**
+   - Permanently disabled
+   - Historical reference only
+   - User Story: USPM.USTM.US5
+
+### State Transitions
+
+1. **INVITED → ACTIVE**
+   - Trigger: User completes activation
+   - Validation: Valid invitation link, password set
+   - User Story: USPM.UINV.US2
+   - Audit Log: "User {email} activated their account"
+   - Notifications:
+     - To User: "Welcome to {companyName}"
+     - To Admin: "User {email} has completed activation"
+
+2. **ACTIVE → SUSPENDED**
+   - Trigger: Admin suspends user
+   - Required: Suspension reason
+   - User Story: USPM.USTM.US2
+   - Audit Log: "User {email} suspended by {actor}. Reason: {reason}"
+   - Notifications:
+     - To User: "Your account has been suspended"
+     - To Admins: "User {email} has been suspended"
+
+3. **ACTIVE → BLOCKED**
+   - Trigger: Security violation (automatic)
+   - User Story: USPM.STAT.US3
+   - Audit Log: "User {email} blocked due to {reason}"
+   - Notifications:
+     - To User: "Your account has been blocked"
+     - To Admins: "User {email} has been blocked"
+
+4. **SUSPENDED/BLOCKED → ACTIVE**
+   - Trigger: Admin reactivates user
+   - Required: Reactivation reason
+   - User Story: USPM.STAT.US4
+   - Audit Log: "User {email} reactivated by {actor}"
+   - Notifications:
+     - To User: "Your account has been reactivated"
+     - To Admins: "User {email} has been reactivated"
+
+5. **ANY → ARCHIVED**
+   - Trigger: Admin archives user
+   - Required: Archival reason
+   - User Story: USPM.USTM.US5
+   - Audit Log: "User {email} archived by {actor}. Reason: {reason}"
+   - Notifications:
+     - To User: "Your account has been archived"
+     - To Admins: "User {email} has been archived"
+
+## 4. Actions/Methods
+
+### Account Management
+1. **createUser(companyId, details)**
+   - Actor: Company Admin
+   - User Story: USPM.UINV.US1
+   - Validation:
+     - Unique email
+     - Valid company
+     - Valid designation
+   - Creates user in INVITED state
+   - Audit Log: "New user account created for {email} by {actor}"
+
+2. **sendInvitation(userId)**
+   - Actor: System/Admin
+   - User Story: USPM.UINV.US2
+   - Validation:
+     - User in INVITED state
+     - Within resend limits
+   - Audit Log: "Invitation sent to {email} by {actor}"
+
+3. **activateAccount(userId, activationDetails)**
+   - Actor: User
+   - User Story: USPM.UINV.US2
+   - Validation:
+     - Valid invitation link
+     - Password meets requirements
+   - Changes state to ACTIVE
+   - Audit Log: "User {email} activated their account"
+
+### Profile Management
+1. **updateProfile(userId, details)**
+   - Actor: User/Admin
+   - User Story: USPM.UAMG.US1
+   - Validation:
+     - User in ACTIVE state
+     - Valid field values
+   - Audit Log: "Profile updated for user {email}"
+
+2. **changeEmail(userId, newEmail)**
+   - Actor: User/Admin
+   - User Story: USPM.UAMG.US2
+   - Validation:
+     - Unique email
+     - Verification required
+   - Audit Log: "Email changed from {oldEmail} to {newEmail}"
+
+### Security Management
+1. **resetPassword(userId)**
+   - Actor: Admin
+   - User Story: USPM.UAMG.US4
+   - Validation:
+     - User in ACTIVE state
+   - Audit Log: "Password reset initiated for {email}"
+
+2. **configureMultiFactorAuth(userId, mfaConfig)**
+   - Actor: User
+   - User Story: CCMT.SECF.US6
+   - Validation:
+     - User in ACTIVE state
+     - Valid MFA method
+   - Audit Log: "MFA configuration updated for {email}"
+
+## 5. Relationships
+
+1. **Company (Many-to-One)**
+   - User belongs to one company
+   - Company controls global settings
+
+2. **Spaces (Many-to-Many)**
+   - Through space assignments
+   - Different roles per space
+
+3. **Applications (Many-to-Many)**
+   - Through application roles
+   - Different roles per application
+
+4. **Designation (Many-to-One)**
+   - User has one designation
+   - Influences role suggestions
+
+## 6. Access Control
+
+1. **Platform Roles**
+   - Company Admin
+   - Space Admin
+   - User Manager
+   - Basic User
+
+2. **Application Roles**
+   - Managed through MARA/SARA
+   - Application-specific permissions
+   - Used in: USPM.MARA.US1
+
+3. **Space Permissions**
+   - Inherited through hierarchy
+   - Direct assignments
+   - Used in: SPA.USM.US3
+
+## 7. Special Considerations
+
+1. **Security Measures**
+   - Password policies
+   - MFA requirements
+   - Session management
+   - IP restrictions
+
+2. **Data Privacy**
+   - PII handling
+   - Data retention
+   - Access logs
+
+3. **Compliance**
+   - Audit requirements
+   - Password history
+   - Access reviews
