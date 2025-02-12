@@ -78,4 +78,12 @@
   .motion-safe\:animate-enter-from-bottom {
     @apply motion-safe:animate-[enter-from-bottom_0.25s_ease-out];
   }
+
+  /* Background patterns */
+  .bg-grid-pattern {
+    background-color: #f8fafc;
+    background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+      linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
 }
