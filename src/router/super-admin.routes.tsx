@@ -1,19 +1,12 @@
 import React from 'react';
-import { RouteObject, Outlet } from 'react-router-dom';
+import { RouteObject } from 'react-router-dom';
+import { SuperAdminLayout } from '../layouts/SuperAdminLayout';
 import { SuperAdminDashboardPage } from '../pages/super-admin/DashboardPage';
-import { ShowcaseLayout } from '../layouts/ShowcaseLayout';
 
 export const superAdminRoutes: RouteObject[] = [
   {
     path: '/super-admin',
-    element: (
-      <ShowcaseLayout 
-        title="Super Admin" 
-        description="System administration and monitoring"
-      >
-        <Outlet />
-      </ShowcaseLayout>
-    ),
+    element: <SuperAdminLayout />,
     children: [
       {
         path: 'dashboard',

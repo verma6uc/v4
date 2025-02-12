@@ -1,5 +1,4 @@
 import React from 'react';
-import { ShowcaseLayout } from '../../layouts/ShowcaseLayout';
 import { MetricCard } from '../../components/MetricCard';
 import { Chart } from '../../components/Chart';
 import { SimpleTable } from '../../components/SimpleTable';
@@ -36,10 +35,14 @@ export function SuperAdminDashboardPage() {
   ];
 
   return (
-    <ShowcaseLayout 
-      title="System Overview" 
-      description="Monitor system health, growth metrics, and key activities"
-    >
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">System Overview</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Monitor system health, growth metrics, and key activities
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <MetricCard
           title="Total Companies"
@@ -110,6 +113,6 @@ export function SuperAdminDashboardPage() {
         columns={alertColumns}
         data={alertsData}
       />
-    </ShowcaseLayout>
+    </div>
   );
 }
