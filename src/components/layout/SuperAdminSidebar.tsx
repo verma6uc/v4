@@ -3,12 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Building2, 
+  Users,
   CreditCard, 
   ScrollText,
   Settings,
-  Users,
-  Bell,
-  Shield
+  Shield,
+  Bell
 } from 'lucide-react';
 
 const menuItems = [
@@ -24,13 +24,13 @@ const menuItems = [
     section: 'Management',
     items: [
       { icon: CreditCard, label: 'Billing', path: '/super-admin/billing' },
-      { icon: Bell, label: 'Notifications', path: '/super-admin/notifications' },
-      { icon: Shield, label: 'Security', path: '/super-admin/security' }
+      { icon: Bell, label: 'Notifications', path: '/super-admin/notifications' }
     ]
   },
   {
     section: 'System',
     items: [
+      { icon: Shield, label: 'Security', path: '/super-admin/security' },
       { icon: ScrollText, label: 'Audit Logs', path: '/super-admin/audit' },
       { icon: Settings, label: 'Settings', path: '/super-admin/settings' }
     ]
