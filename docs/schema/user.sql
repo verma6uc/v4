@@ -64,9 +64,7 @@ CREATE TABLE users (
 
     /* System Audit Fields */
     created_at TIMESTAMPTZ DEFAULT now(),           -- Record creation timestamp
-    created_by UUID,                                -- Creator (user reference)
     updated_at TIMESTAMPTZ DEFAULT now(),           -- Record update timestamp
-    updated_by UUID,                                -- Last updater (user reference)
     activated_at TIMESTAMPTZ,                       -- Account activation timestamp
     suspended_at TIMESTAMPTZ,                       -- Suspension timestamp
     suspended_reason TEXT,                          -- Reason for suspension
