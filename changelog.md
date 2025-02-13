@@ -33,6 +33,11 @@
   - Added UUID generation for table data
   - Fixed prop name mismatch in AdvancedTable component
 
+### Documentation
+- Enhanced super admin pages documentation with detailed schema information:
+  - Added specific field names and data types from database schema
+  - Expanded configuration options and management capabilities
+
 ### Todo
 - Create schema.sql file to define database structure
 - Create user-stories.md to document requirements
