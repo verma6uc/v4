@@ -41,6 +41,12 @@
   - Split into CompanyMiniCard and CompanyMacroCard variants
   - Added proper TypeScript types based on schema
 
+- Added role management components:
+  - RoleManagementCard for platform and application roles
+  - Added role types based on database schema
+  - Added role assignment handling
+  - Added role status indicators
+
 ### Documentation
 - Enhanced super admin pages documentation with detailed schema information:
   - Added specific field names and data types from database schema

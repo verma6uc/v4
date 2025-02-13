@@ -1,12 +1,14 @@
 import React from 'react'
-import { Shield, AlertTriangle, Users, Globe } from 'lucide-react'
+import { Shield, AlertTriangle, Users, Globe, Lock } from 'lucide-react'
 import { Tabs } from '../../components/Tabs'
 import {
   SecurityMetricCard,
   SecurityPolicyCard,
   SecurityEventCard,
-  SecurityRoleCard,
-  SecurityEventSeverity
+  RoleManagementCard,
+  SecurityEventSeverity,
+  PlatformRole,
+  ApplicationRole
 } from '../../components/super-admin/security'
 
 const demoSecurityPolicies = [
@@ -55,50 +57,60 @@ const demoSecurityEvents = [
   }
 ]
 
-const demoSecurityRoles = [
+const demoPlatformRoles: PlatformRole[] = [
   {
     id: '1',
-    name: 'Super Admin',
+    name: 'SUPER_ADMIN',
+    displayName: 'Super Admin',
     description: 'Full system access with all permissions',
-    type: 'system' as const,
-    permissions: [
+    type: 'SYSTEM',
+    assignments: [
       {
         id: '1',
-        name: 'Manage Users',
-        description: 'Create, update, and delete users',
-        category: 'User Management'
-      },
-      {
-        id: '2',
-        name: 'Manage Roles',
-        description: 'Create and assign roles',
-        category: 'User Management'
-      },
-      {
-        id: '3',
-        name: 'View Audit Logs',
-        description: 'Access system audit logs',
-        category: 'Security'
+        userId: 'user1',
+        roleId: '1',
+        assignedAt: '2024-01-01T00:00:00Z',
+        status: 'ACTIVE',
+        type: 'PLATFORM'
       }
     ]
   },
   {
     id: '2',
-    name: 'Company Admin',
+    name: 'COMPANY_ADMIN',
+    displayName: 'Company Admin',
     description: 'Company-wide access with limited system settings',
-    type: 'company' as const,
-    permissions: [
+    type: 'COMPANY',
+    assignments: [
       {
-        id: '4',
-        name: 'Manage Company Users',
-        description: 'Manage users within company',
-        category: 'User Management'
-      },
+        id: '2',
+        userId: 'user2',
+        roleId: '2',
+        assignedAt: '2024-01-01T00:00:00Z',
+        status: 'ACTIVE',
+        type: 'PLATFORM'
+      }
+    ]
+  }
+]
+
+const demoApplicationRoles: ApplicationRole[] = [
+  {
+    id: '1',
+    applicationId: 'app1',
+    name: 'APP_ADMIN',
+    displayName: 'Application Admin',
+    description: 'Full access to application settings and data',
+    autoAssignable: false,
+    requiresApproval: true,
+    assignments: [
       {
-        id: '5',
-        name: 'View Company Logs',
-        description: 'Access company audit logs',
-        category: 'Security'
+        id: '3',
+        userId: 'user3',
+        roleId: '3',
+        assignedAt: '2024-01-01T00:00:00Z',
+        status: 'ACTIVE',
+        type: 'APPLICATION'
       }
     ]
   }
@@ -175,11 +187,17 @@ export function SecurityPage() {
       )
     },
     {
-      id: 'access',
-      label: 'Access Control',
-      icon: Users,
+      id: 'roles',
+      label: 'Role Management',
+      icon: Lock,
       content: (
-        <SecurityRoleCard roles={demoSecurityRoles} />
+        <RoleManagementCard
+          platformRoles={demoPlatformRoles}
+          applicationRoles={demoApplicationRoles}
+          onAddRole={() => console.log('Add role')}
+          onEditRole={(role) => console.log('Edit role:', role)}
+          onManageAssignments={(role) => console.log('Manage assignments:', role)}
+        />
       )
     },
     {
