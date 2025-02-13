@@ -1,5 +1,5 @@
 import React from 'react'
-import { Shield, AlertTriangle, Users, Globe, Lock } from 'lucide-react'
+import { Shield, AlertTriangle, Users, Globe, Lock, Activity } from 'lucide-react'
 import { Tabs } from '../../components/Tabs'
 import {
   SecurityMetricCard,
@@ -8,11 +8,15 @@ import {
   RoleManagementCard,
   SessionManagementCard,
   FailedLoginCard,
+  AuditLogCard,
+  ActivityLogCard,
   SecurityEventSeverity,
   PlatformRole,
   ApplicationRole,
   UserSession,
-  FailedLoginAttempt
+  FailedLoginAttempt,
+  AuditLog,
+  ActivityLog
 } from '../../components/super-admin/security'
 
 const demoSecurityPolicies = [
@@ -185,6 +189,68 @@ const networkPolicies = [
   }
 ]
 
+const demoAuditLogs: AuditLog[] = [
+  {
+    id: '1',
+    actorId: 'user1',
+    actorEmail: 'admin@example.com',
+    timestamp: new Date().toISOString(),
+    action: 'UPDATE_SECURITY_SETTINGS',
+    category: 'SECURITY',
+    description: 'Updated password policy settings',
+    oldValues: { minLength: 8 },
+    newValues: { minLength: 12 }
+  },
+  {
+    id: '2',
+    actorId: 'user2',
+    actorEmail: 'security@example.com',
+    timestamp: new Date(Date.now() - 3600000).toISOString(),
+    action: 'CONFIGURE_MFA',
+    category: 'SECURITY',
+    description: 'Enabled MFA for all admin accounts',
+    oldValues: { mfaRequired: false },
+    newValues: { mfaRequired: true }
+  }
+]
+
+const demoActivityLogs: ActivityLog[] = [
+  {
+    id: '1',
+    userId: 'user1',
+    userEmail: 'admin@example.com',
+    timestamp: new Date().toISOString(),
+    category: 'Security',
+    action: 'Access',
+    label: 'Security settings page',
+    deviceType: 'desktop',
+    deviceOs: 'macOS',
+    deviceBrowser: 'Chrome',
+    geoCountry: 'US',
+    geoRegion: 'California',
+    geoCity: 'San Francisco'
+  },
+  {
+    id: '2',
+    userId: 'user2',
+    userEmail: 'security@example.com',
+    timestamp: new Date(Date.now() - 1800000).toISOString(),
+    category: 'API',
+    action: 'Request',
+    label: '/api/security/settings',
+    apiEndpoint: '/api/security/settings',
+    apiMethod: 'PUT',
+    apiStatusCode: 200,
+    apiResponseTime: 150,
+    deviceType: 'desktop',
+    deviceOs: 'Windows',
+    deviceBrowser: 'Firefox',
+    geoCountry: 'US',
+    geoRegion: 'New York',
+    geoCity: 'New York City'
+  }
+]
+
 export function SecurityPage() {
   const tabs = [
     {
@@ -257,6 +323,23 @@ export function SecurityPage() {
           onEditRole={(role) => console.log('Edit role:', role)}
           onManageAssignments={(role) => console.log('Manage assignments:', role)}
         />
+      )
+    },
+    {
+      id: 'monitoring',
+      label: 'Monitoring',
+      icon: Activity,
+      content: (
+        <div className="space-y-6">
+          <AuditLogCard 
+            logs={demoAuditLogs}
+            onViewDetails={(log) => console.log('View audit log:', log)}
+          />
+          <ActivityLogCard 
+            logs={demoActivityLogs}
+            onViewDetails={(log) => console.log('View activity log:', log)}
+          />
+        </div>
       )
     },
     {
