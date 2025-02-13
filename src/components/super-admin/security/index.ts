@@ -5,6 +5,8 @@ export { SecurityRoleCard } from './SecurityRoleCard'
 export { RoleManagementCard } from './RoleManagementCard'
 export { SessionManagementCard } from './SessionManagementCard'
 export { FailedLoginCard } from './FailedLoginCard'
+export { AuditLogCard } from './AuditLogCard'
+export { ActivityLogCard } from './ActivityLogCard'
 
 export type {
   SecurityEventSeverity,
@@ -21,5 +23,9 @@ export type {
   RoleAssignmentStatus,
   SessionStatus,
   UserSession,
-  FailedLoginAttempt
+  FailedLoginAttempt,
+  AuditAction,
+  AuditCategory,
+  AuditLog,
+  ActivityLog
 } from './types'

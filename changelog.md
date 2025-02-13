@@ -53,6 +53,12 @@
   - Added session status tracking
   - Added failed login monitoring
 
+- Added audit and activity tracking:
+  - AuditLogCard for displaying system audit events
+  - ActivityLogCard for user activity monitoring
+  - Added detailed geo-location tracking
+  - Added device and browser tracking
+
 ### Documentation
 - Enhanced super admin pages documentation with detailed schema information:
   - Added specific field names and data types from database schema
