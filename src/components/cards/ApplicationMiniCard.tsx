@@ -9,7 +9,6 @@ import {
   TestTube,
   CheckCircle2,
   RotateCcw,
-  ArrowUpRight,
   Layout,
   Lightbulb
 } from 'lucide-react';
@@ -30,16 +29,15 @@ interface ApplicationMiniCardProps {
   onStartTesting?: () => void;
   onMarkComplete?: () => void;
   onRevertToPrevious?: () => void;
-  onViewDetails?: () => void;
 }
 
 const statusConfig = {
-  MEMORY: { color: 'warning' as const, icon: Lightbulb },
-  BLUEPRINT: { color: 'info' as const, icon: FileCode },
-  VISUAL_PRD: { color: 'info' as const, icon: Eye },
-  DURING_DEVELOPMENT: { color: 'info' as const, icon: Code },
-  UNDER_TESTED: { color: 'warning' as const, icon: TestTube },
-  DEVELOPMENT_COMPLETE: { color: 'success' as const, icon: CheckCircle2 }
+  MEMORY: { color: 'warning' as const, icon: Lightbulb, label: 'Memory' },
+  BLUEPRINT: { color: 'info' as const, icon: FileCode, label: 'Blueprint' },
+  VISUAL_PRD: { color: 'info' as const, icon: Eye, label: 'Visual PRD' },
+  DURING_DEVELOPMENT: { color: 'info' as const, icon: Code, label: 'In Development' },
+  UNDER_TESTED: { color: 'warning' as const, icon: TestTube, label: 'Testing' },
+  DEVELOPMENT_COMPLETE: { color: 'success' as const, icon: CheckCircle2, label: 'Complete' }
 };
 
 export function ApplicationMiniCard({
@@ -54,8 +52,7 @@ export function ApplicationMiniCard({
   onStartDevelopment,
   onStartTesting,
   onMarkComplete,
-  onRevertToPrevious,
-  onViewDetails
+  onRevertToPrevious
 }: ApplicationMiniCardProps) {
   const StatusIcon = statusConfig[status].icon;
 
@@ -82,7 +79,7 @@ export function ApplicationMiniCard({
               size="sm"
               icon={<StatusIcon className="w-3 h-3" />}
             >
-              {status.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
+              {statusConfig[status].label}
             </Badge>
             {currentVersion && (
               <Badge variant="default" size="sm">
@@ -92,23 +89,9 @@ export function ApplicationMiniCard({
           </div>
         </div>
 
-        <div className="flex flex-col items-end space-y-2">
-          <div className="flex items-center text-sm text-gray-600">
-            <Layout className="w-4 h-4 mr-1" />
-            <span>{deployedSpacesCount}</span>
-          </div>
-          {onViewDetails && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onViewDetails();
-              }}
-            >
-              <ArrowUpRight className="w-4 h-4" />
-            </Button>
-          )}
+        <div className="flex items-center text-sm text-gray-600">
+          <Layout className="w-4 h-4 mr-1" />
+          <span>{deployedSpacesCount}</span>
         </div>
       </div>
       
