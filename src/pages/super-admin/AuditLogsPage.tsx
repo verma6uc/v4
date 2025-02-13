@@ -3,7 +3,7 @@ import { AdvancedTable, Column } from '../../components/AdvancedTable';
 import { Badge } from '../../components/Badge';
 import { MetricCard } from '../../components/MetricCard';
 import { ScrollText, Shield, AlertTriangle, Activity } from 'lucide-react';
-import { BaseCard } from '../../components/base/BaseCard';
+import { DateRangeFilter } from '../../components/DateRangeFilter';
 
 type AuditLog = {
   id: string;
@@ -35,10 +35,10 @@ type CategoryColor = {
 };
 
 export function AuditLogsPage() {
-  const [timeRange, setTimeRange] = React.useState('24h');
-  const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
-  const [selectedSeverities, setSelectedSeverities] = React.useState<string[]>([]);
-  const [pageSize, setPageSize] = React.useState(5);
+  const [dateRange, setDateRange] = React.useState({
+    start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+    end: new Date()
+  });
 
   // Generate 15 audit logs for testing pagination
   const generateAuditLogs = (): AuditLog[] => {
@@ -72,7 +72,14 @@ export function AuditLogsPage() {
     return logs;
   };
 
-  const auditLogs = generateAuditLogs();
+  const allLogs = React.useMemo(() => generateAuditLogs(), []);
+
+  const filteredLogs = React.useMemo(() => {
+    return allLogs.filter(log => {
+      const logDate = new Date(log.timestamp);
+      return logDate >= dateRange.start && logDate <= dateRange.end;
+    });
+  }, [allLogs, dateRange]);
 
   const severityColors: SeverityColor = {
     info: 'info',
@@ -186,10 +193,10 @@ export function AuditLogsPage() {
   ];
 
   const getMetrics = () => {
-    const total = auditLogs.length;
-    const security = auditLogs.filter(log => log.category === 'security').length;
-    const critical = auditLogs.filter(log => log.severity === 'critical').length;
-    const warning = auditLogs.filter(log => log.severity === 'warning').length;
+    const total = filteredLogs.length;
+    const security = filteredLogs.filter(log => log.category === 'security').length;
+    const critical = filteredLogs.filter(log => log.severity === 'critical').length;
+    const warning = filteredLogs.filter(log => log.severity === 'warning').length;
 
     return {
       total,
@@ -211,28 +218,10 @@ export function AuditLogsPage() {
               Monitor and track all system activities and events
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <select
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={25}>25 per page</option>
-              <option value={50}>50 per page</option>
-            </select>
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="1h">Last hour</option>
-              <option value="24h">Last 24 hours</option>
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-            </select>
-          </div>
+          <DateRangeFilter
+            onChange={setDateRange}
+            className="w-[250px]"
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -268,9 +257,8 @@ export function AuditLogsPage() {
       </div>
 
       <AdvancedTable<AuditLog>
-        items={auditLogs}
+        items={filteredLogs}
         columns={columns}
-        itemsPerPage={pageSize}
         enableSearch
         enableExport
       />
