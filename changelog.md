@@ -33,6 +33,14 @@
   - Added UUID generation for table data
   - Fixed prop name mismatch in AdvancedTable component
 
+### Components
+- Created reusable base components:
+  - BaseCard component for consistent card styling
+  - CompanyStatusBadge for status indicators
+- Improved company components:
+  - Split into CompanyMiniCard and CompanyMacroCard variants
+  - Added proper TypeScript types based on schema
+
 ### Documentation
 - Enhanced super admin pages documentation with detailed schema information:
   - Added specific field names and data types from database schema
