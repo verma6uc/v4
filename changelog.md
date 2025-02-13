@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Added
+- Basic Creator Interface
+  - Created basic applications list view
+  - Implemented CreatorLayout with responsive design
+  - Added CreatorHeader with search functionality
+  - Created CreatorSidebar with navigation
+  - Set up creator routes
 - Creator Interface Layout
   - Created CreatorLayout component with responsive design
   - Implemented CreatorHeader with search and notifications

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { superAdminRoutes } from './super-admin.routes';
+import { creatorRoutes } from './creator.routes';
 import { ShowcaseLayout } from '../layouts/ShowcaseLayout';
 import { ComponentShowcase } from '../pages/ComponentShowcase';
 import { ButtonsPage } from '../pages/ButtonsPage';
@@ -65,5 +66,6 @@ export const router = createBrowserRouter([
       }
     ]
   },
-  ...superAdminRoutes
+  ...superAdminRoutes,
+  ...creatorRoutes
 ]);

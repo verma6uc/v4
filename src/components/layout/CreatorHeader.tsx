@@ -1,7 +1,7 @@
 import React from 'react';
 import { Logo } from '../Logo';
 import { UserMenu } from '../UserMenu';
-import { Bell, Search, Code2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export function CreatorHeader() {
   return (
@@ -12,7 +12,7 @@ export function CreatorHeader() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search resources..."
+              placeholder="Search applications..."
               className="pl-10 pr-4 py-2 rounded-lg bg-indigo-50/50 border-0 focus:ring-2 focus:ring-indigo-500 w-64 placeholder-indigo-400"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
@@ -20,13 +20,6 @@ export function CreatorHeader() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="p-2 rounded-lg hover:bg-indigo-50 relative group">
-            <Code2 className="w-5 h-5 text-indigo-600 group-hover:text-indigo-700" />
-          </button>
-          <button className="p-2 rounded-lg hover:bg-indigo-50 relative">
-            <Bell className="w-5 h-5 text-indigo-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full"></span>
-          </button>
           <UserMenu />
         </div>
       </div>

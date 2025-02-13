@@ -1,40 +1,42 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
+  LayoutDashboard,
   Code2,
-  Box,
-  Layers,
+  PlusCircle,
+  ListTodo,
+  Boxes,
+  PlayCircle,
+  History,
   Settings,
   FileCode,
-  Database,
-  Activity,
-  Users2
+  HelpCircle
 } from 'lucide-react';
 
 const menuItems = [
   {
-    section: 'Overview',
+    section: 'Applications',
     items: [
-      { icon: LayoutDashboard, label: 'Dashboard', path: '/creator/dashboard' },
-      { icon: Code2, label: 'Applications', path: '/creator/applications' },
-      { icon: Box, label: 'Resources', path: '/creator/resources' }
+      { icon: LayoutDashboard, label: 'Dashboard', path: '/creator/applications' },
+      { icon: PlusCircle, label: 'New Application', path: '/creator/applications/new' },
+      { icon: Code2, label: 'In Progress', path: '/creator/applications/in-progress' }
     ]
   },
   {
-    section: 'Development',
+    section: 'Creation Flow',
     items: [
-      { icon: FileCode, label: 'Content', path: '/creator/content' },
-      { icon: Layers, label: 'Assets', path: '/creator/assets' },
-      { icon: Database, label: 'Data', path: '/creator/data' }
+      { icon: HelpCircle, label: 'Q&A Process', path: '/creator/applications/new/qna' },
+      { icon: ListTodo, label: 'Product Backlog', path: '/creator/applications/new/backlog' },
+      { icon: FileCode, label: 'Blueprint', path: '/creator/applications/new/blueprint' },
+      { icon: Boxes, label: 'Project Plan', path: '/creator/applications/new/project-plan' },
+      { icon: PlayCircle, label: 'Prototype', path: '/creator/applications/new/prototype' }
     ]
   },
   {
     section: 'Management',
     items: [
-      { icon: Settings, label: 'Environment', path: '/creator/environment' },
-      { icon: Activity, label: 'Monitoring', path: '/creator/monitoring' },
-      { icon: Users2, label: 'Collaboration', path: '/creator/collaboration' }
+      { icon: History, label: 'Audit Logs', path: '/creator/applications/audit' },
+      { icon: Settings, label: 'Settings', path: '/creator/settings' }
     ]
   }
 ];
