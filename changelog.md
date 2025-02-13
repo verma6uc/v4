@@ -3,68 +3,95 @@
 ## [Unreleased]
 
 ### Added
-- Initial project setup with React + TypeScript + Vite
-- Documentation site structure with features:
-  - Multi-tenancy support
-  - User management
-  - Organization hierarchy
-  - Billing and subscriptions
-  - Company management
-  - Space administration
-  - Integrations
-- Form components with enhanced styling:
-  - Custom select component with white background and improved dropdown
-  - Radio buttons with better hover/focus states
-  - Checkboxes with improved visual feedback
-  - Multi-select component with tag-based selection
-- Card components for business objects:
-  - Mini and Macro card variants for:
-    - Users
-    - Companies
-    - Spaces
-    - Applications
-    - Invoices
-    - Subscription Plans
-  - Modular organization with separate example data and sections
+- Enhanced Audit Logs page
+  - Real-time metrics dashboard
+  - Time-based filtering
+  - Color-coded severity and category badges
+  - Exact timestamps for better readability
+  - Entity tracking with type and ID
+  - Configurable pagination (5/10/25/50 per page)
+  - Detailed event information with IP tracking
+  - Export functionality
+- Detailed metrics pages
+  - Source details page with resource utilization metrics
+  - Service details page with performance metrics
+  - Detailed metric breakdowns
+  - Service dependency visualization
+- Enhanced navigation system
+  - Click-through from dashboard to detailed views
+  - Time range selection for metrics
+  - Interactive metric cards with hover effects
+  - Keyboard navigation support
+  - Fixed audit logs sidebar link
+- Comprehensive metrics implementation strategy
+  - Defined data sources and calculation methods
+  - Planned database functions and optimizations
+  - Outlined real-time update strategy
+  - Documented performance considerations
+  - Added audit metrics calculation strategy
+    - Total events tracking with month-over-month changes
+    - Security events monitoring
+    - Critical and warning events tracking
+    - Caching and performance optimizations
+    - Real-time update mechanisms
+- Database Enhancements
+  - Added severity field to audit_logs table
+  - Created performance indexes for metrics
+  - Implemented table partitioning by month
+  - Added materialized views for metrics
+  - Fixed audit logs sidebar link
+- Comprehensive metrics implementation strategy
+  - Defined data sources and calculation methods
+  - Planned database functions and optimizations
+  - Outlined real-time update strategy
+  - Documented performance considerations
+  - Added audit metrics calculation strategy
+    - Total events tracking with month-over-month changes
+    - Security events monitoring
+    - Critical and warning events tracking
+    - Caching and performance optimizations
+    - Real-time update mechanisms
+- Database Enhancements
+  - Added severity field to audit_logs table
+  - Created performance indexes for metrics
+  - Implemented table partitioning by month
+  - Added materialized views for metrics
+  - Added IP address tracking
+  - Created metric calculation functions
+  - Added automatic refresh triggers
+- Implementation phases and timeline in tasks.md
 
-- Added header component to showcase layout for better navigation and context
-### Fixed
-- Tables showcase page:
-  - Added UUID generation for table data
-  - Fixed prop name mismatch in AdvancedTable component
+### Changed
+- Updated super_admin.md with detailed SQL queries for metrics
+- Reorganized dashboard components for better maintainability
+- Improved mock data structure to match planned real data format
+- Enhanced navigation with detailed metric pages
+- Added hover effects and visual feedback to interactive elements
+- Simplified metric displays for better clarity
+- Improved accessibility with keyboard navigation
+- Removed redundant navigation buttons
+- Enhanced audit log structure with entity information
+- Improved table pagination with page numbers and navigation
+- Fixed audit logs path in sidebar
+- Updated audit log timestamps to show exact time
+- Optimized database schema for better performance
 
-### Components
-- Created reusable base components:
-  - BaseCard component for consistent card styling
-  - CompanyStatusBadge for status indicators
-- Improved company components:
-  - Split into CompanyMiniCard and CompanyMacroCard variants
-  - Added proper TypeScript types based on schema
+### Technical Planning
+- Defined database function specifications
+- Outlined caching and optimization strategies
+- Planned real-time subscription architecture
+- Documented error handling approach
+- Created data collection strategy
+- Defined alert thresholds and routing
+- Added audit metrics calculation functions
+- Implemented materialized views strategy
+- Added performance monitoring plan
+- Created database migration plan
 
-- Added role management components:
-  - RoleManagementCard for platform and application roles
-  - Added role types based on database schema
-  - Added role assignment handling
-  - Added role status indicators
+## [0.1.0] - 2025-02-13
 
-- Added session management components:
-  - SessionManagementCard for tracking user sessions
-  - FailedLoginCard for monitoring login attempts
-  - Added session status tracking
-  - Added failed login monitoring
-
-- Added audit and activity tracking:
-  - AuditLogCard for displaying system audit events
-  - ActivityLogCard for user activity monitoring
-  - Added detailed geo-location tracking
-  - Added device and browser tracking
-
-### Documentation
-- Enhanced super admin pages documentation with detailed schema information:
-  - Added specific field names and data types from database schema
-  - Expanded configuration options and management capabilities
-
-### Todo
-- Create schema.sql file to define database structure
-- Create user-stories.md to document requirements
-- Implement core features based on documentation structure
+### Added
+- Initial project setup
+- Basic component structure
+- Mock data implementation
+- Basic UI layout

@@ -1,149 +1,97 @@
 import React from 'react'
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  Info, 
-  AlertTriangle, 
-  X 
-} from 'lucide-react'
+import { AlertCircle, CheckCircle, Info, X, XCircle } from 'lucide-react'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
-interface ToastProps {
-  type?: ToastType
-  title: string
-  message?: string
-  onClose?: () => void
-  duration?: number
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+export interface Toast {
+  id: string
+  type: ToastType
+  message: string
 }
 
-const toastIcons = {
-  success: CheckCircle,
-  error: AlertCircle,
-  info: Info,
-  warning: AlertTriangle
+interface ToastProps {
+  type: ToastType
+  message: string
+  onClose: () => void
 }
 
 const toastStyles = {
-  success: {
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    icon: 'text-green-500',
-    title: 'text-green-800',
-    message: 'text-green-600'
-  },
-  error: {
-    bg: 'bg-red-50',
-    border: 'border-red-200',
-    icon: 'text-red-500',
-    title: 'text-red-800',
-    message: 'text-red-600'
-  },
-  info: {
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    icon: 'text-blue-500',
-    title: 'text-blue-800',
-    message: 'text-blue-600'
-  },
-  warning: {
-    bg: 'bg-yellow-50',
-    border: 'border-yellow-200',
-    icon: 'text-yellow-500',
-    title: 'text-yellow-800',
-    message: 'text-yellow-600'
-  }
+  success: 'bg-green-50 text-green-800 border-green-200',
+  error: 'bg-red-50 text-red-800 border-red-200',
+  info: 'bg-blue-50 text-blue-800 border-blue-200',
+  warning: 'bg-yellow-50 text-yellow-800 border-yellow-200'
 }
 
-const positions = {
-  'top-right': 'top-4 right-4',
-  'top-left': 'top-4 left-4',
-  'bottom-right': 'bottom-4 right-4',
-  'bottom-left': 'bottom-4 left-4'
+const ToastIcon = {
+  success: CheckCircle,
+  error: XCircle,
+  info: Info,
+  warning: AlertCircle
 }
 
-export function Toast({ 
-  type = 'info',
-  title,
-  message,
-  onClose,
-  duration = 5000,
-  position = 'top-right'
-}: ToastProps) {
-  const [isClosing, setIsClosing] = React.useState(false)
-  const Icon = toastIcons[type]
-  const styles = toastStyles[type]
+export function Toast({ type, message, onClose }: ToastProps) {
+  const Icon = ToastIcon[type]
 
   React.useEffect(() => {
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        handleClose()
-      }, duration)
-      return () => clearTimeout(timer)
-    }
-  }, [duration])
+    const timer = setTimeout(() => {
+      onClose()
+    }, 5000)
 
-  const handleClose = () => {
-    setIsClosing(true)
-    setTimeout(() => {
-      onClose?.()
-    }, 200)
-  }
+    return () => clearTimeout(timer)
+  }, [onClose])
 
   return (
-    <div className={`
-      fixed ${positions[position]} z-50
-      transition-all duration-200 ease-in-out
-      ${isClosing ? 'opacity-0 translate-x-2' : 'opacity-100 translate-x-0'}
-    `}>
-      <div className={`
-        flex items-start gap-3 p-4 rounded-lg shadow-lg border
-        ${styles.bg} ${styles.border}
-        min-w-[320px] max-w-md
-      `}>
-        <Icon className={`w-5 h-5 mt-0.5 ${styles.icon}`} strokeWidth={2} />
-        
-        <div className="flex-1 min-w-0">
-          <h3 className={`text-sm font-medium ${styles.title}`}>
-            {title}
-          </h3>
-          {message && (
-            <p className={`mt-1 text-sm ${styles.message}`}>
-              {message}
-            </p>
-          )}
-        </div>
-
-        <button
-          onClick={handleClose}
-          className={`
-            p-1 rounded-lg opacity-70 hover:opacity-100
-            transition-opacity duration-200
-          `}
-        >
-          <X className={`w-4 h-4 ${styles.icon}`} strokeWidth={2} />
-        </button>
-      </div>
+    <div
+      className={`flex items-center gap-2 px-4 py-3 rounded-lg border shadow-sm ${toastStyles[type]}`}
+      role="alert"
+    >
+      <Icon className="w-5 h-5" />
+      <p className="text-sm font-medium">{message}</p>
+      <button
+        onClick={onClose}
+        className="ml-2 inline-flex text-gray-400 hover:text-gray-600 focus:outline-none"
+      >
+        <X className="w-4 h-4" />
+      </button>
     </div>
   )
 }
 
 interface ToastContainerProps {
-  children: React.ReactNode
-  position?: ToastProps['position']
+  toasts: Toast[]
+  onClose: (id: string) => void
 }
 
-export function ToastContainer({ 
-  children,
-  position = 'top-right'
-}: ToastContainerProps) {
+export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   return (
-    <div className={`
-      fixed ${positions[position]} z-50
-      flex flex-col gap-3
-    `}>
-      {children}
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          type={toast.type}
+          message={toast.message}
+          onClose={() => onClose(toast.id)}
+        />
+      ))}
     </div>
   )
+}
+
+export function useToasts() {
+  const [toasts, setToasts] = React.useState<Toast[]>([])
+
+  const addToast = React.useCallback((type: ToastType, message: string) => {
+    const id = Math.random().toString(36).substr(2, 9)
+    setToasts((prev) => [...prev, { id, type, message }])
+  }, [])
+
+  const removeToast = React.useCallback((id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id))
+  }, [])
+
+  return {
+    toasts,
+    addToast,
+    removeToast
+  }
 }

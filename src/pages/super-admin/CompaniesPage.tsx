@@ -1,201 +1,179 @@
 import React from 'react'
-import { LayoutGrid, LayoutList, Building2, Users, Clock, Plus } from 'lucide-react'
-import { AdvancedTable, Column } from '../../components/AdvancedTable'
-import { Button } from '../../components/Button'
-import { MetricCard } from '../../components/MetricCard'
-import { CompanyMiniCard } from '../../components/super-admin/company'
-import { Company, CompanyStatus } from '../../types/schema'
-
-const demoCompanies: Company[] = [
-  {
-    id: '1',
-    name: 'Acme Corp',
-    identifier: 'acme',
-    status: CompanyStatus.ACTIVE,
-    primaryEmail: 'contact@acme.com',
-    primaryPhone: '+1 (555) 123-4567',
-    website: 'https://acme.com',
-    addressStreet: '123 Main St',
-    addressCity: 'San Francisco',
-    addressState: 'CA',
-    addressCountry: 'USA',
-    addressPostalCode: '94105',
-    createdAt: new Date().toISOString(),
-    activatedAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    name: 'TechStart Inc',
-    identifier: 'techstart',
-    status: CompanyStatus.ACTIVE,
-    primaryEmail: 'hello@techstart.io',
-    primaryPhone: '+1 (555) 987-6543',
-    website: 'https://techstart.io',
-    addressCity: 'New York',
-    addressState: 'NY',
-    addressCountry: 'USA',
-    createdAt: new Date().toISOString(),
-    activatedAt: new Date().toISOString()
-  },
-  {
-    id: '3',
-    name: 'Global Systems',
-    identifier: 'globalsys',
-    status: CompanyStatus.SUSPENDED,
-    primaryEmail: 'info@globalsys.com',
-    website: 'https://globalsys.com',
-    addressCity: 'London',
-    addressCountry: 'UK',
-    createdAt: new Date().toISOString(),
-    activatedAt: new Date().toISOString(),
-    suspendedAt: new Date().toISOString(),
-    suspendedReason: 'Payment overdue'
-  }
-]
+import { useNavigate } from 'react-router-dom'
+import { ToastContainer, ToastType, useToasts } from '../../components/Toast'
+import {
+  Company,
+  CompanyHeader,
+  CompanyMetrics,
+  CompanyList,
+  CreateCompanyModal,
+  CompanyListHeader,
+  demoCompanies
+} from '../../components/super-admin/company'
+import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 
 export function CompaniesPage() {
+  // State
   const [viewMode, setViewMode] = React.useState<'grid' | 'table'>('grid')
-  const companies = demoCompanies
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
+  const [confirmDialog, setConfirmDialog] = React.useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: () => void;
+    variant: 'warning' | 'danger';
+  } | null>(null)
+  const [companies] = React.useState<Company[]>(demoCompanies)
+  const { toasts, addToast, removeToast } = useToasts()
+  const navigate = useNavigate()
 
-  const columns: Column<Company>[] = [
-    {
-      key: 'name',
-      label: 'Company',
-      sortable: true,
-      cell: (company) => (
-        <div>
-          <div className="font-medium text-gray-900">{company.name}</div>
-          <div className="text-sm text-gray-500">{company.identifier}</div>
-        </div>
-      )
-    },
-    {
-      key: 'primaryEmail',
-      label: 'Email',
-      sortable: true
-    },
-    {
-      key: 'website',
-      label: 'Website',
-      sortable: true,
-      cell: (company) => company.website && (
-        <a 
-          href={company.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800"
-        >
-          {company.website.replace(/^https?:\/\//, '')}
-        </a>
-      )
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      sortable: true
-    },
-    {
-      key: 'createdAt',
-      label: 'Created',
-      sortable: true,
-      cell: (company) => new Date(company.createdAt).toLocaleDateString()
+  // Handlers
+  const handleCreateCompany = async (newCompany: Partial<Company>) => {
+    try {
+      // TODO: API call to create company
+      console.log('Create company:', newCompany)
+      
+      setIsCreateModalOpen(false)
+      addToast('success', 'Company created successfully')
+    } catch (error) {
+      console.error('Error creating company:', error)
+      addToast('error', 'Failed to create company. Please try again.')
     }
-  ]
-
-  const handleActivate = (company: Company) => {
-    console.log('Activate company:', company.id)
   }
 
-  const handleSuspend = (company: Company) => {
-    console.log('Suspend company:', company.id)
+  const handleActivate = async (company: Company) => {
+    try {
+      // TODO: API call to activate company
+      console.log('Activate company:', company.id)
+      addToast('success', 'Company activated successfully')
+    } catch (error) {
+      console.error('Error activating company:', error)
+      addToast('error', 'Failed to activate company. Please try again.')
+    }
   }
 
-  const handleArchive = (company: Company) => {
-    console.log('Archive company:', company.id)
+  const confirmSuspend = (company: Company) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Suspend Company',
+      message: 'Are you sure you want to suspend this company? All users will lose access until the company is reactivated.',
+      action: () => handleSuspend(company),
+      variant: 'warning'
+    })
+  }
+
+  const handleSuspend = async (company: Company) => {
+    try {
+      // TODO: API call to suspend company
+      console.log('Suspend company:', company.id)
+      setConfirmDialog(null)
+      addToast('success', 'Company suspended successfully')
+    } catch (error) {
+      console.error('Error suspending company:', error)
+      addToast('error', 'Failed to suspend company. Please try again.')
+    }
+  }
+
+  const confirmArchive = (company: Company) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Archive Company',
+      message: 'Are you sure you want to archive this company? This action cannot be undone.',
+      action: () => handleArchive(company),
+      variant: 'danger'
+    })
+  }
+
+  const handleArchive = async (company: Company) => {
+    try {
+      // TODO: API call to archive company
+      console.log('Archive company:', company.id)
+      setConfirmDialog(null)
+      addToast('success', 'Company archived successfully')
+    } catch (error) {
+      console.error('Error archiving company:', error)
+      addToast('error', 'Failed to archive company. Please try again.')
+    }
+  }
+
+  const confirmDelete = (company: Company) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Company',
+      message: 'Are you sure you want to permanently delete this company? This action cannot be undone.',
+      action: () => handleDelete(company),
+      variant: 'danger'
+    })
+  }
+
+  const handleDelete = async (company: Company) => {
+    try {
+      // TODO: API call to delete company
+      console.log('Delete company:', company.id)
+      setConfirmDialog(null)
+      addToast('success', 'Company marked for deletion successfully')
+    } catch (error) {
+      console.error('Error deleting company:', error)
+      addToast('error', 'Failed to delete company. Please try again.')
+    }
+  }
+
+  const handleCompanyClick = (company: Company) => {
+    navigate(`/super-admin/companies/${company.id}`)
   }
 
   return (
     <>
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Companies</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage and monitor all companies in the system
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
-              <button
-                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm' : ''}`}
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                className={`p-2 rounded ${viewMode === 'table' ? 'bg-white shadow-sm' : ''}`}
-                onClick={() => setViewMode('table')}
-              >
-                <LayoutList className="w-4 h-4" />
-              </button>
-            </div>
-            <Button>
-              <Plus className="w-4 h-4 mr-1" />
-              Add Company
-            </Button>
-          </div>
-        </div>
+        <CompanyHeader
+          onCreateClick={() => setIsCreateModalOpen(true)}
+        />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <MetricCard
-            title="Total Companies"
-            value={companies.length.toString()}
-            change={12}
-            icon={Building2}
-            status="success"
-          />
-          <MetricCard
-            title="Active Companies"
-            value={companies.filter(c => c.status === CompanyStatus.ACTIVE).length.toString()}
-            change={5}
-            icon={Users}
-            status="success"
-          />
-          <MetricCard
-            title="Average Activity"
-            value="85%"
-            change={3}
-            icon={Clock}
-            status="success"
-          />
-        </div>
+        <CompanyMetrics companies={companies} />
       </div>
 
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {companies.map(company => (
-            <CompanyMiniCard
-              key={company.id}
-              company={company}
-              userCount={156} // This would come from API
-              spaceCount={12} // This would come from API
-              onClick={() => console.log('View company:', company.id)}
-              onActivate={company.status === CompanyStatus.SUSPENDED ? handleActivate : undefined}
-              onSuspend={company.status === CompanyStatus.ACTIVE ? handleSuspend : undefined}
-              onArchive={
-                (company.status === CompanyStatus.ACTIVE || 
-                 company.status === CompanyStatus.SUSPENDED) ? handleArchive : undefined
-              }
-            />
-          ))}
-        </div>
-      ) : (
-        <AdvancedTable<Company>
-          items={companies}
-          columns={columns}
-          itemsPerPage={10}
+      <div>
+        <CompanyListHeader
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+
+        <CompanyList
+          companies={companies}
+          viewMode={viewMode}
+          searchQuery={searchQuery}
+          onCompanyClick={handleCompanyClick}
+          onActivate={handleActivate}
+          onSuspend={confirmSuspend}
+          onArchive={confirmArchive}
+          onDelete={confirmDelete}
+        />
+      </div>
+
+      <CreateCompanyModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateCompany}
+      />
+
+      {confirmDialog && (
+        <ConfirmationDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          onConfirm={confirmDialog.action}
+          onCancel={() => setConfirmDialog(null)}
+          variant={confirmDialog.variant}
         />
       )}
+
+      <ToastContainer
+        toasts={toasts}
+        onClose={removeToast}
+      />
     </>
   )
 }

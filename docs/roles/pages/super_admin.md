@@ -1,161 +1,185 @@
 # Super Admin Pages
 
 ## Dashboard (/super-admin/dashboard)
-Main system overview showing:
-- System status
-- Growth metrics
-- Resource metrics
-- Usage metrics (based on usage_records table)
-  - User count
-  - Storage usage
-  - API calls
-  - Data transfer
-- Space utilization
-- User activities
-- System alerts
 
-Key Actions:
-- View metrics
-- Handle alerts
-- Export reports
+### Data Sources and Metrics
 
-## Companies (/super-admin/companies)
-Company management showing:
-- Company list with fields:
-  - Name
-  - Identifier
-  - Status (ACTIVE, SUSPENDED, ARCHIVED)
-  - Primary email/phone
-  - Website
-  - Address details
-  - Creation date
-- Status indicators
-- Quick actions
+#### 1. System Health
+Calculated from activity_logs table:
+```sql
+-- Overall API Health
+SELECT 
+  COUNT(*) as total_requests,
+  AVG(api_response_time) as avg_response_time,
+  COUNT(CASE WHEN api_status_code >= 500 THEN 1 END)::float / COUNT(*) * 100 as error_rate
+FROM activity_logs 
+WHERE timestamp > NOW() - INTERVAL '5 minutes'
+AND api_endpoint IS NOT NULL;
 
-### Company Detail (/super-admin/companies/:id)
-Detailed company view with tabs:
+-- Service-specific Health
+SELECT 
+  api_endpoint as service,
+  COUNT(*) as requests,
+  AVG(api_response_time) as latency,
+  COUNT(CASE WHEN api_status_code >= 500 THEN 1 END)::float / COUNT(*) * 100 as error_rate
+FROM activity_logs
+WHERE timestamp > NOW() - INTERVAL '5 minutes'
+GROUP BY api_endpoint;
+```
 
-1. Overview Tab
-   - Company profile
-     - Basic info (name, identifier, status)
-     - Contact details
-     - Address information
-     - Logo
-   - Key metrics
-   - Status management (activate, suspend, archive)
-   - Quick actions
+#### 2. Security Metrics
+From failed_login_attempts and audit_logs:
+```sql
+-- Failed Login Patterns
+SELECT 
+  ip_address,
+  COUNT(*) as attempt_count,
+  MIN(attempt_at) as first_attempt,
+  MAX(attempt_at) as last_attempt
+FROM failed_login_attempts 
+WHERE attempt_at > NOW() - INTERVAL '1 hour'
+GROUP BY ip_address, user_id
+HAVING COUNT(*) > 5;
 
-2. Configuration Tab
-   - Localization settings
-     - Language (en, es, fr, de, it, pt, zh, ja, ko, ru)
-     - Timezone
-     - Date format (DD_MM_YYYY, MM_DD_YYYY)
-     - Time format (12/24 hour)
-     - Number format (US/EU)
-     - Week start (Monday/Sunday)
-     - Currency code
-   - Security settings
-     - MFA configuration
-     - Session management
-     - IP restrictions
-     - Password policies
-   - App store settings
-     - Status management
-     - Deployment controls
-     - Space admin permissions
+-- Security Events
+SELECT 
+  action,
+  COUNT(*) as event_count
+FROM audit_logs
+WHERE category = 'SECURITY'
+AND timestamp > NOW() - INTERVAL '24 hours'
+GROUP BY action;
+```
 
-3. Users Tab
-   - User list with fields:
-     - Name (first_name, last_name)
-     - Email
-     - Status (INVITED, ACTIVE, SUSPENDED, BLOCKED, ARCHIVED)
-     - Designation
-     - Platform role
-     - Creation date
-   - Role assignments
-   - Access levels
-   - User status management
+#### 3. Growth Metrics
+From users and companies tables:
+```sql
+-- User Growth
+WITH monthly_users AS (
+  SELECT 
+    DATE_TRUNC('month', created_at) as month,
+    COUNT(*) as user_count
+  FROM users
+  GROUP BY DATE_TRUNC('month', created_at)
+)
+SELECT 
+  current.month,
+  current.user_count,
+  ((current.user_count - prev.user_count)::float / prev.user_count * 100) as growth_rate
+FROM monthly_users current
+LEFT JOIN monthly_users prev ON prev.month = current.month - INTERVAL '1 month';
 
-4. Billing Tab
-   - Current subscription plan details:
-     - Plan name/code
-     - Status
-     - Billing frequency
-     - Base price details
-     - Resource limits
-     - Contract terms
-   - Usage tracking:
-     - User count
-     - Storage usage
-     - API calls
-     - Data transfer
-   - Invoices:
-     - Invoice number
-     - Status
-     - Type
-     - Amount details
-     - Due dates
-   - Payment history
+-- Company Growth
+SELECT 
+  COUNT(*) as total_companies,
+  COUNT(CASE WHEN status = 'ACTIVE' THEN 1 END) as active_companies,
+  COUNT(CASE WHEN created_at > NOW() - INTERVAL '30 days' THEN 1 END) as new_companies
+FROM companies;
+```
 
-5. Email Templates Tab
-   - Template management:
-     - System templates
-     - Custom templates
-   - Template fields:
-     - Name
-     - Code
-     - Type (SYSTEM/CUSTOM)
-     - Status (DRAFT/ACTIVE/INACTIVE)
-     - Content (subject, body)
-     - Styling options
+#### 4. Resource Utilization
+From usage_records table:
+```sql
+-- Overall Resource Usage
+SELECT 
+  resource_type,
+  SUM(usage_amount) as total_usage,
+  MAX(usage_amount) as peak_usage,
+  AVG(usage_amount) as avg_usage
+FROM usage_records
+WHERE timestamp > NOW() - INTERVAL '1 hour'
+GROUP BY resource_type;
 
-## Billing (/super-admin/billing)
-Billing management showing:
-- Plan management
-  - Plan details:
-    - Name/code
-    - Status (DRAFT, ACTIVE, GRANDFATHERED, DISCONTINUED)
-    - Visibility (PUBLIC, PRIVATE, HIDDEN)
-    - Pricing structure
-    - Resource limits
-    - Contract terms
-- Global pricing
-- Invoice tracking:
-  - Status tracking (DRAFT, PENDING, ISSUED, PAID, VOID, CANCELLED)
-  - Payment processing
-  - Credit management
-  - Line item details
+-- Usage by Company
+SELECT 
+  c.name as company_name,
+  ur.resource_type,
+  SUM(ur.usage_amount) as total_usage
+FROM usage_records ur
+JOIN companies c ON c.id = ur.company_id
+WHERE ur.timestamp > NOW() - INTERVAL '24 hours'
+GROUP BY c.name, ur.resource_type;
+```
 
-Key Actions:
-- Manage subscription plans
-- View and manage invoices
-- Track revenue
-- Handle payments and credits
+#### 5. Activity Patterns
+From activity_logs table:
+```sql
+-- Hourly Activity
+SELECT 
+  DATE_TRUNC('hour', timestamp) as hour,
+  COUNT(*) as activity_count,
+  COUNT(DISTINCT user_id) as unique_users,
+  AVG(api_response_time) as avg_response_time
+FROM activity_logs
+WHERE timestamp > NOW() - INTERVAL '24 hours'
+GROUP BY DATE_TRUNC('hour', timestamp);
 
-## Audit (/super-admin/audit)
-System-wide audit logs showing:
-- All system activities
-- Company operations
-- Billing changes
-- Security events
-- User sessions
-- Failed login attempts
+-- Feature Usage
+SELECT 
+  category,
+  action,
+  COUNT(*) as usage_count,
+  COUNT(DISTINCT user_id) as unique_users
+FROM activity_logs
+WHERE timestamp > NOW() - INTERVAL '24 hours'
+GROUP BY category, action;
+```
 
-Key Actions:
-- View audit logs with filters:
-  - Date range
-  - Company
-  - User
-  - Event type
-  - Status
-- Export logs
-- Search history
-- Generate reports
+### Dashboard Components
 
-## Common Elements
-- All changes are logged in audit tables
-- Critical actions need confirmation
-- Most management via modals
-- Detail views use tabs
-- Status changes require reasons
-- All data follows schema constraints
+1. System Overview
+   - System health score (weighted average of service health)
+   - Active security alerts count
+   - Current active users
+   - Resource utilization summary
+
+2. Growth Metrics
+   - Total users with growth rate
+   - Total companies with growth rate
+   - Monthly revenue (from invoices)
+
+3. Resource Monitoring
+   - CPU utilization
+   - Memory usage
+   - Storage usage
+   - Network bandwidth
+
+4. Security Status
+   - Active security alerts
+   - Recent failed login attempts
+   - Suspicious IP activities
+   - System configuration changes
+
+5. Activity Feed
+   - Recent system events
+   - User activities
+   - Error occurrences
+   - Performance anomalies
+
+### Implementation Notes
+
+1. Real-time Updates:
+   - Use Supabase Realtime for live metric updates
+   - Subscribe to relevant tables for instant notifications
+   - Implement websocket connections for live data
+
+2. Performance Considerations:
+   - Cache frequently accessed metrics
+   - Use materialized views for complex calculations
+   - Implement efficient data aggregation
+
+3. Security Measures:
+   - Implement rate limiting for API calls
+   - Log all dashboard access attempts
+   - Restrict access to super admin role only
+
+4. Error Handling:
+   - Graceful degradation when services are down
+   - Clear error messages and status indicators
+   - Automatic retry mechanisms for failed requests
+
+### Key Actions
+- View detailed metrics
+- Export reports in various formats
+- Configure alert thresholds
+- Manage system notifications

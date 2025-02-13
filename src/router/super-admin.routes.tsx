@@ -6,6 +6,10 @@ import { UsersPage } from '../pages/super-admin/UsersPage';
 import { AuditLogsPage } from '../pages/super-admin/AuditLogsPage';
 import { SecurityPage } from '../pages/super-admin/SecurityPage';
 import { BillingPage } from '../pages/super-admin/BillingPage';
+import { CompanyDetailPage } from '../pages/super-admin/CompanyDetailPage';
+import { UserDetailPage } from '../pages/super-admin/UserDetailPage';
+import { SourceDetailsPage } from '../pages/super-admin/SourceDetailsPage';
+import { ServiceDetailsPage } from '../pages/super-admin/ServiceDetailsPage';
 
 export const superAdminRoutes = [
   {
@@ -21,8 +25,16 @@ export const superAdminRoutes = [
         element: <CompaniesPage />
       },
       {
+        path: 'companies/:id',
+        element: <CompanyDetailPage />
+      },
+      {
         path: 'users',
         element: <UsersPage />
+      },
+      {
+        path: 'users/:id',
+        element: <UserDetailPage />
       },
       {
         path: 'audit-logs',
@@ -35,6 +47,14 @@ export const superAdminRoutes = [
       {
         path: 'billing',
         element: <BillingPage />
+      },
+      {
+        path: 'sources/:sourceId',
+        element: <SourceDetailsPage />
+      },
+      {
+        path: 'services/:serviceId',
+        element: <ServiceDetailsPage />
       }
     ]
   }

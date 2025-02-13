@@ -8,9 +8,25 @@ export enum UserStatus {
 }
 
 export enum CompanyStatus {
+  DRAFT = 'DRAFT',
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED',
-  ARCHIVED = 'ARCHIVED'
+  ARCHIVED = 'ARCHIVED',
+  DELETED = 'DELETED'
+}
+
+export enum InvitationType {
+  COMPANY_ADMIN = 'COMPANY_ADMIN',
+  SPACE_ADMIN = 'SPACE_ADMIN',
+  USER = 'USER'
+}
+
+export enum InvitationStatus {
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  EXPIRED = 'EXPIRED',
+  ACCEPTED = 'ACCEPTED',
+  CANCELLED = 'CANCELLED'
 }
 
 export enum DateFormat {
@@ -111,6 +127,49 @@ export interface Company {
   suspendedReason?: string
   archivedAt?: string
   archivedReason?: string
+  deletedAt?: string
+  deletedReason?: string
+}
+
+export interface User {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  designationId?: string
+  companyId?: string  // Optional for platform-level users (super admins)
+  lastLoginAt?: string | null
+  status: UserStatus
+  platformRoleId?: string
+  phone?: string
+  profilePictureUrl?: string
+  createdAt: string
+  updatedAt: string
+  activatedAt?: string
+  suspendedAt?: string
+  suspendedReason?: string
+  blockedAt?: string
+  blockedReason?: string
+  archivedAt?: string
+  archivedReason?: string
+}
+
+export interface Invitation {
+  id: string
+  companyId: string
+  email: string
+  type: InvitationType
+  status: InvitationStatus
+  createdAt: string
+  expiresAt: string
+  sentAt?: string
+  acceptedAt?: string
+  cancelledAt?: string
+  lastResendAt?: string
+  resendCount: number
+  cancellationReason?: string
+  ipCreated?: string
+  ipAccepted?: string
 }
 
 export interface CompanyConfiguration {
@@ -143,28 +202,6 @@ export interface CompanyConfiguration {
   passwordExpiryEnabled: boolean
   passwordHistoryCount: number
   createdAt: string
-}
-
-export interface User {
-  id: string
-  companyId: string
-  email: string
-  firstName: string
-  lastName: string
-  designationId?: string
-  status: UserStatus
-  platformRoleId?: string
-  phone?: string
-  profilePictureUrl?: string
-  createdAt: string
-  updatedAt: string
-  activatedAt?: string
-  suspendedAt?: string
-  suspendedReason?: string
-  blockedAt?: string
-  blockedReason?: string
-  archivedAt?: string
-  archivedReason?: string
 }
 
 export interface Invoice {

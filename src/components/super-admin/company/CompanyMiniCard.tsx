@@ -13,6 +13,7 @@ interface CompanyMiniCardProps {
   onActivate?: (company: Company) => void
   onSuspend?: (company: Company) => void
   onArchive?: (company: Company) => void
+  onDelete?: (company: Company) => void
 }
 
 export function CompanyMiniCard({
@@ -22,7 +23,8 @@ export function CompanyMiniCard({
   onClick,
   onActivate,
   onSuspend,
-  onArchive
+  onArchive,
+  onDelete
 }: CompanyMiniCardProps) {
   const handleAction = (
     e: React.MouseEvent,
@@ -34,7 +36,7 @@ export function CompanyMiniCard({
 
   return (
     <BaseCard 
-      className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+      className="p-6 cursor-pointer"
       onClick={() => onClick?.(company)}
     >
       <div className="flex items-start justify-between">
@@ -69,17 +71,7 @@ export function CompanyMiniCard({
       </div>
       
       <div className="mt-4 flex items-center justify-end space-x-2">
-        {company.status === 'ACTIVE' && onSuspend && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => handleAction(e, onSuspend)}
-          >
-            Suspend
-          </Button>
-        )}
-        
-        {company.status === 'SUSPENDED' && onActivate && (
+        {onActivate && (
           <Button
             variant="ghost"
             size="sm"
@@ -89,14 +81,34 @@ export function CompanyMiniCard({
           </Button>
         )}
         
-        {(company.status === 'ACTIVE' || company.status === 'SUSPENDED') && 
-         onArchive && (
+        {onSuspend && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => handleAction(e, onSuspend)}
+          >
+            Suspend
+          </Button>
+        )}
+        
+        {onArchive && (
           <Button
             variant="ghost"
             size="sm"
             onClick={(e) => handleAction(e, onArchive)}
           >
             Archive
+          </Button>
+        )}
+
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={(e) => handleAction(e, onDelete)}
+          >
+            Delete
           </Button>
         )}
       </div>

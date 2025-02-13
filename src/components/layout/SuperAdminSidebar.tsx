@@ -15,7 +15,7 @@ const menuItems = [
     items: [
       { icon: LayoutDashboard, label: 'Dashboard', path: '/super-admin/dashboard' },
       { icon: Building2, label: 'Companies', path: '/super-admin/companies' },
-      { icon: Users, label: 'Users', path: '/super-admin/users' }
+      { icon: Users, label: 'Super Admins', path: '/super-admin/users' }
     ]
   },
   {
@@ -28,7 +28,7 @@ const menuItems = [
     section: 'System',
     items: [
       { icon: Shield, label: 'Security', path: '/super-admin/security' },
-      { icon: ScrollText, label: 'Audit Logs', path: '/super-admin/audit' }
+      { icon: ScrollText, label: 'Audit Logs', path: '/super-admin/audit-logs' }
     ]
   }
 ];
