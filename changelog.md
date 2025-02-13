@@ -47,6 +47,12 @@
   - Added role assignment handling
   - Added role status indicators
 
+- Added session management components:
+  - SessionManagementCard for tracking user sessions
+  - FailedLoginCard for monitoring login attempts
+  - Added session status tracking
+  - Added failed login monitoring
+
 ### Documentation
 - Enhanced super admin pages documentation with detailed schema information:
   - Added specific field names and data types from database schema

@@ -6,9 +6,13 @@ import {
   SecurityPolicyCard,
   SecurityEventCard,
   RoleManagementCard,
+  SessionManagementCard,
+  FailedLoginCard,
   SecurityEventSeverity,
   PlatformRole,
-  ApplicationRole
+  ApplicationRole,
+  UserSession,
+  FailedLoginAttempt
 } from '../../components/super-admin/security'
 
 const demoSecurityPolicies = [
@@ -54,6 +58,50 @@ const demoSecurityEvents = [
       location: 'Unknown location',
       device: 'New device'
     }
+  }
+]
+
+const demoSessions: UserSession[] = [
+  {
+    id: '1',
+    userId: 'user1',
+    userEmail: 'john.doe@example.com',
+    ipAddress: '192.168.1.100',
+    userAgent: 'Chrome/120.0.0.0',
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 3600000).toISOString()
+  },
+  {
+    id: '2',
+    userId: 'user2',
+    userEmail: 'jane.smith@example.com',
+    ipAddress: '192.168.1.101',
+    userAgent: 'Firefox/121.0',
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 3600000).toISOString()
+  }
+]
+
+const demoFailedLogins: FailedLoginAttempt[] = [
+  {
+    id: '1',
+    userId: 'user1',
+    userEmail: 'john.doe@example.com',
+    attemptAt: new Date().toISOString(),
+    ipAddress: '192.168.1.200',
+    userAgent: 'Chrome/120.0.0.0',
+    failedReason: 'Incorrect password'
+  },
+  {
+    id: '2',
+    userId: 'user1',
+    userEmail: 'john.doe@example.com',
+    attemptAt: new Date(Date.now() - 300000).toISOString(),
+    ipAddress: '192.168.1.200',
+    userAgent: 'Chrome/120.0.0.0',
+    failedReason: 'Incorrect password'
   }
 ]
 
@@ -183,7 +231,18 @@ export function SecurityPage() {
         variant: 'error' as const
       },
       content: (
-        <SecurityEventCard events={demoSecurityEvents} />
+        <div className="space-y-6">
+          <SecurityEventCard events={demoSecurityEvents} />
+          <SessionManagementCard 
+            sessions={demoSessions}
+            onTerminateSession={(session) => console.log('Terminate session:', session)}
+            onTerminateAll={() => console.log('Terminate all sessions')}
+          />
+          <FailedLoginCard 
+            attempts={demoFailedLogins}
+            maxAttempts={3}
+          />
+        </div>
       )
     },
     {

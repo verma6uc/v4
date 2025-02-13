@@ -37,6 +37,7 @@ export type PlatformRoleName = 'SUPER_ADMIN' | 'COMPANY_ADMIN' | 'SPACE_ADMIN' |
 export type PlatformRoleType = 'SYSTEM' | 'COMPANY' | 'SPACE'
 export type RoleAssignmentType = 'PLATFORM' | 'APPLICATION'
 export type RoleAssignmentStatus = 'ACTIVE' | 'ARCHIVED'
+export type SessionStatus = 'ACTIVE' | 'SUSPENDED' | 'TERMINATED' | 'EXPIRED'
 
 export interface RoleAssignment {
   id: string
@@ -65,4 +66,25 @@ export interface ApplicationRole {
   autoAssignable: boolean
   requiresApproval: boolean
   assignments?: RoleAssignment[]
+}
+
+export interface UserSession {
+  id: string
+  userId: string
+  userEmail: string
+  ipAddress: string
+  userAgent: string
+  status: SessionStatus
+  createdAt: string
+  expiresAt: string
+}
+
+export interface FailedLoginAttempt {
+  id: string
+  userId: string
+  userEmail: string
+  attemptAt: string
+  ipAddress: string
+  userAgent: string
+  failedReason: string
 }

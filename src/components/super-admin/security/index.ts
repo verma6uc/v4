@@ -3,6 +3,8 @@ export { SecurityPolicyCard } from './SecurityPolicyCard'
 export { SecurityEventCard } from './SecurityEventCard'
 export { SecurityRoleCard } from './SecurityRoleCard'
 export { RoleManagementCard } from './RoleManagementCard'
+export { SessionManagementCard } from './SessionManagementCard'
+export { FailedLoginCard } from './FailedLoginCard'
 
 export type {
   SecurityEventSeverity,
@@ -16,5 +18,8 @@ export type {
   PlatformRoleName,
   PlatformRoleType,
   RoleAssignmentType,
-  RoleAssignmentStatus
+  RoleAssignmentStatus,
+  SessionStatus,
+  UserSession,
+  FailedLoginAttempt
 } from './types'
