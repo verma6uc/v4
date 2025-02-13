@@ -20,7 +20,7 @@ CREATE TYPE application_deployment_status_enum AS ENUM ('DEPLOYED', 'INACTIVE');
 
 /* Enum for Deployment Environment */
 DROP TYPE IF EXISTS environment_enum;
-CREATE TYPE environment_enum AS ENUM ('TEST', 'PRODUCTION', 'UAT');
+CREATE TYPE environment_enum AS ENUM ('TEST', 'UAT', 'PRODUCTION');
 
 /* -----------------------------
    Applications Table
@@ -43,6 +43,28 @@ CREATE TABLE applications (
     CONSTRAINT fk_applications_company 
        FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
 );
+
+/* -----------------------------
+   Application Meta Data Table
+   ----------------------------- */
+CREATE TABLE application_meta_data (
+    id UUID PRIMARY KEY,
+    application_id UUID NOT NULL,
+    meta_key VARCHAR(100) NOT NULL,      
+    meta_value TEXT,                      
+    is_required BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    
+    CONSTRAINT fk_app_meta_data_application 
+        FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE,
+    CONSTRAINT unique_app_meta_key 
+        UNIQUE (application_id, meta_key)
+);
+
+/* Create index for faster lookups by application */
+CREATE INDEX idx_app_meta_data_application_id 
+    ON application_meta_data(application_id);
 
 /* -----------------------------
    Application Deployments Table

@@ -141,6 +141,59 @@ CREATE TABLE space_field_values (
     UNIQUE (space_id, field_id)           -- One value per field per space
 );
 
+/* =========================
+   Space Configurations Table
+   ========================= */
+CREATE TABLE space_configurations (
+    id UUID PRIMARY KEY,
+    space_id UUID NOT NULL,
+
+    /* Localization Settings */
+    default_language language_enum NOT NULL DEFAULT 'en',
+    default_timezone timezone_enum NOT NULL DEFAULT 'UTC',
+    date_format date_format_enum NOT NULL DEFAULT 'DD_MM_YYYY',
+    time_format time_format_enum NOT NULL DEFAULT 'TWENTY_FOUR_HOUR',
+    number_format number_format_enum NOT NULL DEFAULT 'US',
+    first_day_of_week week_start_enum NOT NULL DEFAULT 'MONDAY',
+    currency_code VARCHAR(3) NOT NULL DEFAULT 'USD',
+
+    /* MFA Configuration */
+    mfa_enabled BOOLEAN NOT NULL DEFAULT false,
+    mfa_enforcement_level mfa_enforcement_level_enum NOT NULL,
+    mfa_default_method mfa_default_method_enum,
+
+    /* Session Management */
+    session_timeout INTEGER NOT NULL DEFAULT 30,
+    max_concurrent_sessions INTEGER NOT NULL DEFAULT 3,
+
+    /* IP Access Control */
+    enforce_ip_restrictions BOOLEAN NOT NULL DEFAULT false,
+    allowed_ip_ranges TEXT[],
+    blocklisted_ip_ranges TEXT[],
+
+    /* Account Security Settings */
+    max_login_attempts INTEGER NOT NULL DEFAULT 5,
+    lockout_duration INTEGER NOT NULL DEFAULT 30,
+    password_reset_timeout INTEGER NOT NULL DEFAULT 24,
+    invitation_validity_period INTEGER NOT NULL DEFAULT 72,
+    password_policy_min_length INTEGER NOT NULL DEFAULT 8,
+    password_policy_require_special_char BOOLEAN NOT NULL DEFAULT true,
+    password_policy_require_number BOOLEAN NOT NULL DEFAULT true,
+    password_policy_require_uppercase BOOLEAN NOT NULL DEFAULT true,
+    password_policy_expiry_days INTEGER NOT NULL DEFAULT 90,
+    password_expiry_enabled BOOLEAN NOT NULL DEFAULT true,
+    password_history_count INTEGER NOT NULL DEFAULT 5,
+
+    created_at TIMESTAMPTZ DEFAULT now(),
+
+    CONSTRAINT fk_space_configurations_space 
+        FOREIGN KEY (space_id) REFERENCES spaces (id) ON DELETE CASCADE
+);
+
+/* Create unique index to ensure one configuration per space */
+CREATE UNIQUE INDEX idx_space_configurations_space_id 
+    ON space_configurations(space_id);
+
 /* -----------------------------
    Space Users Table
    ----------------------------- */
