@@ -27,6 +27,7 @@
     - Subscription Plans
   - Modular organization with separate example data and sections
 
+- Added header component to showcase layout for better navigation and context
 ### Todo
 - Create schema.sql file to define database structure
 - Create user-stories.md to document requirements
