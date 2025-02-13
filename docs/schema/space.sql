@@ -14,14 +14,6 @@ CREATE TYPE space_status_enum AS ENUM ('DRAFT', 'ACTIVE', 'SUSPENDED', 'ARCHIVED
 DROP TYPE IF EXISTS space_type_status_enum;
 CREATE TYPE space_type_status_enum AS ENUM ('ACTIVE', 'SUSPENDED', 'ARCHIVED');
 
-/* Enum for Deployment status */
-DROP TYPE IF EXISTS deployment_status_enum;
-CREATE TYPE deployment_status_enum AS ENUM ('ACTIVE', 'INACTIVE');
-
-/* Enum for Deployment Environment */
-DROP TYPE IF EXISTS environment_enum;
-CREATE TYPE environment_enum AS ENUM ('TEST', 'PRODUCTION', 'UAT');
-
 /* Enum for Space Field Type */
 DROP TYPE IF EXISTS space_field_type_enum;
 CREATE TYPE space_field_type_enum AS ENUM ('TEXT', 'NUMBER', 'DATE', 'DROPDOWN', 'BOOLEAN', 'EMAIL', 'PHONE');
@@ -147,32 +139,6 @@ CREATE TABLE space_field_values (
     CONSTRAINT fk_space_field_values_field 
         FOREIGN KEY (field_id) REFERENCES space_type_fields (id) ON DELETE CASCADE,
     UNIQUE (space_id, field_id)           -- One value per field per space
-);
-
-/* -----------------------------
-   Space Deployments Table
-   ----------------------------- */
-/*
-   Tracks the deployment of applications into a space.
-   Includes an environment value to distinguish between TEST, PRODUCTION, and UAT.
-*/
-CREATE TABLE space_deployments (
-    id UUID PRIMARY KEY,
-    space_id UUID NOT NULL,                 -- Reference to the space
-    application_id UUID NOT NULL,           -- Deployed application
-    deployed_by UUID NOT NULL,              -- User who deployed
-    deployed_at TIMESTAMPTZ NOT NULL,       -- Deployment timestamp
-    environment environment_enum NOT NULL,  -- TEST, PRODUCTION, or UAT
-    status deployment_status_enum NOT NULL, -- ACTIVE or INACTIVE
-    version VARCHAR(50) NOT NULL,           -- Version identifier
-    created_at TIMESTAMPTZ DEFAULT now(),
-    
-    CONSTRAINT fk_space_deployments_space 
-        FOREIGN KEY (space_id) REFERENCES spaces (id) ON DELETE CASCADE,
-    CONSTRAINT fk_space_deployments_application 
-        FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE,
-    CONSTRAINT fk_space_deployments_user 
-        FOREIGN KEY (deployed_by) REFERENCES users (id) ON DELETE SET NULL
 );
 
 /* -----------------------------

@@ -52,6 +52,9 @@ CREATE TABLE users (
     designation_id UUID,                            -- Reference to the user's designation (if any)
     status user_status_enum NOT NULL,               -- User status: INVITED, ACTIVE, SUSPENDED, BLOCKED, ARCHIVED
 
+    /* Platform Role*/
+    platform_role_id UUID, -- Reference to p
+
     /* Authentication Fields */
     password_hash VARCHAR(255),                     -- Hashed password
 
@@ -75,7 +78,9 @@ CREATE TABLE users (
     CONSTRAINT fk_users_company 
         FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE,
     CONSTRAINT fk_users_designation 
-        FOREIGN KEY (designation_id) REFERENCES designations (id) ON DELETE SET NULL
+        FOREIGN KEY (designation_id) REFERENCES designations (id) ON DELETE SET NULL,
+    CONSTRAINT fk_users_platform_role 
+        FOREIGN KEY (platform_role_id) REFERENCES platform_roles (id)  ON DELETE SET NULL,
 );
 
 

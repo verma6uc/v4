@@ -50,26 +50,23 @@ CREATE TABLE platform_roles (
 );
 
 /* -------------------------
-   Role Assignments Table
+   Application Role Assignments Table
 ------------------------- */
-CREATE TABLE role_assignments (
+CREATE TABLE application_role_assignments (
     id UUID PRIMARY KEY,
-    user_id UUID NOT NULL,                  -- Reference to the user receiving the role
-    role_id UUID NOT NULL,                  -- Reference to the role (platform or application)
-    role_type role_assignment_type_enum NOT NULL, -- Indicates if the role is PLATFORM or APPLICATION
-    application_id UUID NULL,               -- Nullable, used when assigning an application role
-    space_id UUID NULL,                     -- Nullable, used when assigning a space-specific role
-    assigned_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    status role_assignment_status_enum NOT NULL DEFAULT 'ACTIVE',  -- Assignment status: ACTIVE or ARCHIVED
+    user_id UUID NOT NULL,                  
+    application_role_id UUID NOT NULL,       
+    application_id UUID NOT NULL,            
+    space_id UUID NULL,                      
+    assigned_at TIMESTAMPTZ DEFAULT now(),
+    status role_assignment_status_enum NOT NULL DEFAULT 'ACTIVE',
     
-    CONSTRAINT fk_role_assignments_user 
-      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-
-    CONSTRAINT fk_role_assignments_application 
-      FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE SET NULL,
-
-    CONSTRAINT fk_role_assignments_space 
-      FOREIGN KEY (space_id) REFERENCES spaces (id) ON DELETE SET NULL
-
-    -- Note: role_id is polymorphic and may reference either platform_roles or application_roles.
+    CONSTRAINT fk_application_role_assignments_user 
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_application_role_assignments_role
+        FOREIGN KEY (application_role_id) REFERENCES application_roles (id),
+    CONSTRAINT fk_application_role_assignments_application 
+        FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE,
+    CONSTRAINT fk_application_role_assignments_space 
+        FOREIGN KEY (space_id) REFERENCES spaces (id) ON DELETE SET NULL
 );
