@@ -2,6 +2,12 @@ import React from 'react'
 import { SimpleTable } from '../components/SimpleTable'
 import { AdvancedTable } from '../components/AdvancedTable'
 import { ComplexTable } from '../components/ComplexTable'
+import {
+  simpleColumns,
+  simpleData,
+  advancedColumns,
+  advancedData
+} from '../components/examples/table.data'
 
 export function TablesPage() {
   return (
@@ -12,6 +18,8 @@ export function TablesPage() {
         <SimpleTable 
           title="Basic Users Table" 
           description="A simple table with basic sorting functionality."
+          columns={simpleColumns}
+          data={simpleData}
         />
       </div>
 
@@ -21,6 +29,8 @@ export function TablesPage() {
         <AdvancedTable 
           title="Users with Search & Export" 
           description="Enhanced table with search, pagination, and export capabilities."
+          columns={advancedColumns}
+          items={advancedData}
         />
       </div>
 

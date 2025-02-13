@@ -28,6 +28,11 @@
   - Modular organization with separate example data and sections
 
 - Added header component to showcase layout for better navigation and context
+### Fixed
+- Tables showcase page:
+  - Added UUID generation for table data
+  - Fixed prop name mismatch in AdvancedTable component
+
 ### Todo
 - Create schema.sql file to define database structure
 - Create user-stories.md to document requirements
