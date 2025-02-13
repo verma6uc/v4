@@ -6,7 +6,8 @@
 - [x] Create CreatorLayout component
 - [x] Implement CreatorHeader component
 - [x] Implement CreatorSidebar component
-- [x] Create basic applications list page
+- [x] Create Dashboard page for in-progress applications
+- [x] Create App Store page for completed applications
 - [x] Set up creator routes
 
 ### Phase 2: Application Management (Next)
@@ -22,6 +23,13 @@
 - [ ] Create backlog management
 - [ ] Add blueprint designer
 - [ ] Implement prototype viewer
+
+### Phase 4: App Store Features (Future)
+- [ ] Add application search
+- [ ] Implement category filtering
+- [ ] Add deployment workflow
+- [ ] Create space selection interface
+- [ ] Add version management
 
 ## Dashboard Implementation
 
@@ -83,36 +91,6 @@
   - Set up monitoring
   ```
 
-### Phase 4: Data Collection Setup (Future Sprint)
-- [ ] System Metrics Collection
-  ```
-  - Set up node_exporter
-  - Configure Prometheus
-  - Implement collection pipeline
-  - Set up metric aggregation
-  ```
-- [ ] Application Metrics Collection
-  ```
-  - Add instrumentation middleware
-  - Implement request tracking
-  - Set up performance monitoring
-  - Configure error tracking
-  ```
-- [ ] Database Metrics Collection
-  ```
-  - Set up pg_stat_statements
-  - Create monitoring views
-  - Configure query tracking
-  - Implement size monitoring
-  ```
-- [ ] Infrastructure Metrics Collection
-  ```
-  - Configure cloud provider SDK
-  - Set up resource monitoring
-  - Implement usage tracking
-  - Configure network monitoring
-  ```
-
 ## Completed Tasks
 - [x] Initial project setup
 - [x] Basic component structure
@@ -134,13 +112,14 @@
 - [x] Configurable pagination
 - [x] Audit metrics strategy
 - [x] Basic creator interface implementation
+- [x] Creator dashboard and app store pages
 
 ## Next Steps
 1. Create application detail page
 2. Add application status management
 3. Implement application filtering
-4. Set up database partitioning for audit_logs
-5. Implement metric calculation functions
-6. Configure Redis caching
-7. Set up real-time updates
-8. Add monitoring and alerting
+4. Add app store search functionality
+5. Create deployment workflow
+6. Set up database partitioning for audit_logs
+7. Implement metric calculation functions
+8. Configure Redis caching

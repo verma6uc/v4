@@ -3,69 +3,99 @@ import { Badge } from '../Badge';
 import { Button } from '../Button';
 import {
   Box,
-  PlayCircle,
+  FileCode,
+  Eye,
+  Code,
+  TestTube,
   CheckCircle2,
-  Upload,
   RotateCcw,
   Layout,
-  Calendar,
-  ListTodo,
-  FileCode,
-  TestTube,
-  Settings,
-  History,
   Lightbulb
 } from 'lucide-react';
+
+type ApplicationStatus = 'MEMORY' | 'BLUEPRINT' | 'VISUAL_PRD' | 'DURING_DEVELOPMENT' | 'UNDER_TESTED' | 'DEVELOPMENT_COMPLETE';
+
+interface Memory {
+  summary: string;
+  createdAt: string;
+  notes: string[];
+}
+
+interface Blueprint {
+  version: string;
+  diagram: string;
+  states: string[];
+  actions: string[];
+  lastModified: string;
+  reviewStatus: string;
+  reviewComments: string[];
+}
+
+interface VisualPRD {
+  version: string;
+  mockups: string[];
+  userFlows: string[];
+  designSystem: {
+    colors: string[];
+    typography: string;
+  };
+  lastModified: string;
+  reviewStatus: string;
+}
+
+interface Development {
+  startedAt: string;
+  currentPhase: string;
+  completedModules: number;
+  totalModules: number;
+  technicalDebt: string[];
+}
+
+interface Testing {
+  startedAt: string;
+  testCases: number;
+  bugs: number;
+  testCoverage: number;
+  lastTestRun: string;
+}
+
+interface DeployedSpace {
+  id: string;
+  name: string;
+  version: string;
+  deployedAt: string;
+}
 
 interface ApplicationMacroCardProps {
   id: string;
   title: string;
   description: string;
-  status: 'DRAFT' | 'IN_PROGRESS' | 'READY_TO_DEPLOY' | 'PUBLISHED';
+  status: ApplicationStatus;
   currentVersion?: string;
-  deployedSpaces: Array<{
-    id: string;
-    name: string;
-    version: string;
-    deployedAt: string;
-  }>;
-  concept?: {
-    summary: string;
-    selectedAt: string;
-  };
-  backlog?: {
-    featuresCount: number;
-    useCasesCount: number;
-    userStoriesCount: number;
-  };
-  blueprint?: {
-    version: string;
-    lastModified: string;
-  };
-  prototype?: {
-    version: string;
-    status: string;
-    feedbackCount: number;
-    lastTested: string;
-  };
+  deployedSpaces: DeployedSpace[];
+  memory?: Memory;
+  blueprint?: Blueprint;
+  visualPRD?: VisualPRD;
+  development?: Development;
+  testing?: Testing;
   createdAt: string;
   updatedAt: string;
   onClick?: () => void;
+  onMoveToBlueprint?: () => void;
+  onMoveToVisualPRD?: () => void;
   onStartDevelopment?: () => void;
-  onMarkReady?: () => void;
-  onPublish?: () => void;
-  onRevertToDraft?: () => void;
-  onUpdateBacklog?: () => void;
-  onUpdateBlueprint?: () => void;
-  onDeployToSpace?: () => void;
-  onManageDeployments?: () => void;
+  onStartTesting?: () => void;
+  onMarkComplete?: () => void;
+  onRevertToPrevious?: () => void;
 }
 
 const statusConfig = {
-  DRAFT: { color: 'warning' as const },
-  IN_PROGRESS: { color: 'info' as const },
-  READY_TO_DEPLOY: { color: 'success' as const },
-  PUBLISHED: { color: 'primary' as const }
+  MEMORY: { color: 'warning' as const, icon: Lightbulb },
+  BLUEPRINT: { color: 'info' as const, icon: FileCode },
+  VISUAL_PRD: { color: 'info' as const, icon: Eye },
+  DURING_DEVELOPMENT: { color: 'info' as const, icon: Code },
+  UNDER_TESTED: { color: 'warning' as const, icon: TestTube },
+  DEVELOPMENT_COMPLETE: { color: 'success' as const, icon: CheckCircle2 }
 };
 
 export function ApplicationMacroCard({
@@ -74,22 +104,23 @@ export function ApplicationMacroCard({
   status,
   currentVersion,
   deployedSpaces,
-  concept,
-  backlog,
+  memory,
   blueprint,
-  prototype,
+  visualPRD,
+  development,
+  testing,
   createdAt,
   updatedAt,
   onClick,
+  onMoveToBlueprint,
+  onMoveToVisualPRD,
   onStartDevelopment,
-  onMarkReady,
-  onPublish,
-  onRevertToDraft,
-  onUpdateBacklog,
-  onUpdateBlueprint,
-  onDeployToSpace,
-  onManageDeployments
+  onStartTesting,
+  onMarkComplete,
+  onRevertToPrevious
 }: ApplicationMacroCardProps) {
+  const StatusIcon = statusConfig[status].icon;
+
   return (
     <div 
       className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
@@ -106,9 +137,9 @@ export function ApplicationMacroCard({
         <div className="flex items-center space-x-2">
           <Badge 
             variant={statusConfig[status].color}
-            dot
+            icon={<StatusIcon className="w-4 h-4" />}
           >
-            {status.toLowerCase().replace('_', ' ')}
+            {status.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
           </Badge>
           {currentVersion && (
             <Badge variant="default">
@@ -120,27 +151,13 @@ export function ApplicationMacroCard({
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div className="flex flex-col space-y-3">
-          {concept && (
+          {memory && (
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Lightbulb className="w-4 h-4" />
               <div>
-                <div className="font-medium">Concept</div>
-                <div className="text-xs">{concept.summary}</div>
-                <div className="text-xs text-gray-400">Selected: {concept.selectedAt}</div>
-              </div>
-            </div>
-          )}
-          
-          {backlog && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <ListTodo className="w-4 h-4" />
-              <div>
-                <div className="font-medium">Backlog</div>
-                <div className="text-xs">
-                  {backlog.featuresCount} Features, 
-                  {backlog.useCasesCount} Use Cases, 
-                  {backlog.userStoriesCount} Stories
-                </div>
+                <div className="font-medium">Memory</div>
+                <div className="text-xs">{memory.summary}</div>
+                <div className="text-xs text-gray-400">Created: {memory.createdAt}</div>
               </div>
             </div>
           )}
@@ -150,21 +167,50 @@ export function ApplicationMacroCard({
               <FileCode className="w-4 h-4" />
               <div>
                 <div className="font-medium">Blueprint v{blueprint.version}</div>
-                <div className="text-xs">Modified: {blueprint.lastModified}</div>
+                <div className="text-xs">Status: {blueprint.reviewStatus}</div>
+                <div className="text-xs text-gray-400">Modified: {blueprint.lastModified}</div>
+              </div>
+            </div>
+          )}
+
+          {visualPRD && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <Eye className="w-4 h-4" />
+              <div>
+                <div className="font-medium">Visual PRD v{visualPRD.version}</div>
+                <div className="text-xs">Status: {visualPRD.reviewStatus}</div>
+                <div className="text-xs text-gray-400">Modified: {visualPRD.lastModified}</div>
               </div>
             </div>
           )}
         </div>
 
         <div className="flex flex-col space-y-3">
-          {prototype && (
+          {development && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <Code className="w-4 h-4" />
+              <div>
+                <div className="font-medium">Development Progress</div>
+                <div className="text-xs">Phase: {development.currentPhase}</div>
+                <div className="text-xs">{development.completedModules}/{development.totalModules} Modules</div>
+                <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full"
+                    style={{ width: `${(development.completedModules / development.totalModules) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {testing && (
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <TestTube className="w-4 h-4" />
               <div>
-                <div className="font-medium">Prototype v{prototype.version}</div>
-                <div className="text-xs">Status: {prototype.status}</div>
-                <div className="text-xs">{prototype.feedbackCount} Feedback Items</div>
-                <div className="text-xs text-gray-400">Tested: {prototype.lastTested}</div>
+                <div className="font-medium">Testing Status</div>
+                <div className="text-xs">Coverage: {testing.testCoverage}%</div>
+                <div className="text-xs">Open Bugs: {testing.bugs}</div>
+                <div className="text-xs text-gray-400">Last Run: {testing.lastTestRun}</div>
               </div>
             </div>
           )}
@@ -187,21 +233,40 @@ export function ApplicationMacroCard({
               </div>
             </div>
           )}
-          
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <History className="w-4 h-4" />
-            <div>
-              <div className="text-xs">Created: {createdAt}</div>
-              <div className="text-xs">Updated: {updatedAt}</div>
-            </div>
-          </div>
         </div>
       </div>
 
       <div className="mt-6 border-t pt-4">
         <div className="flex flex-wrap gap-2">
-          {/* State Management Actions */}
-          {status === 'DRAFT' && onStartDevelopment && (
+          {status === 'MEMORY' && onMoveToBlueprint && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveToBlueprint();
+              }}
+            >
+              <FileCode className="w-4 h-4 mr-1" />
+              Move to Blueprint
+            </Button>
+          )}
+          
+          {status === 'BLUEPRINT' && onMoveToVisualPRD && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveToVisualPRD();
+              }}
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              Move to Visual PRD
+            </Button>
+          )}
+          
+          {status === 'VISUAL_PRD' && onStartDevelopment && (
             <Button
               variant="outline"
               size="sm"
@@ -210,117 +275,51 @@ export function ApplicationMacroCard({
                 onStartDevelopment();
               }}
             >
-              <PlayCircle className="w-4 h-4 mr-1" />
+              <Code className="w-4 h-4 mr-1" />
               Start Development
             </Button>
           )}
-          
-          {status === 'IN_PROGRESS' && onMarkReady && (
+
+          {status === 'DURING_DEVELOPMENT' && onStartTesting && (
             <Button
               variant="outline"
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onMarkReady();
+                onStartTesting();
+              }}
+            >
+              <TestTube className="w-4 h-4 mr-1" />
+              Start Testing
+            </Button>
+          )}
+
+          {status === 'UNDER_TESTED' && onMarkComplete && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMarkComplete();
               }}
             >
               <CheckCircle2 className="w-4 h-4 mr-1" />
-              Mark Ready
+              Mark Complete
             </Button>
           )}
           
-          {status === 'READY_TO_DEPLOY' && onPublish && (
+          {status !== 'MEMORY' && onRevertToPrevious && (
             <Button
               variant="outline"
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onPublish();
-              }}
-            >
-              <Upload className="w-4 h-4 mr-1" />
-              Publish
-            </Button>
-          )}
-          
-          {status !== 'DRAFT' && onRevertToDraft && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRevertToDraft();
+                onRevertToPrevious();
               }}
             >
               <RotateCcw className="w-4 h-4 mr-1" />
-              Revert to Draft
+              Revert to Previous
             </Button>
-          )}
-
-          {/* Development Actions */}
-          {status === 'IN_PROGRESS' && (
-            <>
-              {onUpdateBacklog && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpdateBacklog();
-                  }}
-                >
-                  <ListTodo className="w-4 h-4 mr-1" />
-                  Update Backlog
-                </Button>
-              )}
-              
-              {onUpdateBlueprint && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpdateBlueprint();
-                  }}
-                >
-                  <FileCode className="w-4 h-4 mr-1" />
-                  Update Blueprint
-                </Button>
-              )}
-            </>
-          )}
-
-          {/* Deployment Actions */}
-          {status === 'PUBLISHED' && (
-            <>
-              {onDeployToSpace && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeployToSpace();
-                  }}
-                >
-                  <Layout className="w-4 h-4 mr-1" />
-                  Deploy to Space
-                </Button>
-              )}
-              
-              {onManageDeployments && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onManageDeployments();
-                  }}
-                >
-                  <Settings className="w-4 h-4 mr-1" />
-                  Manage Deployments
-                </Button>
-              )}
-            </>
           )}
         </div>
       </div>

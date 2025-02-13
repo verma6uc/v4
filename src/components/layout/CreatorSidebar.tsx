@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard,
-  Code2,
+  Store,
   PlusCircle,
   ListTodo,
   Boxes,
@@ -15,11 +15,11 @@ import {
 
 const menuItems = [
   {
-    section: 'Applications',
+    section: 'Overview',
     items: [
-      { icon: LayoutDashboard, label: 'Dashboard', path: '/creator/applications' },
-      { icon: PlusCircle, label: 'New Application', path: '/creator/applications/new' },
-      { icon: Code2, label: 'In Progress', path: '/creator/applications/in-progress' }
+      { icon: LayoutDashboard, label: 'Dashboard', path: '/creator/dashboard' },
+      { icon: Store, label: 'App Store', path: '/creator/app-store' },
+      { icon: PlusCircle, label: 'New Application', path: '/creator/applications/new' }
     ]
   },
   {

@@ -3,34 +3,43 @@ import { Badge } from '../Badge';
 import { Button } from '../Button';
 import {
   Box,
-  PlayCircle,
+  FileCode,
+  Eye,
+  Code,
+  TestTube,
   CheckCircle2,
-  Upload,
   RotateCcw,
   ArrowUpRight,
-  Layout
+  Layout,
+  Lightbulb
 } from 'lucide-react';
+
+type ApplicationStatus = 'MEMORY' | 'BLUEPRINT' | 'VISUAL_PRD' | 'DURING_DEVELOPMENT' | 'UNDER_TESTED' | 'DEVELOPMENT_COMPLETE';
 
 interface ApplicationMiniCardProps {
   id: string;
   title: string;
   description: string;
-  status: 'DRAFT' | 'IN_PROGRESS' | 'READY_TO_DEPLOY' | 'PUBLISHED';
+  status: ApplicationStatus;
   currentVersion?: string;
   deployedSpacesCount: number;
   onClick?: () => void;
+  onMoveToBlueprint?: () => void;
+  onMoveToVisualPRD?: () => void;
   onStartDevelopment?: () => void;
-  onMarkReady?: () => void;
-  onPublish?: () => void;
-  onRevertToDraft?: () => void;
+  onStartTesting?: () => void;
+  onMarkComplete?: () => void;
+  onRevertToPrevious?: () => void;
   onViewDetails?: () => void;
 }
 
 const statusConfig = {
-  DRAFT: { color: 'warning' as const },
-  IN_PROGRESS: { color: 'info' as const },
-  READY_TO_DEPLOY: { color: 'success' as const },
-  PUBLISHED: { color: 'primary' as const }
+  MEMORY: { color: 'warning' as const, icon: Lightbulb },
+  BLUEPRINT: { color: 'info' as const, icon: FileCode },
+  VISUAL_PRD: { color: 'info' as const, icon: Eye },
+  DURING_DEVELOPMENT: { color: 'info' as const, icon: Code },
+  UNDER_TESTED: { color: 'warning' as const, icon: TestTube },
+  DEVELOPMENT_COMPLETE: { color: 'success' as const, icon: CheckCircle2 }
 };
 
 export function ApplicationMiniCard({
@@ -40,12 +49,16 @@ export function ApplicationMiniCard({
   currentVersion,
   deployedSpacesCount,
   onClick,
+  onMoveToBlueprint,
+  onMoveToVisualPRD,
   onStartDevelopment,
-  onMarkReady,
-  onPublish,
-  onRevertToDraft,
+  onStartTesting,
+  onMarkComplete,
+  onRevertToPrevious,
   onViewDetails
 }: ApplicationMiniCardProps) {
+  const StatusIcon = statusConfig[status].icon;
+
   return (
     <div 
       className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
@@ -67,8 +80,9 @@ export function ApplicationMiniCard({
             <Badge 
               variant={statusConfig[status].color}
               size="sm"
+              icon={<StatusIcon className="w-3 h-3" />}
             >
-              {status.toLowerCase().replace('_', ' ')}
+              {status.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
             </Badge>
             {currentVersion && (
               <Badge variant="default" size="sm">
@@ -99,7 +113,35 @@ export function ApplicationMiniCard({
       </div>
       
       <div className="mt-4 flex items-center justify-end space-x-2">
-        {status === 'DRAFT' && onStartDevelopment && (
+        {status === 'MEMORY' && onMoveToBlueprint && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveToBlueprint();
+            }}
+          >
+            <FileCode className="w-4 h-4 mr-1" />
+            Move to Blueprint
+          </Button>
+        )}
+        
+        {status === 'BLUEPRINT' && onMoveToVisualPRD && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveToVisualPRD();
+            }}
+          >
+            <Eye className="w-4 h-4 mr-1" />
+            Move to Visual PRD
+          </Button>
+        )}
+        
+        {status === 'VISUAL_PRD' && onStartDevelopment && (
           <Button
             variant="ghost"
             size="sm"
@@ -108,50 +150,50 @@ export function ApplicationMiniCard({
               onStartDevelopment();
             }}
           >
-            <PlayCircle className="w-4 h-4 mr-1" />
+            <Code className="w-4 h-4 mr-1" />
             Start Development
           </Button>
         )}
-        
-        {status === 'IN_PROGRESS' && onMarkReady && (
+
+        {status === 'DURING_DEVELOPMENT' && onStartTesting && (
           <Button
             variant="ghost"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onMarkReady();
+              onStartTesting();
+            }}
+          >
+            <TestTube className="w-4 h-4 mr-1" />
+            Start Testing
+          </Button>
+        )}
+
+        {status === 'UNDER_TESTED' && onMarkComplete && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMarkComplete();
             }}
           >
             <CheckCircle2 className="w-4 h-4 mr-1" />
-            Mark Ready
+            Mark Complete
           </Button>
         )}
         
-        {status === 'READY_TO_DEPLOY' && onPublish && (
+        {status !== 'MEMORY' && onRevertToPrevious && (
           <Button
             variant="ghost"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onPublish();
-            }}
-          >
-            <Upload className="w-4 h-4 mr-1" />
-            Publish
-          </Button>
-        )}
-        
-        {status !== 'DRAFT' && onRevertToDraft && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRevertToDraft();
+              onRevertToPrevious();
             }}
           >
             <RotateCcw className="w-4 h-4 mr-1" />
-            Revert to Draft
+            Revert to Previous
           </Button>
         )}
       </div>

@@ -9,6 +9,7 @@ interface BadgeProps {
   outline?: boolean
   className?: string
   onClick?: () => void
+  icon?: React.ReactNode
 }
 
 export function Badge({ 
@@ -19,7 +20,8 @@ export function Badge({
   dot = false,
   outline = false,
   className = '',
-  onClick
+  onClick,
+  icon
 }: BadgeProps) {
   const variants = {
     primary: outline 
@@ -79,6 +81,11 @@ export function Badge({
           w-1.5 h-1.5 rounded-full mr-1.5
           ${dotColors[variant]}
         `} />
+      )}
+      {icon && (
+        <span className="mr-1.5 flex items-center">
+          {icon}
+        </span>
       )}
       {children}
     </span>

@@ -3,17 +3,18 @@
 ## [Unreleased]
 
 ### Added
+- Creator Interface Pages
+  - Created DashboardPage for managing in-progress applications
+  - Added AppStorePage for completed applications
+  - Implemented application status filtering
+  - Used reusable ApplicationMacroCard component
+  - Added navigation between dashboard and app store
 - Basic Creator Interface
   - Created basic applications list view
   - Implemented CreatorLayout with responsive design
   - Added CreatorHeader with search functionality
   - Created CreatorSidebar with navigation
   - Set up creator routes
-- Creator Interface Layout
-  - Created CreatorLayout component with responsive design
-  - Implemented CreatorHeader with search and notifications
-  - Added CreatorSidebar with role-specific navigation
-  - Custom styling with indigo theme for creator interface
 - Enhanced Audit Logs page
   - Real-time metrics dashboard
   - Time-based filtering
@@ -73,6 +74,10 @@
 - Implementation phases and timeline in tasks.md
 
 ### Changed
+- Restructured creator interface navigation
+  - Split applications view into Dashboard and App Store
+  - Updated sidebar navigation structure
+  - Improved application status management
 - Updated super_admin.md with detailed SQL queries for metrics
 - Reorganized dashboard components for better maintainability
 - Improved mock data structure to match planned real data format
