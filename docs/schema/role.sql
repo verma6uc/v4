@@ -64,9 +64,9 @@ CREATE TABLE application_role_assignments (
     CONSTRAINT fk_application_role_assignments_user 
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_application_role_assignments_role
-        FOREIGN KEY (application_role_id) REFERENCES application_roles (id),
+        FOREIGN KEY (application_role_id) REFERENCES application_roles (id) ON DELETE CASCADE,
     CONSTRAINT fk_application_role_assignments_application 
         FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE,
     CONSTRAINT fk_application_role_assignments_space 
-        FOREIGN KEY (space_id) REFERENCES spaces (id) ON DELETE SET NULL
+        FOREIGN KEY (space_id) REFERENCES spaces (id) ON DELETE CASCADE
 );
