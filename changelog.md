@@ -46,6 +46,7 @@
     - Added warehouse location management
     - Enhanced filtering for inventory items
 - Creator Interface Pages
+  - Improved user story details layout in Product Backlog tab for better readability
   - Created DashboardPage for managing in-progress applications
   - Added AppStorePage for completed applications
   - Implemented application status filtering
