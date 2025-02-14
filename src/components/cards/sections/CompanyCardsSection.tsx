@@ -14,30 +14,17 @@ export function CompanyCardsSection() {
           <h3 className="text-sm font-medium text-gray-500 mb-4">Mini Card</h3>
           <div className="grid grid-cols-1 gap-4 max-w-md">
             <CompanyMiniCard 
-              company={exampleCompany}
+              {...exampleCompany}
+              userCount={150}
+              spaceCount={12}
               onSuspend={createHandler('Suspend Company')}
               onArchive={createHandler('Archive Company')}
             />
             <CompanyMiniCard 
-              company={{
-                ...exampleCompany,
-                status: CompanyStatus.DRAFT
-              }}
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Company Cards</h2>
-      <div className="space-y-8">
-        <div>
-          <h3 className="text-sm font-medium text-gray-500 mb-4">Mini Card</h3>
-          <div className="grid grid-cols-1 gap-4 max-w-md">
-            <CompanyMiniCard 
-              company={exampleCompany}
-              onSuspend={createHandler('Suspend Company')}
-              onArchive={createHandler('Archive Company')}
-            />
-            <CompanyMiniCard 
-              company={{
-                ...exampleCompany,
-                status: CompanyStatus.DRAFT
-              }}
+              {...exampleCompany}
+              status={CompanyStatus.DRAFT}
+              userCount={0}
+              spaceCount={0}
               onActivate={createHandler('Activate Company')}
             />
           </div>

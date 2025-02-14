@@ -3,67 +3,13 @@ import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { ApplicationMacroCard } from '../../components/cards/ApplicationMacroCard';
-
-type ApplicationStatus = 'MEMORY' | 'BLUEPRINT' | 'VISUAL_PRD' | 'DURING_DEVELOPMENT' | 'UNDER_TESTED' | 'DEVELOPMENT_COMPLETE';
-
-// Mock data - in real app this would come from API
-const mockApplications = [
-  {
-    id: '1',
-    title: 'Customer Portal',
-    description: 'Self-service portal for customer account management',
-    status: 'DURING_DEVELOPMENT' as ApplicationStatus,
-    currentVersion: '0.1.0',
-    deployedSpaces: [],
-    development: {
-      startedAt: '1 month ago',
-      currentPhase: 'Frontend Implementation',
-      completedModules: 8,
-      totalModules: 12,
-      technicalDebt: []
-    },
-    createdAt: '2025-02-10',
-    updatedAt: '2025-02-13'
-  },
-  {
-    id: '2',
-    title: 'Inventory Manager',
-    description: 'Real-time inventory tracking system',
-    status: 'MEMORY' as ApplicationStatus,
-    deployedSpaces: [],
-    memory: {
-      summary: 'Automated inventory tracking with real-time updates',
-      createdAt: '2025-02-12',
-      notes: ['Initial concept', 'Focus on automation']
-    },
-    createdAt: '2025-02-12',
-    updatedAt: '2025-02-12'
-  },
-  {
-    id: '3',
-    title: 'Analytics Dashboard',
-    description: 'Business intelligence and reporting platform',
-    status: 'UNDER_TESTED' as ApplicationStatus,
-    currentVersion: '0.9.0',
-    deployedSpaces: [],
-    development: {
-      startedAt: '2 weeks ago',
-      currentPhase: 'Testing',
-      completedModules: 15,
-      totalModules: 15,
-      technicalDebt: []
-    },
-    testing: {
-      startedAt: '2 days ago',
-      testCases: 87,
-      bugs: 3,
-      testCoverage: 92,
-      lastTestRun: '1 hour ago'
-    },
-    createdAt: '2025-02-09',
-    updatedAt: '2025-02-11'
-  }
-];
+import {
+  memoryPhaseApp,
+  blueprintPhaseApp,
+  visualPRDPhaseApp,
+  developmentPhaseApp,
+  testingPhaseApp
+} from '../../components/cards/examples/application.data';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -74,9 +20,13 @@ export function DashboardPage() {
   };
 
   // Filter out DEVELOPMENT_COMPLETE applications
-  const inProgressApps = mockApplications.filter(
-    app => app.status !== 'DEVELOPMENT_COMPLETE'
-  );
+  const inProgressApps = [
+    memoryPhaseApp,
+    blueprintPhaseApp,
+    visualPRDPhaseApp,
+    developmentPhaseApp,
+    testingPhaseApp
+  ];
 
   return (
     <div className="space-y-6">
