@@ -6,8 +6,8 @@ import { ServiceHealthTable } from '../../components/super-admin/dashboard/Servi
 import { GrowthMetrics } from '../../components/super-admin/dashboard/GrowthMetrics';
 import { ActivityFeed } from '../../components/ActivityFeed';
 import { BaseCard } from '../../components/base/BaseCard';
-import { Button } from '../../components/Button';
-import { Download } from 'lucide-react';
+import { DateRangeFilter } from '../../components/DateRangeFilter';
+import { subDays } from 'date-fns';
 import {
   SystemHealthData,
   SecurityAlertsData,
@@ -109,11 +109,15 @@ const mockData: {
 };
 
 export function DashboardPage() {
-  const [timeRange, setTimeRange] = React.useState('24h');
+  const defaultRange = {
+    start: subDays(new Date(), 30),
+    end: new Date()
+  };
+  const [currentRange, setCurrentRange] = React.useState(defaultRange);
 
-  const handleExport = () => {
-    // TODO: Implement dashboard data export
-    console.log('Exporting dashboard data...');
+  const handleDateRangeChange = (range: { start: Date; end: Date }) => {
+    setCurrentRange(range);
+    // TODO: Fetch dashboard data for new date range
   };
 
   return (
@@ -126,21 +130,11 @@ export function DashboardPage() {
             System overview and key metrics
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="1h">Last hour</option>
-            <option value="24h">Last 24 hours</option>
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-          </select>
-          <Button onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
+        <div>
+          <DateRangeFilter 
+            onChange={handleDateRangeChange}
+            defaultValue={defaultRange}
+          />
         </div>
       </div>
 

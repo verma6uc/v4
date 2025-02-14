@@ -189,54 +189,46 @@ export function CompanyDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200">
-        <div>
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center gap-6">
-              <Link
-                to="/super-admin/companies"
-                className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
-              >
-                ← Back to Companies
-              </Link>
-              <div className="flex items-center space-x-3">
-                <h1 className="text-lg font-semibold text-gray-900">
-                  {company.name}
-                </h1>
-                <CompanyStatusBadge status={company.status} />
-                <span className="text-sm text-gray-500">{company.identifier}</span>
-              </div>
-            </div>
+      <div className="bg-blue-50/50 backdrop-blur-xl border-b border-blue-100">
+        <div className="flex items-center justify-between py-4 px-6">
+          <div>
+            <Link
+              to="/super-admin/companies"
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-white/80 rounded-lg"
+            >
+              ←
+            </Link>
+          </div>
 
-            <div className="flex items-center gap-2">
-              {company.status === CompanyStatus.DRAFT && (
+          <div className="flex items-center gap-2">
+            {company.status === CompanyStatus.DRAFT && (
+              <Button onClick={handleActivate}>Activate</Button>
+            )}
+            {company.status === CompanyStatus.ACTIVE && (
+              <>
+                <Button variant="warning" onClick={confirmSuspend}>Suspend</Button>
+                <Button variant="danger" onClick={confirmArchive}>Archive</Button>
+              </>
+            )}
+            {company.status === CompanyStatus.SUSPENDED && (
+              <>
                 <Button onClick={handleActivate}>Activate</Button>
-              )}
-              {company.status === CompanyStatus.ACTIVE && (
-                <>
-                  <Button variant="ghost" onClick={confirmSuspend}>Suspend</Button>
-                  <Button variant="ghost" onClick={confirmArchive}>Archive</Button>
-                </>
-              )}
-              {company.status === CompanyStatus.SUSPENDED && (
-                <>
-                  <Button onClick={handleActivate}>Activate</Button>
-                  <Button variant="ghost" onClick={confirmArchive}>Archive</Button>
-                </>
-              )}
-              {company.status === CompanyStatus.ARCHIVED && (
-                <Button 
-                  variant="ghost" 
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={confirmDelete}
-                >
-                  Delete
-                </Button>
-              )}
-              {company.status !== CompanyStatus.DELETED && activeTab === 'overview' && (
-                <Button onClick={() => setIsEditModalOpen(true)}>Edit</Button>
-              )}
-            </div>
+                <Button variant="danger" onClick={confirmArchive}>Archive</Button>
+              </>
+            )}
+            {company.status === CompanyStatus.ARCHIVED && (
+              <Button 
+                variant="danger"
+                size="sm"
+                onClick={confirmDelete}
+              >
+                Delete
+              </Button>
+            )}
+            {(company.status === CompanyStatus.DRAFT || company.status === CompanyStatus.ACTIVE) && (
+              <Button onClick={() => setIsEditModalOpen(true)}>Edit</Button>
+            )}
+
           </div>
         </div>
       </div>

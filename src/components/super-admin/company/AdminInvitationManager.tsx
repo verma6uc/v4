@@ -165,7 +165,7 @@ export function AdminInvitationManager({
               Manage company admin access invitations
             </p>
           </div>
-          <Button onClick={onInviteNew}>
+          <Button variant="secondary-dark" onClick={onInviteNew}>
             <Mail className="w-4 h-4 mr-1" />
             Invite Admin
           </Button>

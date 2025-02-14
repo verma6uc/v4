@@ -4,7 +4,6 @@ import { DashboardPage } from '../pages/super-admin/DashboardPage';
 import { CompaniesPage } from '../pages/super-admin/CompaniesPage';
 import { UsersPage } from '../pages/super-admin/UsersPage';
 import { AuditLogsPage } from '../pages/super-admin/AuditLogsPage';
-import { SecurityPage } from '../pages/super-admin/SecurityPage';
 import { BillingPage } from '../pages/super-admin/BillingPage';
 import { CompanyDetailPage } from '../pages/super-admin/CompanyDetailPage';
 import { UserDetailPage } from '../pages/super-admin/UserDetailPage';
@@ -39,10 +38,6 @@ export const superAdminRoutes = [
       {
         path: 'audit-logs',
         element: <AuditLogsPage />
-      },
-      {
-        path: 'security',
-        element: <SecurityPage />
       },
       {
         path: 'billing',

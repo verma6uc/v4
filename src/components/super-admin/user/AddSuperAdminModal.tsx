@@ -101,7 +101,7 @@ export function AddSuperAdminModal({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            variant="secondary-dark"
             onClick={handleSubmit}
           >
             Add Super Admin

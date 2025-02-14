@@ -11,6 +11,7 @@ interface DateRange {
 interface DateRangeFilterProps {
   onChange: (range: DateRange) => void
   className?: string
+  defaultValue?: DateRange
 }
 
 const PRESET_RANGES = [
@@ -22,9 +23,9 @@ const PRESET_RANGES = [
   { label: 'Last 12 months', getValue: () => ({ start: subMonths(new Date(), 12), end: new Date() }) }
 ]
 
-export function DateRangeFilter({ onChange, className = '' }: DateRangeFilterProps) {
+export function DateRangeFilter({ onChange, className = '', defaultValue }: DateRangeFilterProps) {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [selectedRange, setSelectedRange] = React.useState<DateRange>(PRESET_RANGES[2].getValue())
+  const [selectedRange, setSelectedRange] = React.useState<DateRange>(defaultValue || PRESET_RANGES[2].getValue())
   const [customRange, setCustomRange] = React.useState<DateRange>({
     start: new Date(),
     end: new Date()
@@ -41,6 +42,11 @@ export function DateRangeFilter({ onChange, className = '' }: DateRangeFilterPro
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Call onChange with initial value
+  React.useEffect(() => {
+    onChange(selectedRange)
   }, [])
 
   const handlePresetSelect = (preset: typeof PRESET_RANGES[0]) => {
@@ -81,7 +87,7 @@ export function DateRangeFilter({ onChange, className = '' }: DateRangeFilterPro
       <Button
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full justify-between min-w-[200px]"
+        className="w-full justify-between min-w-[200px] bg-blue-50 hover:bg-blue-100"
       >
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4" />

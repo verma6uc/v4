@@ -69,7 +69,7 @@ export function UsersPage() {
       // TODO: API call to create super admin
       console.log('Add super admin:', data);
       setIsAddModalOpen(false);
-      addToast('success', 'Super admin invitation sent successfully');
+      addToast('success', 'Super admin account created successfully. Password has been sent to their email.');
     } catch (error) {
       console.error('Error adding super admin:', error);
       addToast('error', 'Failed to add super admin. Please try again.');
@@ -159,9 +159,9 @@ export function UsersPage() {
             Manage super administrators with full system access
           </p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)}>
+        <Button variant="secondary-dark" onClick={() => setIsAddModalOpen(true)}>
           <Shield className="w-4 h-4 mr-1" />
-          Add Platform Admin
+          Add Super Admin
         </Button>
       </div>
 

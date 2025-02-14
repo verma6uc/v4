@@ -5,8 +5,7 @@ import {
   Building2, 
   Users,
   CreditCard, 
-  ScrollText,
-  Shield
+  ScrollText
 } from 'lucide-react';
 
 const menuItems = [
@@ -27,7 +26,6 @@ const menuItems = [
   {
     section: 'System',
     items: [
-      { icon: Shield, label: 'Security', path: '/super-admin/security' },
       { icon: ScrollText, label: 'Audit Logs', path: '/super-admin/audit-logs' }
     ]
   }
@@ -47,7 +45,7 @@ export function SuperAdminSidebar() {
             </h2>
             <ul className="space-y-1">
               {section.items.map((item, itemIdx) => {
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
                 return (
                   <li key={itemIdx}>
                     <button

@@ -200,14 +200,6 @@ export function AuditLogFilters({ onFilterChange }: AuditLogFiltersProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Audit Logs</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Monitor and track all system activities and events
-          </p>
-        </div>
-      </div>
 
       <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
