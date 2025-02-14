@@ -3,6 +3,11 @@ export interface Feature {
   title: string;
   description: string;
   complexity: 'low' | 'medium' | 'high';
+  selectedUseCases?: string[]; // IDs of selected use cases
+}
+
+export interface FeatureWithUseCases extends Feature {
+  selectedUseCases: string[]; // Required in this interface
 }
 
 export interface FeatureResponse {

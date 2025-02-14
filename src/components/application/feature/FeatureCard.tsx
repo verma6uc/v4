@@ -7,9 +7,10 @@ import { Feature } from '../../../services/mock/features';
 interface FeatureCardProps extends Feature {
   useCases: UseCase[];
   isLoading: boolean;
+  onUseCaseSelect?: (featureId: string, selectedUseCaseIds: string[]) => void;
 }
 
-export function FeatureCard({ id, title, description, complexity, useCases, isLoading }: FeatureCardProps) {
+export function FeatureCard({ id, title, description, complexity, useCases, isLoading, onUseCaseSelect }: FeatureCardProps) {
   const [selectedUseCases, setSelectedUseCases] = useState<Set<string>>(new Set());
 
   const getComplexityColor = (complexity: string) => {
@@ -32,6 +33,10 @@ export function FeatureCard({ id, title, description, complexity, useCases, isLo
         next.delete(useCaseId);
       } else {
         next.add(useCaseId);
+      }
+      
+      if (onUseCaseSelect) {
+        onUseCaseSelect(id, Array.from(next));
       }
       return next;
     });

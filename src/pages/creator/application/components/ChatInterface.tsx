@@ -2,13 +2,14 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApplicationCreation } from '../context/ApplicationCreationContext';
 import { Feature } from '../../../../services/mock/features';
+import { UseCase } from '../../../../services/mock/useCases';
 import { generateResponse } from '../../../../services/mock';
 import { Message } from '../Message';
 import { ChatInput } from '../ChatInput';
 import { ConceptOption, Question } from '../../../../utils/openai';
 import { generateConcepts } from '../../../../services/api/conceptGeneration';
 import { generateQuestions } from '../../../../services/api/questionGeneration';
-import { generateFeatures } from '../../../../services/api/applicationCreation';
+import { generateFeatures, generateUseCases } from '../../../../services/api/applicationCreation';
 import { FeatureCard } from '../../../../components/application/feature/FeatureCard';
 import { Button } from '../../../../components/Button';
 
@@ -33,8 +34,10 @@ export function ChatInterface() {
   const [input, setInput] = useState('');
   const [isProcessingConcept, setIsProcessingConcept] = useState(false);
   const [features, setFeatures] = useState<Feature[]>([]);
+  const [loadingUseCases, setLoadingUseCases] = useState<Record<string, boolean>>({});
+  const [useCaseCache, setUseCaseCache] = useState<Record<string, UseCase[]>>({});
+  const [selectedUseCases, setSelectedUseCases] = useState<Record<string, string[]>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isLoadingUseCases, setIsLoadingUseCases] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,11 +51,18 @@ export function ChatInterface() {
     if (features.length === 0) return;
     
     // Store features in application data
-    setApplicationData(prev => ({ ...prev, features }));
+    setApplicationData(prev => ({ 
+      ...prev, 
+      features: features.map(feature => ({
+        ...feature,
+        selectedUseCases: selectedUseCases[feature.id] || []
+      }))
+    }));
     
     // Navigate to project plan page
     navigate('/creator/applications/new/plan');
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   };
@@ -62,6 +72,13 @@ export function ChatInterface() {
       e.preventDefault();
       handleSubmit(e);
     }
+  };
+
+  const handleUseCaseSelect = (featureId: string, selectedUseCaseIds: string[]) => {
+    setSelectedUseCases(prev => ({
+      ...prev,
+      [featureId]: selectedUseCaseIds
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -246,9 +263,10 @@ export function ChatInterface() {
           ...prev,
           {
             type: 'system',
-            content: "Processing your application..."
+            content: "Crafting the features of your application..."
           }
         ]);
+
 
         try {
           // Get all questions and their selected answers
@@ -276,9 +294,45 @@ export function ChatInterface() {
           
           setFeatures(generatedFeatures);
 
+          // Validate use cases before showing
+          const validateUseCase = (useCase: UseCase) => {
+            return useCase.title?.trim() && useCase.description?.trim();
+          };
+
+          // Generate use cases for each feature
+          generatedFeatures.forEach(async (feature) => {
+            if (useCaseCache[feature.id]) return; // Skip if already cached
+            if (loadingUseCases[feature.id]) return; // Skip if already loading
+            
+            setLoadingUseCases(prev => ({ ...prev, [feature.id]: true }));
+            
+            try {
+              const useCases = await generateUseCases(
+                feature,
+                {
+                  title: applicationData.title,
+                  description: applicationData.description,
+                  selectedConcept: selectedConcept!,
+                  answers: answersWithText
+                }
+              );
+
+              // Filter out invalid use cases
+              const validUseCases = useCases.filter(validateUseCase);
+              
+              setUseCaseCache(prev => ({
+                ...prev,
+                [feature.id]: validUseCases.length > 0 ? validUseCases : []
+              }));
+            } catch (error) {
+              console.error(`Error generating use cases for feature ${feature.id}:`, error);
+            } finally {
+              setLoadingUseCases(prev => ({ ...prev, [feature.id]: false }));
+            }
+          });
+
           // Show features in chat
-          setMessages(prev => [
-            ...prev,
+          setMessages(prev => [...prev.slice(0, -1), // Remove loading message
             {
               type: 'system',
               content: (
@@ -287,8 +341,9 @@ export function ChatInterface() {
                     <FeatureCard 
                       key={feature.id}
                       {...feature}
-                      useCases={[]}
-                      isLoading={isLoadingUseCases}
+                      useCases={useCaseCache[feature.id] || []}
+                      isLoading={loadingUseCases[feature.id] || false}
+                      onUseCaseSelect={handleUseCaseSelect}
                     />
                   ))}
                   <div className="flex justify-end mt-4">
