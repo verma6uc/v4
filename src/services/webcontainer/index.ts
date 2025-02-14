@@ -1,6 +1,7 @@
 import { WebContainer } from '@webcontainer/api';
 
-const files = {
+// Default files for when no repository is provided
+const defaultFiles = {
   'index.html': {
     file: {
       contents: `
@@ -68,7 +69,7 @@ class WebContainerService {
     return WebContainerService.instance;
   }
 
-  async boot(): Promise<WebContainer> {
+  async boot(repoUrl?: string): Promise<WebContainer> {
     // If already booted, return the instance
     if (this.webcontainerInstance) {
       return this.webcontainerInstance;
@@ -86,7 +87,14 @@ class WebContainerService {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         this.webcontainerInstance = await WebContainer.boot();
-        await this.webcontainerInstance.mount(files);
+
+        if (repoUrl) {
+          await this.setupGitEnvironment();
+          await this.cloneRepository(repoUrl);
+        } else {
+          await this.webcontainerInstance.mount(defaultFiles);
+        }
+
         return this.webcontainerInstance;
       } catch (error) {
         this.bootPromise = null;
@@ -97,6 +105,54 @@ class WebContainerService {
     })();
 
     return this.bootPromise;
+  }
+
+  private async setupGitEnvironment() {
+    if (!this.webcontainerInstance) throw new Error('WebContainer not initialized');
+
+    // Install git
+    const installProcess = await this.webcontainerInstance.spawn('apt-get', ['install', 'git']);
+    installProcess.output.pipeTo(
+      new WritableStream({
+        write: (data) => {
+          this.writeToTerminal(data);
+        },
+      })
+    );
+    await installProcess.exit;
+  }
+
+  private async cloneRepository(repoUrl: string) {
+    if (!this.webcontainerInstance) throw new Error('WebContainer not initialized');
+
+    // Clone the repository
+    const cloneProcess = await this.webcontainerInstance.spawn('git', ['clone', repoUrl, '.']);
+    cloneProcess.output.pipeTo(
+      new WritableStream({
+        write: (data) => {
+          this.writeToTerminal(data);
+        },
+      })
+    );
+    await cloneProcess.exit;
+  }
+
+  private async detectPackageManager(): Promise<'npm' | 'yarn' | 'pnpm'> {
+    if (!this.webcontainerInstance) throw new Error('WebContainer not initialized');
+
+    try {
+      const files = await this.webcontainerInstance.fs.readdir('.');
+      
+      if (files.includes('yarn.lock')) {
+        return 'yarn';
+      } else if (files.includes('pnpm-lock.yaml')) {
+        return 'pnpm';
+      }
+      
+      return 'npm';
+    } catch {
+      return 'npm';
+    }
   }
 
   onTerminalOutput(writer: (data: string) => void) {
@@ -117,8 +173,16 @@ class WebContainerService {
     }
 
     try {
+      // Detect package manager
+      const packageManager = await this.detectPackageManager();
+      
       // Install dependencies
-      const installProcess = await instance.spawn('npm', ['install']);
+      const installCmd = packageManager === 'yarn' ? 'yarn' : 
+                        packageManager === 'pnpm' ? 'pnpm install' : 
+                        'npm install';
+      
+      const [cmd, ...args] = installCmd.split(' ');
+      const installProcess = await instance.spawn(cmd, args);
       
       installProcess.output.pipeTo(
         new WritableStream({
@@ -135,7 +199,12 @@ class WebContainerService {
       }
 
       // Start dev server
-      const devProcess = await instance.spawn('npm', ['run', 'dev']);
+      const devCmd = packageManager === 'yarn' ? 'yarn dev' :
+                    packageManager === 'pnpm' ? 'pnpm dev' :
+                    'npm run dev';
+      
+      const [devCmdExec, ...devArgs] = devCmd.split(' ');
+      const devProcess = await instance.spawn(devCmdExec, devArgs);
       
       devProcess.output.pipeTo(
         new WritableStream({

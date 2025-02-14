@@ -2,8 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Terminal } from './Terminal';
 import { Preview } from './Preview';
 import { webContainerService } from '../../../services/webcontainer';
+import { GitBranch } from 'lucide-react';
 
-export function PrototypeTab() {
+interface PrototypeTabProps {
+  repoUrl?: string;
+}
+
+export function PrototypeTab({ repoUrl }: PrototypeTabProps) {
   const [previewUrl, setPreviewUrl] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -22,7 +27,7 @@ export function PrototypeTab() {
 
         if (!isMounted) return;
 
-        await webContainerService.boot();
+        await webContainerService.boot(repoUrl);
         if (!isMounted) return;
 
         const url = await webContainerService.startDevServer();
@@ -51,7 +56,7 @@ export function PrototypeTab() {
       // Cleanup WebContainer on unmount
       webContainerService.teardown().catch(console.error);
     };
-  }, []);
+  }, [repoUrl]);
 
   if (error) {
     return (
@@ -73,6 +78,12 @@ export function PrototypeTab() {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 p-4">
+        {repoUrl && (
+          <div className="mb-4 flex items-center gap-2 text-gray-500">
+            <GitBranch className="w-4 h-4" />
+            <span className="text-sm">Repository: {repoUrl}</span>
+          </div>
+        )}
         <div className="h-full grid grid-rows-[minmax(768px,1fr),300px] gap-4">
           {/* Preview Section */}
           <div className="w-full h-full">

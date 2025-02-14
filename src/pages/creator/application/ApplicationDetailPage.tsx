@@ -23,7 +23,11 @@ export function ApplicationDetailPage() {
     {
       id: 'prototype',
       label: 'Prototype',
-      content: <PrototypeTab />
+      content: (
+        <PrototypeTab 
+          repoUrl="https://github.com/vitejs/vite-react-starter.git" 
+        />
+      )
     }
   ];
 
