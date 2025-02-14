@@ -1,5 +1,7 @@
 import React from 'react'
 import { Bell, ChevronDown, Settings, LogOut, User } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 interface Notification {
   id: number
@@ -34,12 +36,15 @@ const notifications: Notification[] = [
 ]
 
 export function UserMenu() {
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
   const [notificationsOpen, setNotificationsOpen] = React.useState(false)
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
   const menuRef = React.useRef<HTMLDivElement>(null)
   const notificationRef = React.useRef<HTMLDivElement>(null)
 
   const unreadCount = notifications.filter(n => !n.read).length
+  const userInitials = user?.user_metadata?.first_name?.[0] + user?.user_metadata?.last_name?.[0] || '??'
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -54,6 +59,15 @@ export function UserMenu() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      navigate('/login')
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+  }
 
   return (
     <div className="flex items-center gap-4">
@@ -101,7 +115,7 @@ export function UserMenu() {
           onClick={() => setUserMenuOpen(!userMenuOpen)}
         >
           <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-            VV
+            {userInitials}
           </div>
           <ChevronDown className="w-4 h-4 text-gray-600" />
         </button>
@@ -109,8 +123,10 @@ export function UserMenu() {
         {userMenuOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
             <div className="px-4 py-2 border-b border-gray-100">
-              <p className="text-sm font-medium text-gray-900">Vaibhav Verma</p>
-              <p className="text-sm text-gray-500">admin@example.com</p>
+              <p className="text-sm font-medium text-gray-900">
+                {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
+              </p>
+              <p className="text-sm text-gray-500">{user?.email}</p>
             </div>
             <div className="py-2">
               <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
@@ -121,7 +137,10 @@ export function UserMenu() {
                 <Settings className="w-4 h-4" />
                 Settings
               </button>
-              <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2">
+              <button 
+                onClick={handleSignOut}
+                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2"
+              >
                 <LogOut className="w-4 h-4" />
                 Sign out
               </button>

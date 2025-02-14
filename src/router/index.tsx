@@ -1,7 +1,11 @@
 import React from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { LoginPage } from '../pages/LoginPage';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import { superAdminRoutes } from './super-admin.routes';
 import { creatorRoutes } from './creator.routes';
+import { SuperAdminLayout } from '../layouts/SuperAdminLayout';
+import { CreatorLayout } from '../layouts/CreatorLayout';
 import { ShowcaseLayout } from '../layouts/ShowcaseLayout';
 import { ComponentShowcase } from '../pages/ComponentShowcase';
 import { ButtonsPage } from '../pages/ButtonsPage';
@@ -16,6 +20,14 @@ import { TabsPage } from '../pages/TabsPage';
 import { CardsShowcasePage } from '../pages/CardsShowcasePage';
 
 export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Navigate to="/login" replace />
+  },
+  {
+    path: '/login',
+    element: <LoginPage />
+  },
   {
     path: '/showcase',
     element: <ShowcaseLayout />,
@@ -66,6 +78,23 @@ export const router = createBrowserRouter([
       }
     ]
   },
-  ...superAdminRoutes,
-  ...creatorRoutes
+  {
+    path: '/super-admin',
+    element: <ProtectedRoute requiredRole="SUPER_ADMIN">
+      <SuperAdminLayout />
+    </ProtectedRoute>,
+    children: superAdminRoutes[0].children
+  },
+  {
+    path: '/creator',
+    element: <ProtectedRoute requiredRole="CREATOR">
+      <CreatorLayout />
+    </ProtectedRoute>,
+    children: creatorRoutes[0].children
+  },
+  {
+    // Catch-all route - redirect to login for any unmatched paths except showcase
+    path: '*',
+    element: <Navigate to="/login" replace />
+  }
 ]);
