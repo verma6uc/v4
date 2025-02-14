@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Terminal } from './Terminal';
 import { Preview } from './Preview';
 import { webContainerService } from '../../../services/webcontainer';
 import { GitBranch } from 'lucide-react';
@@ -84,20 +83,10 @@ export function PrototypeTab({ repoUrl }: PrototypeTabProps) {
             <span className="text-sm">Repository: {repoUrl}</span>
           </div>
         )}
-        <div className="h-full grid grid-rows-[minmax(768px,1fr),300px] gap-4">
+        <div className="h-full min-h-[820px]">
           {/* Preview Section */}
-          <div className="w-full h-full">
+          <div className="w-full h-full min-h-[820px]">
             <Preview url={previewUrl} isLoading={isLoading} />
-          </div>
-
-          {/* Terminal Section */}
-          <div className="w-full">
-            <Terminal 
-              onMount={(write) => {
-                const unsubscribe = webContainerService.onTerminalOutput(write);
-                return () => unsubscribe();
-              }} 
-            />
           </div>
         </div>
       </div>
