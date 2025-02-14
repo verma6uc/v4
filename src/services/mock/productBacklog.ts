@@ -8,25 +8,41 @@ export interface UserStory {
   priority: 'High' | 'Medium' | 'Low';
   complexity: 'Simple' | 'Medium' | 'Complex';
   status: 'Planned' | 'In Progress' | 'Done';
+  sprint?: number;
+  dependencies?: string[];
   estimatedHours: number;
+  lastModified: string;
+  reviewStatus: 'Pending' | 'In Review' | 'Approved' | 'Changes Requested';
+  assignedTo?: string;
+  tags?: string[];
 }
 
 export interface UseCase {
   id: string;
   title: string;
   description: string;
-  userStories: UserStory[];
   status: 'Planned' | 'In Progress' | 'Done';
+  reviewStatus: 'Pending' | 'In Review' | 'Approved' | 'Changes Requested';
+  lastModified: string;
+  dependencies?: string[];
+  userStories: UserStory[];
+  owner?: string;
+  version?: string;
 }
 
 export interface Feature {
   id: string;
-  code: string;  // e.g., "USPM" for User Profile Management
+  code: string;  // e.g., "USPM"
   name: string;
   description: string;
-  useCases: UseCase[];
   priority: 'High' | 'Medium' | 'Low';
   status: 'Planned' | 'In Progress' | 'Done';
+  version: string;
+  lastModified: string;
+  reviewStatus: 'Pending' | 'In Review' | 'Approved' | 'Changes Requested';
+  useCases: UseCase[];
+  owner?: string;
+  tags?: string[];
 }
 
 export const mockFeatures: Feature[] = [
@@ -37,12 +53,17 @@ export const mockFeatures: Feature[] = [
     description: 'Core user profile and authentication features',
     priority: 'High',
     status: 'Planned',
+    version: '1.0.0',
+    lastModified: new Date().toISOString(),
+    reviewStatus: 'Pending',
     useCases: [
       {
         id: uuidv4(),
         title: 'User Registration',
         description: 'Allow users to create new accounts',
         status: 'Planned',
+        reviewStatus: 'Pending',
+        lastModified: new Date().toISOString(),
         userStories: [
           {
             id: uuidv4(),
@@ -57,7 +78,11 @@ export const mockFeatures: Feature[] = [
             priority: 'High',
             complexity: 'Medium',
             status: 'Planned',
-            estimatedHours: 8
+            sprint: 1,
+            estimatedHours: 8,
+            lastModified: new Date().toISOString(),
+            reviewStatus: 'Pending',
+            tags: ['auth', 'email']
           },
           {
             id: uuidv4(),
@@ -71,7 +96,12 @@ export const mockFeatures: Feature[] = [
             priority: 'Medium',
             complexity: 'Complex',
             status: 'Planned',
-            estimatedHours: 16
+            sprint: 1,
+            dependencies: ['US-1'],
+            estimatedHours: 16,
+            lastModified: new Date().toISOString(),
+            reviewStatus: 'Pending',
+            tags: ['auth', 'social']
           }
         ]
       },
@@ -80,6 +110,8 @@ export const mockFeatures: Feature[] = [
         title: 'Profile Management',
         description: 'Allow users to manage their profiles',
         status: 'Planned',
+        reviewStatus: 'Pending',
+        lastModified: new Date().toISOString(),
         userStories: [
           {
             id: uuidv4(),
@@ -94,7 +126,11 @@ export const mockFeatures: Feature[] = [
             priority: 'High',
             complexity: 'Simple',
             status: 'Planned',
-            estimatedHours: 6
+            sprint: 2,
+            estimatedHours: 6,
+            lastModified: new Date().toISOString(),
+            reviewStatus: 'Pending',
+            tags: ['profile']
           }
         ]
       }
@@ -107,12 +143,17 @@ export const mockFeatures: Feature[] = [
     description: 'Team communication and collaboration features',
     priority: 'High',
     status: 'Planned',
+    version: '1.0.0',
+    lastModified: new Date().toISOString(),
+    reviewStatus: 'Pending',
     useCases: [
       {
         id: uuidv4(),
         title: 'Team Chat',
         description: 'Enable team members to chat in real-time',
         status: 'Planned',
+        reviewStatus: 'Pending',
+        lastModified: new Date().toISOString(),
         userStories: [
           {
             id: uuidv4(),
@@ -127,7 +168,11 @@ export const mockFeatures: Feature[] = [
             priority: 'High',
             complexity: 'Complex',
             status: 'Planned',
-            estimatedHours: 20
+            sprint: 3,
+            estimatedHours: 20,
+            lastModified: new Date().toISOString(),
+            reviewStatus: 'Pending',
+            tags: ['chat', 'real-time']
           }
         ]
       }
