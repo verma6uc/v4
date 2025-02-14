@@ -4,13 +4,8 @@ import {
   LayoutDashboard,
   Store,
   PlusCircle,
-  ListTodo,
-  Boxes,
-  PlayCircle,
   History,
-  Settings,
-  FileCode,
-  HelpCircle
+  Settings
 } from 'lucide-react';
 
 const menuItems = [
@@ -20,16 +15,6 @@ const menuItems = [
       { icon: LayoutDashboard, label: 'Dashboard', path: '/creator/dashboard' },
       { icon: Store, label: 'App Store', path: '/creator/app-store' },
       { icon: PlusCircle, label: 'New Application', path: '/creator/applications/new' }
-    ]
-  },
-  {
-    section: 'Creation Flow',
-    items: [
-      { icon: HelpCircle, label: 'Q&A Process', path: '/creator/applications/new/qna' },
-      { icon: ListTodo, label: 'Product Backlog', path: '/creator/applications/new/backlog' },
-      { icon: FileCode, label: 'Blueprint', path: '/creator/applications/new/blueprint' },
-      { icon: Boxes, label: 'Project Plan', path: '/creator/applications/new/project-plan' },
-      { icon: PlayCircle, label: 'Prototype', path: '/creator/applications/new/prototype' }
     ]
   },
   {

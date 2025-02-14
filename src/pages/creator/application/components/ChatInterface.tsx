@@ -5,9 +5,12 @@ import { Feature } from '../../../../services/mock/features';
 import { generateResponse } from '../../../../services/mock';
 import { Message } from '../Message';
 import { ChatInput } from '../ChatInput';
-import { ConceptOption } from '../../../../utils/openai';
+import { ConceptOption, Question } from '../../../../utils/openai';
 import { generateConcepts } from '../../../../services/api/conceptGeneration';
 import { generateQuestions } from '../../../../services/api/questionGeneration';
+import { generateFeatures } from '../../../../services/api/applicationCreation';
+import { FeatureCard } from '../../../../components/application/feature/FeatureCard';
+import { Button } from '../../../../components/Button';
 
 export function ChatInterface() {
   const {
@@ -31,6 +34,7 @@ export function ChatInterface() {
   const [isProcessingConcept, setIsProcessingConcept] = useState(false);
   const [features, setFeatures] = useState<Feature[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isLoadingUseCases, setIsLoadingUseCases] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -40,6 +44,15 @@ export function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
+  const handleCreateProjectPlan = async () => {
+    if (features.length === 0) return;
+    
+    // Store features in application data
+    setApplicationData(prev => ({ ...prev, features }));
+    
+    // Navigate to project plan page
+    navigate('/creator/applications/new/plan');
+  };
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   };
@@ -236,6 +249,70 @@ export function ChatInterface() {
             content: "Processing your application..."
           }
         ]);
+
+        try {
+          // Get all questions and their selected answers
+          const answeredQuestions = messages
+            .filter(msg => msg.options?.length === 1 && 'question' in msg.options[0])
+            .map(msg => msg.options![0] as Question);
+          
+          const answersWithText = Object.entries(applicationData.answers || {}).reduce((acc, [questionId, selectedIds]) => {
+            const question = answeredQuestions.find(q => q.id === questionId);
+            if (question) {
+              acc[question.question] = question.options
+                .filter(opt => selectedIds.includes(opt.id))
+                .map(opt => opt.text);
+            }
+            return acc;
+          }, {} as Record<string, string[]>);
+
+          // Generate features
+          const generatedFeatures = await generateFeatures({
+            title: applicationData.title,
+            description: applicationData.description,
+            selectedConcept: selectedConcept!,
+            answers: answersWithText
+          });
+          
+          setFeatures(generatedFeatures);
+
+          // Show features in chat
+          setMessages(prev => [
+            ...prev,
+            {
+              type: 'system',
+              content: (
+                <div className="space-y-6">
+                  {generatedFeatures.map(feature => (
+                    <FeatureCard 
+                      key={feature.id}
+                      {...feature}
+                      useCases={[]}
+                      isLoading={isLoadingUseCases}
+                    />
+                  ))}
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      onClick={() => handleCreateProjectPlan()} 
+                      className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+                    >
+                      <span>Create Project Plan</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </Button>
+                  </div>
+                </div>
+              )
+            }
+          ]);
+        } catch (error) {
+          console.error('Error generating features:', error);
+          setMessages(prev => [...prev, {
+            type: 'system',
+            content: "I encountered an error while generating features. Please try again."
+          }]);
+        } finally {
+          setIsProcessing(false);
+        }
       }
     }
   };

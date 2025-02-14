@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Tabs } from '../../../components/Tabs';
+import { ApplicationCreationProvider } from './context/ApplicationCreationContext';
 import { ProductBacklogTab } from '../../../components/application/backlog/ProductBacklogTab';
 import { ProjectPlanTab } from '../../../components/application/plan/ProjectPlanTab';
-import { ApplicationCreationProvider } from './context/ApplicationCreationContext';
+import { PrototypeTab } from '../../../components/application/prototype/PrototypeTab';
 
 export function ApplicationDetailPage() {
   const { applicationId } = useParams();
-  const [activeTab, setActiveTab] = useState('backlog');
+  const [activeTab, setActiveTab] = useState('prototype');
 
   const tabs = [
     {
@@ -23,7 +24,11 @@ export function ApplicationDetailPage() {
     {
       id: 'prototype',
       label: 'Prototype',
-      content: <div>Prototype content will be implemented here</div>
+      content: (
+        <PrototypeTab 
+          repoUrl="https://github.com/vitejs/vite-react-starter.git" 
+        />
+      )
     }
   ];
 
@@ -40,7 +45,7 @@ export function ApplicationDetailPage() {
         <div className="bg-white rounded-lg shadow">
           <Tabs
             tabs={tabs}
-            defaultTab="backlog"
+            defaultTab={activeTab}
             onChange={setActiveTab}
           />
         </div>

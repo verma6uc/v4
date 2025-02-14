@@ -13,6 +13,13 @@ export default defineConfig({
         target: 'http://localhost:5173',
         rewrite: () => '/',
       }
+    },
+    headers: {
+      // Required for WebContainers
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      // Allow iframe embedding
+      'X-Frame-Options': 'SAMEORIGIN'
     }
   },
   preview: {
