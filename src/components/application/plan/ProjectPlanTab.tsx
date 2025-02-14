@@ -36,45 +36,11 @@ export function ProjectPlanTab() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <BaseCard>
-          <div className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">Total Tasks</h3>
-            <p className="mt-1 text-2xl font-semibold">{plan.summary.totalTasks}</p>
-          </div>
-        </BaseCard>
-        <BaseCard>
-          <div className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">Overall Progress</h3>
-            <div className="flex items-center gap-2">
-              <p className="mt-1 text-2xl font-semibold">{plan.summary.progress}%</p>
-              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-600 rounded-full"
-                  style={{ width: `${plan.summary.progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </BaseCard>
-        <BaseCard>
-          <div className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">Estimated Hours</h3>
-            <p className="mt-1 text-2xl font-semibold">{plan.summary.totalHours}h</p>
-          </div>
-        </BaseCard>
-        <BaseCard>
-          <div className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">Current Phase</h3>
-            <p className="mt-1 text-2xl font-semibold">{plan.summary.currentPhase}</p>
-          </div>
-        </BaseCard>
-      </div>
-
+      <h2 className="text-xl font-semibold text-gray-900 mb-6 pl-4">Project Plan</h2>
+      
       {/* Tasks by Phase */}
       {plan.phases.map(phase => (
-        <div key={phase.id} className="space-y-4">
+        <div key={phase.id} className="space-y-4 px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-medium text-gray-900">{phase.name}</h3>
