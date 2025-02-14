@@ -3,6 +3,7 @@ import { RouteObject } from 'react-router-dom';
 import { CreatorLayout } from '../layouts/CreatorLayout';
 import { DashboardPage } from '../pages/creator/DashboardPage';
 import { AppStorePage } from '../pages/creator/AppStorePage';
+import { NewApplicationPage } from '../pages/creator/NewApplicationPage';
 
 export const creatorRoutes: RouteObject[] = [
   {
@@ -20,6 +21,10 @@ export const creatorRoutes: RouteObject[] = [
       {
         path: 'app-store',
         element: <AppStorePage />
+      },
+      {
+        path: 'applications/new',
+        element: <NewApplicationPage />
       }
     ]
   }
