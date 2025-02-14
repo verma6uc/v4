@@ -115,49 +115,38 @@ export function UserStoryList({ stories }: UserStoryListProps) {
                   </ul>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Details</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Priority:</span>
-                        <Badge variant={getPriorityColor(story.priority)}>{story.priority}</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Complexity:</span>
-                        <Badge variant={getComplexityColor(story.complexity)}>{story.complexity}</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Status:</span>
-                        <Badge variant={story.status === 'Done' ? 'success' : 'default'}>{story.status}</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Review Status:</span>
-                        <Badge variant={getReviewStatusColor(story.reviewStatus)}>{story.reviewStatus}</Badge>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Priority:</span>
+                    <Badge variant={getPriorityColor(story.priority)}>{story.priority}</Badge>
                   </div>
-
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Planning</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Sprint:</span>
-                        <span>{story.sprint || '-'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Estimated Hours:</span>
-                        <span>{story.estimatedHours}h</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Assigned To:</span>
-                        <span>{story.assignedTo || '-'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Last Modified:</span>
-                        <span>{formatDate(story.lastModified)}</span>
-                      </div>
-                    </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Complexity:</span>
+                    <Badge variant={getComplexityColor(story.complexity)}>{story.complexity}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Status:</span>
+                    <Badge variant={story.status === 'Done' ? 'success' : 'default'}>{story.status}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Review Status:</span>
+                    <Badge variant={getReviewStatusColor(story.reviewStatus)}>{story.reviewStatus}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Sprint:</span>
+                    <span className="text-sm">{story.sprint || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Estimated Hours:</span>
+                    <span className="text-sm">{story.estimatedHours}h</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Assigned To:</span>
+                    <span className="text-sm">{story.assignedTo || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Last Modified:</span>
+                    <span className="text-sm">{formatDate(story.lastModified)}</span>
                   </div>
                 </div>
 
