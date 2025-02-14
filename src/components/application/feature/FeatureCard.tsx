@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BaseCard } from '../../base/BaseCard';
 import { Badge } from '../../Badge';
 import { UseCase } from '../../../services/mock/useCases';
@@ -12,6 +12,12 @@ interface FeatureCardProps extends Feature {
 
 export function FeatureCard({ id, title, description, complexity, useCases, isLoading, onUseCaseSelect }: FeatureCardProps) {
   const [selectedUseCases, setSelectedUseCases] = useState<Set<string>>(new Set());
+
+  // Debug state changes
+  useEffect(() => {
+    console.log(`Feature ${id} loading:`, isLoading);
+    console.log(`Feature ${id} use cases:`, useCases);
+  }, [id, isLoading, useCases]);
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
@@ -55,7 +61,7 @@ export function FeatureCard({ id, title, description, complexity, useCases, isLo
         <p className="text-gray-600 mb-4">{description}</p>
 
         <div className="border-t border-gray-100 pt-4 mt-auto">
-          {isLoading ? (
+          {(isLoading || useCases.length === 0) ? (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

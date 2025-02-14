@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApplicationCreation } from '../context/ApplicationCreationContext';
 import { Feature } from '../../../../services/mock/features';
@@ -47,6 +47,120 @@ export function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
+  // Debug state changes
+  useEffect(() => {
+    console.log('Features:', features);
+    console.log('Loading states:', loadingUseCases);
+    console.log('Use case cache:', useCaseCache);
+  }, [features, loadingUseCases, useCaseCache]);
+
+  // Generate use cases when features are set
+  useEffect(() => {
+    if (features.length > 0 && selectedConcept) {
+      console.log('Starting use case generation for features:', features);
+      
+      // Initialize loading states for all features
+      const initialLoadingStates = features.reduce((acc, feature) => ({
+        ...acc,
+        [feature.id]: true
+      }), {});
+      
+      setLoadingUseCases(initialLoadingStates);
+    }
+  }, [features, selectedConcept]);
+
+  // Update UI when features or use cases change
+  useEffect(() => {
+      setMessages(prev => {
+        // Find and remove the last message if it's a loading or feature display message
+        const lastMessageIndex = prev.findIndex(msg => 
+          typeof msg.content === 'string' && msg.content === "Crafting the features of your application..." ||
+          typeof msg.content !== 'string' // React element for feature display
+        );
+
+        return [
+          ...prev.slice(0, lastMessageIndex >= 0 ? lastMessageIndex : prev.length),
+          {
+            type: 'system',
+            content: (
+              <div className="space-y-6">
+                {features.map(feature => (
+                  <FeatureCard 
+                    key={feature.id}
+                    {...feature}
+                    useCases={useCaseCache[feature.id] || []}
+                    isLoading={loadingUseCases[feature.id] || false}
+                    onUseCaseSelect={handleUseCaseSelect}
+                  />
+                ))}
+                <div className="flex justify-end mt-4">
+                  <Button 
+                    onClick={() => handleCreateProjectPlan()} 
+                    className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+                  >
+                    <span>Create Project Plan</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </Button>
+                </div>
+              </div>
+            )
+          }
+        ];
+      });
+  }, [features, useCaseCache, loadingUseCases]);
+
+  // Handle use case generation
+  useEffect(() => {
+    const generateUseCasesForFeatures = async () => {
+      if (!features.length || !selectedConcept) return;
+
+      const answeredQuestions = messages
+        .filter(msg => msg.options?.length === 1 && 'question' in msg.options[0])
+        .map(msg => msg.options![0] as Question);
+      
+      const answersWithText = Object.entries(applicationData.answers || {}).reduce((acc, [questionId, selectedIds]) => {
+        const question = answeredQuestions.find(q => q.id === questionId);
+        if (question) {
+          acc[question.question] = question.options
+            .filter(opt => selectedIds.includes(opt.id))
+            .map(opt => opt.text);
+        }
+        return acc;
+      }, {} as Record<string, string[]>);
+
+      // Generate use cases for each feature
+      await Promise.all(features.map(async (feature) => {
+        if (useCaseCache[feature.id]) return; // Skip if already cached
+        if (!loadingUseCases[feature.id]) return; // Skip if not loading
+
+        try {
+          const useCases = await generateUseCases(
+            feature,
+            {
+              title: applicationData.title,
+              description: applicationData.description,
+              selectedConcept: selectedConcept,
+              answers: answersWithText
+            }
+          );
+          
+          setUseCaseCache(prev => ({
+            ...prev,
+            [feature.id]: useCases.map(useCase => ({
+              ...useCase,
+              id: `${feature.id}-${useCase.id}` // Ensure unique IDs
+            }))
+          }));
+        } catch (error) {
+          console.error(`Error generating use cases for feature ${feature.id}:`, error);
+        } finally {
+          setLoadingUseCases(prev => ({ ...prev, [feature.id]: false }));
+        }
+      }));
+    };
+
+    generateUseCasesForFeatures();
+  }, [features, selectedConcept, loadingUseCases, messages, applicationData]);
   const handleCreateProjectPlan = async () => {
     if (features.length === 0) return;
     
@@ -267,7 +381,6 @@ export function ChatInterface() {
           }
         ]);
 
-
         try {
           // Get all questions and their selected answers
           const answeredQuestions = messages
@@ -294,42 +407,12 @@ export function ChatInterface() {
           
           setFeatures(generatedFeatures);
 
-          // Validate use cases before showing
-          const validateUseCase = (useCase: UseCase) => {
-            return useCase.title?.trim() && useCase.description?.trim();
-          };
-
-          // Generate use cases for each feature
-          generatedFeatures.forEach(async (feature) => {
-            if (useCaseCache[feature.id]) return; // Skip if already cached
-            if (loadingUseCases[feature.id]) return; // Skip if already loading
-            
-            setLoadingUseCases(prev => ({ ...prev, [feature.id]: true }));
-            
-            try {
-              const useCases = await generateUseCases(
-                feature,
-                {
-                  title: applicationData.title,
-                  description: applicationData.description,
-                  selectedConcept: selectedConcept!,
-                  answers: answersWithText
-                }
-              );
-
-              // Filter out invalid use cases
-              const validUseCases = useCases.filter(validateUseCase);
-              
-              setUseCaseCache(prev => ({
-                ...prev,
-                [feature.id]: validUseCases.length > 0 ? validUseCases : []
-              }));
-            } catch (error) {
-              console.error(`Error generating use cases for feature ${feature.id}:`, error);
-            } finally {
-              setLoadingUseCases(prev => ({ ...prev, [feature.id]: false }));
-            }
-          });
+          // Initialize loading states for all features
+          const initialLoadingStates = generatedFeatures.reduce((acc, feature) => ({
+            ...acc,
+            [feature.id]: true
+          }), {});
+          setLoadingUseCases(initialLoadingStates);
 
           // Show features in chat
           setMessages(prev => [...prev.slice(0, -1), // Remove loading message
@@ -359,14 +442,40 @@ export function ChatInterface() {
               )
             }
           ]);
+
+          // Generate use cases for each feature
+          generatedFeatures.forEach(async (feature) => {
+            if (useCaseCache[feature.id]) return; // Skip if already cached
+            
+            try {
+              const useCases = await generateUseCases(
+                feature,
+                {
+                  title: applicationData.title,
+                  description: applicationData.description,
+                  selectedConcept: selectedConcept!,
+                  answers: answersWithText
+                }
+              );
+              
+              setUseCaseCache(prev => ({
+                ...prev,
+                [feature.id]: useCases
+              }));
+            } catch (error) {
+              console.error(`Error generating use cases for feature ${feature.id}:`, error);
+            } finally {
+              setLoadingUseCases(prev => ({ ...prev, [feature.id]: false }));
+            }
+          });
+
+          setIsProcessing(false);
         } catch (error) {
           console.error('Error generating features:', error);
           setMessages(prev => [...prev, {
             type: 'system',
             content: "I encountered an error while generating features. Please try again."
           }]);
-        } finally {
-          setIsProcessing(false);
         }
       }
     }
