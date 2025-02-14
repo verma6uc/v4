@@ -8,6 +8,7 @@ import { ProductBacklogPage } from '../pages/creator/application/ProductBacklogP
 import { BlueprintPage } from '../pages/creator/application/BlueprintPage';
 import { ProjectPlanPage } from '../pages/creator/application/ProjectPlanPage';
 import { PrototypePage } from '../pages/creator/application/PrototypePage';
+import { ApplicationDetailPage } from '../pages/creator/application/ApplicationDetailPage';
 
 export const creatorRoutes: RouteObject[] = [
   {
@@ -29,6 +30,10 @@ export const creatorRoutes: RouteObject[] = [
       {
         path: 'applications/new',
         element: <NewApplicationPage />
+      },
+      {
+        path: 'applications/:applicationId/detail',
+        element: <ApplicationDetailPage />
       },
       {
         path: 'applications/:applicationId/backlog',
