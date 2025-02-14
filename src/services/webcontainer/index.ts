@@ -1,57 +1,8 @@
 import { WebContainer } from '@webcontainer/api';
+import { dashboardTemplate } from './templates/dashboard/files';
 
-// Default files for when no repository is provided
-const defaultFiles = {
-  'index.html': {
-    file: {
-      contents: `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Prototype</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div id="app" class="p-4"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
-</html>
-      `
-    }
-  },
-  'package.json': {
-    file: {
-      contents: `
-{
-  "name": "prototype",
-  "type": "module",
-  "scripts": {
-    "dev": "vite"
-  },
-  "dependencies": {
-    "vite": "^4.0.4"
-  }
-}
-      `
-    }
-  },
-  'src': {
-    directory: {
-      'main.js': {
-        file: {
-          contents: `
-document.querySelector('#app').innerHTML = \`
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Prototype Preview</h1>
-    <p class="text-gray-600">This is a live preview of your application.</p>
-  </div>
-\`
-          `
-        }
-      }
-    }
-  }
-};
+// Use dashboard template as default files
+const defaultFiles = dashboardTemplate;
 
 class WebContainerService {
   private static instance: WebContainerService | null = null;
