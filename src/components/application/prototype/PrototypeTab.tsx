@@ -71,9 +71,9 @@ export function PrototypeTab() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <div className="flex-1 p-4">
-        <div className="h-full grid grid-rows-[1fr,300px] gap-4">
+        <div className="h-full grid grid-rows-[minmax(768px,1fr),300px] gap-4">
           {/* Preview Section */}
           <div className="w-full h-full">
             <Preview url={previewUrl} isLoading={isLoading} />
