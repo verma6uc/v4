@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Message as MessageComponent } from './application/Message';
 import { ChatInput } from './application/ChatInput';
 import { Message, ApplicationData, ApplicationStep } from './application/types';
 import { ConceptOption, Question } from '../../utils/openai';
@@ -29,6 +30,7 @@ export function NewApplicationPage() {
   console.error('NewApplicationPage rendered');
   
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState<ApplicationStep>('title');
   const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
@@ -58,86 +60,7 @@ export function NewApplicationPage() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };ottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.error('NewApplicationPage: handleInputChange called with value:', e.target.value);
-    setInput(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    console.error('NewApplicationPage: handleKeyDown called with key:', e.key);
-    if (e.key === 'Enter' && !e.shiftKey) {
-      console.error('Enter key pressed, submitting form');
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
-  const handleConceptSelect = async (optionId: string) => {
-    console.error('NewApplicationPage: handleConceptSelect called with optionId:', optionId);
-    setSelectedConcept(optionId);
-    const selectedOption = messages
-      .flatMap(msg => (msg.options || []) as (ConceptOption | Question)[])
-      .find(opt => 'title' in opt && opt.id === optionId) as ConceptOption | undefined;
-
-    if (!selectedOption) {
-      console.error('Selected concept not found:', optionId);
-      return;
-    }
-    
-    setApplicationData(prev => ({ ...prev, selectedConcept: optionId }));
-    
-    try {
-      console.error('Generating follow-up questions for concept:', selectedOptin);
-      cons quesins = await generateFollowUpQuestions(selectedOption);
-      console.error('Generated questions:', questions);
-      
-      if (questions.length === 0) {
-        console.error('All questions answered, oving to backlog generation');
-        setAllQuestionsAnswered(true);
-        const responseawait generateResponse([], 'all_questions_answered');
-        setMessages(prev => [
-          ...prev,
-          {
-            type: 'system',
-            content: response
-          }
-        ]);
-        setCurrentStep'backlog-generation';
-      } else {
-        setMessages(prev [
-         ...prev,
-          
-            type: 'system',
-            content: "Please answer this question to help me understand your requirements better:",
-            options: questions,
-            optionType: 'question'
-          }
-        ]);
-        setCurrentStep('question-answering');
-      }
-    } catch (error) {
-      console.error('Error in handleConceptSelect:', error);
-      setMessages(prev => [...prev, {
-        type: 'system',
-        content: "I encountered an error. Please try again."
-      }]);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    console.error('NewApplicationPage: handleSubmit called');
-    e.preventDefault();
-    console.error('Form submitted');
-    console.error('Current step:', currentStep);
-    console.error('Input:', input);
 
   useEffect(() => {
     scrollToBottom();
