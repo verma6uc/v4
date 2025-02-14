@@ -1,11 +1,13 @@
-import React from 'react';
-import { BaseCard } from '../../base/BaseCard';
+import React, { useState } from 'react';
 import { Badge } from '../../Badge';
 import { generateProjectPlan } from '../../../services/mock/projectPlan';
 import { Calendar, Clock, User, AlertCircle } from 'lucide-react';
 
 export function ProjectPlanTab() {
   const plan = generateProjectPlan();
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 9;
+  const allTasks = plan.phases.flatMap(phase => phase.tasks);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -34,76 +36,79 @@ export function ProjectPlanTab() {
     });
   };
 
+  // Get current tasks
+  const indexOfLastTask = currentPage * tasksPerPage;
+  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
+  const currentTasks = allTasks.slice(indexOfFirstTask, indexOfLastTask);
+  const totalPages = Math.ceil(allTasks.length / tasksPerPage);
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6 pl-4">Project Plan</h2>
-      
-      {/* Tasks by Phase */}
-      {plan.phases.map(phase => (
-        <div key={phase.id} className="space-y-4 px-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-medium text-gray-900">{phase.name}</h3>
-              <Badge variant={phase.status === 'Done' ? 'success' : phase.status === 'In Progress' ? 'warning' : 'default'}>
-                {phase.status}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-1 text-sm text-gray-500">
-              <Calendar className="w-4 h-4" />
-              {formatDate(phase.startDate)} - {formatDate(phase.endDate)}
-            </div>
-          </div>
+    <div className="bg-gray-50 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {currentTasks.map(task => (
+          <div key={task.id} className="bg-white rounded shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-3 space-y-2">
+              <div className="flex items-start justify-between">
+                <h4 className="font-medium text-gray-900 text-sm">{task.title}</h4>
+                {task.priority === 'High' && (
+                  <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                )}
+              </div>
+              
+              <p className="text-xs text-gray-500">{task.description}</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {phase.tasks.map(task => (
-              <BaseCard key={task.id}>
-                <div className="p-4 space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{task.title}</h4>
-                      <p className="mt-1 text-sm text-gray-500">{task.description}</p>
-                    </div>
-                    {task.priority === 'High' && (
-                      <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant={getPriorityColor(task.priority)}>{task.priority}</Badge>
-                    <Badge variant={getStatusColor(task.status)}>{task.status}</Badge>
-                    {task.progress > 0 && (
-                      <Badge variant="default">{task.progress}% Complete</Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      {task.estimatedHours}h
-                    </div>
-                    {task.assignee && (
-                      <div className="flex items-center gap-1">
-                        <User className="w-4 h-4" />
-                        {task.assignee.name}
-                      </div>
-                    )}
-                  </div>
-
-                  {task.dependencies && task.dependencies.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {task.dependencies.map(dep => (
-                        <Badge key={dep.taskId} variant="default" size="sm">
-                          {dep.type}: Task {dep.taskId}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+              <div className="flex flex-wrap gap-1">
+                <Badge variant={getPriorityColor(task.priority)}>{task.priority}</Badge>
+                <Badge variant={getStatusColor(task.status)}>{task.status}</Badge>
+                {task.progress > 0 && (
+                  <Badge variant="default">{task.progress}%</Badge>
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {task.estimatedHours}h
                 </div>
-              </BaseCard>
-            ))}
+                {task.assignee && (
+                  <div className="flex items-center gap-1">
+                    <User className="w-3 h-3" />
+                    {task.assignee.name}
+                  </div>
+                )}
+              </div>
+              
+              {task.dependencies && task.dependencies.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {task.dependencies.map(dep => (
+                    <Badge key={dep.taskId} variant="default" size="sm">
+                      {dep.type}: Task {dep.taskId}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      
+      {/* Pagination */}
+      <div className="mt-4 flex justify-center gap-2">
+        <button
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded bg-white shadow-sm disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <button
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded bg-white shadow-sm disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
