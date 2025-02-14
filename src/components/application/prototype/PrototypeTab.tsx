@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Terminal } from './Terminal';
 import { Preview } from './Preview';
 import { webContainerService } from '../../../services/webcontainer';
@@ -7,6 +7,7 @@ export function PrototypeTab() {
   const [previewUrl, setPreviewUrl] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -14,11 +15,13 @@ export function PrototypeTab() {
     const initializeWebContainer = async () => {
       try {
         await webContainerService.boot();
-        if (!isMounted) return;
+        if (!isMounted) {
+          await webContainerService.teardown();
+          return;
+        }
 
         const url = await webContainerService.startDevServer();
         if (!isMounted) return;
-
         setPreviewUrl(url);
       } catch (err) {
         if (!isMounted) return;
@@ -26,15 +29,18 @@ export function PrototypeTab() {
       } finally {
         if (isMounted) {
           setIsLoading(false);
+          setIsInitialized(true);
         }
       }
     };
 
-    initializeWebContainer();
+    if (!isInitialized) {
+      initializeWebContainer();
+    }
 
     return () => {
       isMounted = false;
-      webContainerService.teardown();
+      if (isInitialized) webContainerService.teardown();
     };
   }, []);
 

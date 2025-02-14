@@ -53,8 +53,18 @@ document.querySelector('#app').innerHTML = \`
 };
 
 class WebContainerService {
+  private static instance: WebContainerService | null = null;
   private webcontainerInstance: WebContainer | null = null;
   private terminalWriters: ((data: string) => void)[] = [];
+
+  private constructor() {}
+
+  static getInstance(): WebContainerService {
+    if (!WebContainerService.instance) {
+      WebContainerService.instance = new WebContainerService();
+    }
+    return WebContainerService.instance;
+  }
 
   async boot() {
     if (this.webcontainerInstance) {
@@ -129,11 +139,11 @@ class WebContainerService {
   }
 
   async teardown() {
-    // Cleanup resources if needed
     this.webcontainerInstance = null;
     this.terminalWriters = [];
+    WebContainerService.instance = null;
   }
 }
 
 // Export singleton instance
-export const webContainerService = new WebContainerService();
+export const webContainerService = WebContainerService.getInstance();
