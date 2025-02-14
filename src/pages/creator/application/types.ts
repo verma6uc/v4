@@ -9,7 +9,12 @@ export interface Message {
   optionType?: 'concept' | 'question';
 }
 
-export type ApplicationStep = 'title' | 'description' | 'concept-selection' | 'question-answering';
+export type ApplicationStep = 
+  | 'title' 
+  | 'description' 
+  | 'concept-selection' 
+  | 'question-answering'
+  | 'backlog-generation';
 
 export interface ApplicationData {
   title: string;

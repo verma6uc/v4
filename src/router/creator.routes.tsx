@@ -4,6 +4,10 @@ import { CreatorLayout } from '../layouts/CreatorLayout';
 import { DashboardPage } from '../pages/creator/DashboardPage';
 import { AppStorePage } from '../pages/creator/AppStorePage';
 import { NewApplicationPage } from '../pages/creator/NewApplicationPage';
+import { ProductBacklogPage } from '../pages/creator/application/ProductBacklogPage';
+import { BlueprintPage } from '../pages/creator/application/BlueprintPage';
+import { ProjectPlanPage } from '../pages/creator/application/ProjectPlanPage';
+import { PrototypePage } from '../pages/creator/application/PrototypePage';
 
 export const creatorRoutes: RouteObject[] = [
   {
@@ -25,6 +29,22 @@ export const creatorRoutes: RouteObject[] = [
       {
         path: 'applications/new',
         element: <NewApplicationPage />
+      },
+      {
+        path: 'applications/:applicationId/backlog',
+        element: <ProductBacklogPage />
+      },
+      {
+        path: 'applications/:applicationId/blueprint',
+        element: <BlueprintPage />
+      },
+      {
+        path: 'applications/:applicationId/plan',
+        element: <ProjectPlanPage />
+      },
+      {
+        path: 'applications/:applicationId/prototype',
+        element: <PrototypePage />
       }
     ]
   }

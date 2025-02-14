@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Message as MessageComponent } from './application/Message';
 import { ChatInput } from './application/ChatInput';
 import { Message, ApplicationData, ApplicationStep } from './application/types';
 import { ConceptOption, Question } from '../../utils/openai';
-import { generateConcepts, generateResponse, generateFollowUpQuestions } from '../../services/openai';
+import { generateConcepts, generateResponse, generateFollowUpQuestions } from '../../services/mock';
 
-console.log('NewApplicationPage component loaded');
+console.error('NewApplicationPage component loaded');
 
 const INITIAL_MESSAGES: Message[] = [
   {
@@ -27,13 +26,13 @@ Let's begin! What would you like to call your application?`
 ];
 
 export function NewApplicationPage() {
-  console.log('NewApplicationPage rendered');
+  console.error('NewApplicationPage rendered');
   
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
-  const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState<ApplicationStep>('title');
   const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
+  const [allQuestionsAnswered, setAllQuestionsAnswered] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [applicationData, setApplicationData] = useState<ApplicationData>({
     title: '',
@@ -46,18 +45,20 @@ export function NewApplicationPage() {
   });
 
   useEffect(() => {
-    console.log('Current application data:', applicationData);
+    console.error('Current application data:', applicationData);
   }, [applicationData]);
 
   useEffect(() => {
-    console.log('Current step:', currentStep);
+    console.error('Current step:', currentStep);
   }, [currentStep]);
 
   useEffect(() => {
-    console.log('Messages updated:', messages);
+    console.error('Messages updated:', messages);
   }, [messages]);
 
   const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };ottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -66,20 +67,21 @@ export function NewApplicationPage() {
   }, [messages]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log('Input changed:', e.target.value);
+    console.error('NewApplicationPage: handleInputChange called with value:', e.target.value);
     setInput(e.target.value);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    console.error('NewApplicationPage: handleKeyDown called with key:', e.key);
     if (e.key === 'Enter' && !e.shiftKey) {
-      console.log('Enter key pressed');
+      console.error('Enter key pressed, submitting form');
       e.preventDefault();
       handleSubmit(e);
     }
   };
 
   const handleConceptSelect = async (optionId: string) => {
-    console.log('Selecting concept:', optionId);
+    console.error('NewApplicationPage: handleConceptSelect called with optionId:', optionId);
     setSelectedConcept(optionId);
     const selectedOption = messages
       .flatMap(msg => (msg.options || []) as (ConceptOption | Question)[])
@@ -93,20 +95,34 @@ export function NewApplicationPage() {
     setApplicationData(prev => ({ ...prev, selectedConcept: optionId }));
     
     try {
-      console.log('Generating follow-up questions for concept:', selectedOption);
-      const questions = await generateFollowUpQuestions(selectedOption);
-      console.log('Generated questions:', questions);
+      console.error('Generating follow-up questions for concept:', selectedOptin);
+      cons quesins = await generateFollowUpQuestions(selectedOption);
+      console.error('Generated questions:', questions);
       
-      setMessages(prev => [
-        ...prev,
-        {
-          type: 'system',
-          content: "Great choice! Let's refine this concept further. Please answer these questions:",
-          options: questions,
-          optionType: 'question'
-        }
-      ]);
-      setCurrentStep('question-answering');
+      if (questions.length === 0) {
+        console.error('All questions answered, oving to backlog generation');
+        setAllQuestionsAnswered(true);
+        const responseawait generateResponse([], 'all_questions_answered');
+        setMessages(prev => [
+          ...prev,
+          {
+            type: 'system',
+            content: response
+          }
+        ]);
+        setCurrentStep'backlog-generation';
+      } else {
+        setMessages(prev [
+         ...prev,
+          
+            type: 'system',
+            content: "Please answer this question to help me understand your requirements better:",
+            options: questions,
+            optionType: 'question'
+          }
+        ]);
+        setCurrentStep('question-answering');
+      }
     } catch (error) {
       console.error('Error in handleConceptSelect:', error);
       setMessages(prev => [...prev, {
@@ -117,19 +133,97 @@ export function NewApplicationPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.error('NewApplicationPage: handleSubmit called');
     e.preventDefault();
-    console.log('Form submitted');
-    console.log('Current step:', currentStep);
-    console.log('Input:', input);
-    console.log('Is Processing:', isProcessing);
+    console.error('Form submitted');
+    console.error('Current step:', currentStep);
+    console.error('Input:', input);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.error('NewApplicationPage: handleInputChange called with value:', e.target.value);
+    setInput(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    console.error('NewApplicationPage: handleKeyDown called with key:', e.key);
+    if (e.key === 'Enter' && !e.shiftKey) {
+      console.error('Enter key pressed, submitting form');
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  const handleConceptSelect = async (optionId: string) => {
+    console.error('NewApplicationPage: handleConceptSelect called with optionId:', optionId);
+    setSelectedConcept(optionId);
+    const selectedOption = messages
+      .flatMap(msg => (msg.options || []) as (ConceptOption | Question)[])
+      .find(opt => 'title' in opt && opt.id === optionId) as ConceptOption | undefined;
+
+    if (!selectedOption) {
+      console.error('Selected concept not found:', optionId);
+      return;
+    }
+    
+    setApplicationData(prev => ({ ...prev, selectedConcept: optionId }));
+    
+    try {
+      console.error('Generating follow-up questions for concept:', selectedOption);
+      const questions = await generateFollowUpQuestions(selectedOption);
+      console.error('Generated questions:', questions);
+      
+      if (questions.length === 0) {
+        console.error('All questions answered, moving to backlog generation');
+        setAllQuestionsAnswered(true);
+        const response = await generateResponse([], 'all_questions_answered');
+        setMessages(prev => [
+          ...prev,
+          {
+            type: 'system',
+            content: response
+          }
+        ]);
+        setCurrentStep('backlog-generation');
+      } else {
+        setMessages(prev => [
+          ...prev,
+          {
+            type: 'system',
+            content: "Please answer this question to help me understand your requirements better:",
+            options: questions,
+            optionType: 'question'
+          }
+        ]);
+        setCurrentStep('question-answering');
+      }
+    } catch (error) {
+      console.error('Error in handleConceptSelect:', error);
+      setMessages(prev => [...prev, {
+        type: 'system',
+        content: "I encountered an error. Please try again."
+      }]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    console.error('NewApplicationPage: handleSubmit called');
+    e.preventDefault();
+    console.error('Form submitted');
+    console.error('Current step:', currentStep);
+    console.error('Input:', input);
+    console.error('Is Processing:', isProcessing);
 
     if (!input.trim() || isProcessing) {
-      console.log('Input empty or processing in progress, returning');
+      console.error('Input empty or processing in progress, returning');
       return;
     }
 
     const userMessage = input.trim();
-    console.log('Processing user message:', userMessage);
+    console.error('Processing user message:', userMessage);
     setInput('');
     setMessages(prev => [...prev, { type: 'user', content: userMessage }]);
     setIsProcessing(true);
@@ -137,17 +231,17 @@ export function NewApplicationPage() {
     try {
       switch (currentStep) {
         case 'title':
-          console.log('Processing title step');
+          console.error('Processing title step');
           if (userMessage.length < 3 || userMessage.length > 100) {
-            console.log('Title length validation failed');
+            console.error('Title length validation failed');
             setMessages(prev => [...prev, {
               type: 'system',
               content: "The title should be between 3 and 100 characters. Please try again."
             }]);
           } else {
-            console.log('Setting application title:', userMessage);
+            console.error('Setting application title:', userMessage);
             setApplicationData(prev => ({ ...prev, title: userMessage }));
-            console.log('Generating response for title');
+            console.error('Generating response for title');
             try {
               const response = await generateResponse([
                 {
@@ -155,7 +249,7 @@ export function NewApplicationPage() {
                   content: `I want to create an application called "${userMessage}". Can you help me describe it?`
                 }
               ]);
-              console.log('Response received:', response);
+              console.error('Response received:', response);
               setMessages(prev => [...prev, { type: 'system', content: response }]);
               setCurrentStep('description');
             } catch (error) {
@@ -173,15 +267,15 @@ export function NewApplicationPage() {
           break;
 
         case 'description':
-          console.log('Processing description step');
+          console.error('Processing description step');
           if (userMessage.length > 2000) {
-            console.log('Description length validation failed');
+            console.error('Description length validation failed');
             setMessages(prev => [...prev, {
               type: 'system',
               content: "The description is too long (max 2000 characters). Please try again."
             }]);
           } else {
-            console.log('Setting application description:', userMessage);
+            console.error('Setting application description:', userMessage);
             setApplicationData(prev => ({ ...prev, description: userMessage }));
             
             // Show processing message
@@ -191,10 +285,10 @@ export function NewApplicationPage() {
             }]);
             
             // Generate concepts
-            console.log('Generating concepts');
+            console.error('Generating concepts');
             try {
               const concepts = await generateConcepts(applicationData.title, userMessage);
-              console.log('Concepts received:', concepts);
+              console.error('Concepts received:', concepts);
               
               setMessages(prev => [
                 ...prev.slice(0, -1), // Remove processing message
@@ -222,17 +316,22 @@ export function NewApplicationPage() {
 
         case 'concept-selection':
         case 'question-answering':
-          console.log('Processing concept/question step');
+          console.error('Processing concept/question step');
           try {
             const response = await generateResponse([
               {
                 role: 'user',
                 content: userMessage
               }
-            ], `User is refining the ${applicationData.selectedConcept} concept`);
-            console.log('Response received:', response);
+            ], allQuestionsAnswered ? 'all_questions_answered' : undefined);
+            console.error('Response received:', response);
             
             setMessages(prev => [...prev, { type: 'system', content: response }]);
+            
+            if (allQuestionsAnswered) {
+              console.error('All questions answered, moving to backlog generation');
+              setCurrentStep('backlog-generation');
+            }
           } catch (error) {
             console.error('Error generating response:', error);
             if (error instanceof Error) {
@@ -244,6 +343,11 @@ export function NewApplicationPage() {
             }
             throw error;
           }
+          break;
+
+        case 'backlog-generation':
+          console.error('Processing backlog generation step');
+          // Handle any additional user input during backlog generation
           break;
       }
     } catch (error) {
@@ -260,7 +364,7 @@ export function NewApplicationPage() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto pb-40">
-        <div className="w-full">
+        <div className="w-full max-w-6xl mx-auto">
           {messages.map((message, index) => (
             <MessageComponent
               key={index}
