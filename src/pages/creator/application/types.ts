@@ -5,7 +5,7 @@ export type MessageType = 'system' | 'user';
 export interface Message {
   type: MessageType;
   content: string;
-  options?: ConceptOption[] | Question[];
+  options?: (ConceptOption | Question)[];
   optionType?: 'concept' | 'question';
 }
 
@@ -25,5 +25,12 @@ export interface ApplicationData {
     securityPolicy: string;
   };
   selectedConcept?: string;
-  answers?: Record<string, string>;
+  answers?: {
+    [questionId: string]: string[];  // Changed from string to string[] to support multiple selections
+  };
+}
+
+export interface MessageHandlers {
+  onConceptSelect: (conceptId: string) => void;
+  onQuestionAnswer: (questionId: string, selectedOptionIds: string[]) => void;
 }

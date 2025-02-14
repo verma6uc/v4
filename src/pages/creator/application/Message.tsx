@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Message as MessageType } from './types';
+import React, { useState, useEffect } from 'react';
+import { Message as MessageType, MessageHandlers } from './types';
 import { ConceptOption, Question } from '../../../utils/openai';
 import { ConceptCard } from '../../../components/cards/ConceptCard';
 import { BaseCard } from '../../../components/base/BaseCard';
@@ -7,14 +7,37 @@ import { Button } from '../../../components/Button';
 
 interface MessageProps {
   message: MessageType;
-  onSelectOption?: (optionId: string) => void;
+  handlers: MessageHandlers;
+  answeredQuestions?: Record<string, string[]>;
+  selectedConcept?: string;
+  isProcessingConcept?: boolean;
 }
 
-export function Message({ message, onSelectOption }: MessageProps) {
+export function Message({ 
+  message, 
+  handlers, 
+  answeredQuestions = {},
+  selectedConcept,
+  isProcessingConcept = false
+}: MessageProps) {
   const isSystem = message.type === 'system';
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Initialize selected options from answered questions
+  useEffect(() => {
+    if (message.optionType === 'question' && message.options) {
+      const question = message.options[0] as Question;
+      if (answeredQuestions[question.id]) {
+        setSelectedOptions(new Set(answeredQuestions[question.id]));
+        setIsSubmitted(true);
+      }
+    }
+  }, [message, answeredQuestions]);
 
   const handleOptionToggle = (optionId: string) => {
+    if (isSubmitted) return; // Prevent changes after submission
+
     const newSelected = new Set(selectedOptions);
     if (newSelected.has(optionId)) {
       newSelected.delete(optionId);
@@ -24,23 +47,41 @@ export function Message({ message, onSelectOption }: MessageProps) {
     setSelectedOptions(newSelected);
   };
 
-  const handleSubmitSelections = () => {
-    // Submit all selected options
-    selectedOptions.forEach(optionId => {
-      onSelectOption?.(optionId);
-    });
+  const handleSubmitSelections = (questionId: string) => {
+    // Submit all selected options for the question
+    handlers.onQuestionAnswer(questionId, Array.from(selectedOptions));
+    // Mark as submitted but don't reset selections
+    setIsSubmitted(true);
   };
 
   const renderConceptOptions = (options: ConceptOption[]) => (
     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {options.map(option => (
-        <ConceptCard
+        <div
           key={option.id}
-          concept={option}
-          onSelect={onSelectOption || (() => {})}
-          selected={false} // TODO: Add selected state management
-        />
+          className={`transition-opacity duration-200 ${
+            selectedConcept && option.id !== selectedConcept ? 'opacity-50' : ''
+          }`}
+        >
+          <ConceptCard
+            concept={option}
+            onSelect={() => !selectedConcept && !isProcessingConcept && handlers.onConceptSelect(option.id)}
+            selected={option.id === selectedConcept}
+            disabled={!!selectedConcept || isProcessingConcept}
+          />
+        </div>
       ))}
+      {isProcessingConcept && (
+        <div className="col-span-full mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <div className="flex items-center text-blue-700">
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Exploring this concept in depth...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -53,7 +94,9 @@ export function Message({ message, onSelectOption }: MessageProps) {
             {question.options.map(option => (
               <label
                 key={option.id}
-                className={`flex items-center p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:bg-gray-50 ${
+                className={`flex items-center p-4 rounded-lg border-2 transition-all duration-200 ${
+                  isSubmitted ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50'
+                } ${
                   selectedOptions.has(option.id)
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200'
@@ -63,16 +106,23 @@ export function Message({ message, onSelectOption }: MessageProps) {
                   type="checkbox"
                   checked={selectedOptions.has(option.id)}
                   onChange={() => handleOptionToggle(option.id)}
-                  className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  disabled={isSubmitted}
+                  className={`h-5 w-5 rounded border-gray-300 focus:ring-blue-500 ${
+                    isSubmitted ? 'cursor-not-allowed' : 'cursor-pointer'
+                  } ${
+                    selectedOptions.has(option.id) ? 'text-blue-600' : 'text-gray-400'
+                  }`}
                 />
-                <span className="ml-3 text-gray-700">{option.text}</span>
+                <span className={`ml-3 ${isSubmitted ? 'text-gray-500' : 'text-gray-700'}`}>
+                  {option.text}
+                </span>
               </label>
             ))}
           </div>
-          {selectedOptions.size > 0 && (
+          {!isSubmitted && selectedOptions.size > 0 && (
             <div className="mt-4 flex justify-end">
               <Button
-                onClick={handleSubmitSelections}
+                onClick={() => handleSubmitSelections(question.id)}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Submit Selections ({selectedOptions.size})
