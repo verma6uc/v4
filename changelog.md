@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Added
+- WebContainer Templates
+  - Created dashboard template with metric cards
+  - Added custom CSS styling for metrics
+  - Implemented responsive grid layout
+  - Separated template files for better maintainability
 - Creator Interface Pages
   - Created DashboardPage for managing in-progress applications
   - Added AppStorePage for completed applications
