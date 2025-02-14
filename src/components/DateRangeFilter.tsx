@@ -140,7 +140,7 @@ export function DateRangeFilter({ onChange, className = '' }: DateRangeFilterPro
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full mt-2"
+                  className="w-full mt-2 bg-white hover:bg-gray-50"
                   onClick={handleCustomRangeSelect}
                 >
                   Apply Custom Range

@@ -7,6 +7,8 @@ interface BadgeProps {
   rounded?: 'full' | 'lg'
   dot?: boolean
   outline?: boolean
+  className?: string
+  onClick?: () => void
 }
 
 export function Badge({ 
@@ -15,7 +17,9 @@ export function Badge({
   size = 'md',
   rounded = 'full',
   dot = false,
-  outline = false
+  outline = false,
+  className = '',
+  onClick
 }: BadgeProps) {
   const variants = {
     primary: outline 
@@ -59,13 +63,16 @@ export function Badge({
   }
 
   return (
-    <span className={`
+    <span 
+      onClick={onClick}
+      className={`
       inline-flex items-center font-medium
       ${sizes[size]}
       ${roundedStyles[rounded]}
       ${variants[variant]}
       ${outline ? 'border' : ''}
       transition-colors duration-200
+      ${className}
     `}>
       {dot && (
         <span className={`
