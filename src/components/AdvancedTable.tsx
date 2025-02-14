@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpDown, Download, Search, ChevronDown } from 'lucide-react';
+import { ArrowUpDown, FileText, FileSpreadsheet, Search, ChevronDown, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './Button';
 import { exportToCSV, exportToExcel } from '../utils/export';
 
@@ -25,7 +25,7 @@ interface AdvancedTableProps<T> {
 export function AdvancedTable<T>({ 
   items, 
   columns, 
-  itemsPerPage = 10,
+  itemsPerPage = 8,
   className = '',
   exportFilename = 'export',
   enableSearch = false,
@@ -35,6 +35,7 @@ export function AdvancedTable<T>({
   const [currentPage, setCurrentPage] = React.useState(1);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showExportMenu, setShowExportMenu] = React.useState(false);
+  const [isExporting, setIsExporting] = React.useState(false);
   const exportMenuRef = React.useRef<HTMLDivElement>(null);
   const [sortConfig, setSortConfig] = React.useState<{
     key: string;
@@ -103,6 +104,11 @@ export function AdvancedTable<T>({
     });
   };
 
+  const simulateExport = async () => {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
   const getExportColumns = () => {
     return columns.map(col => ({
       key: col.key,
@@ -120,14 +126,26 @@ export function AdvancedTable<T>({
     }));
   };
 
-  const handleExportCSV = () => {
-    exportToCSV(items, getExportColumns(), exportFilename);
-    setShowExportMenu(false);
+  const handleExportCSV = async () => {
+    setIsExporting(true);
+    try {
+      await simulateExport();
+      await exportToCSV(items, getExportColumns(), exportFilename);
+    } finally {
+      setIsExporting(false);
+      setShowExportMenu(false);
+    }
   };
 
-  const handleExportExcel = () => {
-    exportToExcel(items, getExportColumns(), exportFilename);
-    setShowExportMenu(false);
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      await simulateExport();
+      await exportToExcel(items, getExportColumns(), exportFilename);
+    } finally {
+      setIsExporting(false);
+      setShowExportMenu(false);
+    }
   };
 
   const getPageNumbers = (): number[] => {
@@ -159,8 +177,8 @@ export function AdvancedTable<T>({
     `}>
       <div className="p-4 border-b border-gray-200/50">
         <div className="flex items-center gap-4">
-          {enableSearch && (
-            <div className="relative flex-1 max-w-md">
+          <div className="flex-1 flex items-center gap-4">
+            {enableSearch && <div className="relative flex-1 max-w-md">
               <input
                 type="text"
                 placeholder="Search..."
@@ -169,17 +187,22 @@ export function AdvancedTable<T>({
                 className="w-full pl-10 pr-4 py-2 bg-white/50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-            </div>
-          )}
-          {enableExport && (
+            </div>}
+          </div>
+          <div className="flex items-center gap-2">
             <div className="relative" ref={exportMenuRef}>
               <button
-                className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md flex items-center gap-2"
-                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={() => !isExporting && setShowExportMenu(!showExportMenu)}
+                disabled={isExporting}
               >
-                <Download className="w-4 h-4" />
+                {isExporting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileText className="w-4 h-4" />
+                )}
                 Export
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
               </button>
               {showExportMenu && (
                 <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
@@ -187,20 +210,20 @@ export function AdvancedTable<T>({
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                     onClick={handleExportCSV}
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <FileText className="w-4 h-4 mr-2" />
                     Export as CSV
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                     onClick={handleExportExcel}
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
                     Export as Excel
                   </button>
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -211,7 +234,7 @@ export function AdvancedTable<T>({
               {columns.map(column => (
                 <th
                   key={column.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider"
                 >
                   {column.sortable ? (
                     <button
@@ -241,7 +264,7 @@ export function AdvancedTable<T>({
                 {columns.map(column => (
                   <td
                     key={column.key}
-                    className="px-6 py-4 whitespace-nowrap"
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                   >
                     {column.cell ? column.cell(item) : (item as any)[column.key]}
                   </td>
@@ -255,47 +278,27 @@ export function AdvancedTable<T>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-6 py-4 bg-white/50 border-t border-gray-200/50">
           <div className="flex items-center">
-            <p className="text-sm text-gray-500">
-              Page <span className="font-medium">{currentPage}</span> of{' '}
-              <span className="font-medium">{totalPages}</span> •{' '}
-              Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-              <span className="font-medium">
-                {Math.min(startIndex + itemsPerPage, items.length)}
-              </span>{' '}
-              of <span className="font-medium">{items.length}</span> results
+            <p className="text-sm text-gray-600">
+              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, items.length)} of {items.length} entries
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <button
-              className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-1 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             >
-              Previous
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-1">
-              {getPageNumbers().map(pageNum => (
-                <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`
-                    min-w-[2rem] h-8 flex items-center justify-center rounded-md text-sm
-                    ${currentPage === pageNum
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
-                    }
-                  `}
-                >
-                  {pageNum}
-                </button>
-              ))}
-            </div>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
             <button
-              className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-1 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>

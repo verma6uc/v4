@@ -1,8 +1,7 @@
 import React from 'react';
 import { AuditLogRow } from '../AuditLogRow';
 import { AuditLog, SeverityColors, CategoryColors } from '../../types/audit';
-import { Search, FileSpreadsheet, FileText, ChevronDown, ArrowUpDown, Loader2 } from 'lucide-react';
-import { Button } from '../Button';
+import { Search, FileSpreadsheet, FileText, ChevronDown, ArrowUpDown, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { exportToCSV, exportToExcel } from '../../utils/export';
 
 interface AuditLogTableProps {
@@ -54,7 +53,7 @@ const simulateExport = async () => {
   await new Promise(resolve => setTimeout(resolve, 1500));
 };
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 8;
 
 export function AuditLogTable({ logs, severityColors, categoryColors }: AuditLogTableProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -167,6 +166,23 @@ export function AuditLogTable({ logs, severityColors, categoryColors }: AuditLog
     exportToExcel(data, Object.keys(data[0]).map(key => ({ key, label: key })), filename);
   };
 
+  const getPageNumbers = (): number[] => {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
   return (
     <div className={`
       backdrop-blur-xl 
@@ -189,10 +205,8 @@ export function AuditLogTable({ logs, severityColors, categoryColors }: AuditLog
             <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
           </div>
           <div className="relative" ref={exportMenuRef}>
-            <Button
-              variant="primary"
-              size="sm"
-              className="flex items-center gap-2"
+            <button
+              className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               onClick={() => !isExporting && setShowExportMenu(!showExportMenu)}
               disabled={isExporting}
             >
@@ -201,9 +215,9 @@ export function AuditLogTable({ logs, severityColors, categoryColors }: AuditLog
               ) : (
                 <FileText className="w-4 h-4" />
               )}
-              <span>Export</span>
+              Export
               <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
-            </Button>
+            </button>
             {showExportMenu && (
               <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
                 <button
@@ -227,17 +241,17 @@ export function AuditLogTable({ logs, severityColors, categoryColors }: AuditLog
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50/50">
-            <tr>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50/50">
               {headers.map(header => (
                 <th 
                   key={header.key} 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider whitespace-nowrap"
                 >
                   {header.sortable ? (
                     <button
-                      className="flex items-center gap-1 hover:text-gray-700"
+                      className="flex items-center gap-1.5 hover:text-gray-700"
                       onClick={() => handleSort(header.key)}
                     >
                       {header.label}
@@ -251,7 +265,7 @@ export function AuditLogTable({ logs, severityColors, categoryColors }: AuditLog
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200/50 bg-white/50">
             {paginatedLogs.map(log => (
               <AuditLogRow 
                 key={log.id} 
@@ -266,52 +280,29 @@ export function AuditLogTable({ logs, severityColors, categoryColors }: AuditLog
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 bg-white/50 border-t border-gray-200/50 text-sm">
+        <div className="flex items-center justify-between px-6 py-4 bg-white/50 border-t border-gray-200/50">
           <div className="flex items-center">
-            <p className="text-sm text-gray-500">
-              Page <span className="font-medium">{currentPage}</span> of{' '}
-              <span className="font-medium">{totalPages}</span> •{' '}
-              Showing <span className="font-medium">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> to{' '}
-              <span className="font-medium">
-                {Math.min(currentPage * ITEMS_PER_PAGE, sortedLogs.length)}
-              </span>{' '}
-              of <span className="font-medium">{sortedLogs.length}</span> results
+            <p className="text-sm text-gray-600">
+              Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, sortedLogs.length)} of {sortedLogs.length} entries
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <button
-              className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-1 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             >
-              Previous
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum = i + 1;
-                if (currentPage > 3 && totalPages > 5) {
-                  pageNum = Math.min(currentPage - 2 + i, totalPages);
-                }
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`
-                      min-w-[2rem] h-8 flex items-center justify-center rounded-md text-sm
-                      ${currentPage === pageNum ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}
-                    `}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
             <button
-              className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-1 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>

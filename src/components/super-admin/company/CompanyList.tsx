@@ -28,7 +28,6 @@ export function CompanyList({
   onDelete
 }: CompanyListProps) {
   const [currentPage, setCurrentPage] = React.useState(1)
-  const itemsPerPage = 9 // Show 9 cards per page (3x3 grid)
 
   const filteredCompanies = React.useMemo(() => {
     if (!searchQuery) return companies
@@ -42,9 +41,9 @@ export function CompanyList({
     )
   }, [companies, searchQuery])
 
-  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedCompanies = filteredCompanies.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.ceil(filteredCompanies.length / 8)
+  const startIndex = (currentPage - 1) * 8
+  const paginatedCompanies = filteredCompanies.slice(startIndex, startIndex + 8)
 
   const ActionMenu = ({ company }: { company: Company }) => {
     const [isOpen, setIsOpen] = React.useState(false)
@@ -208,7 +207,7 @@ export function CompanyList({
   const PaginationControls = () => (
     <div className="mt-4 flex items-center justify-between">
       <p className="text-sm text-gray-600">
-        Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredCompanies.length)} of {filteredCompanies.length} entries
+        Showing {startIndex + 1} to {Math.min(startIndex + 8, filteredCompanies.length)} of {filteredCompanies.length} entries
       </p>
       <div className="flex items-center gap-2">
         <button
@@ -262,9 +261,9 @@ export function CompanyList({
     <AdvancedTable<Company>
       items={filteredCompanies}
       columns={columns}
-      itemsPerPage={10}
+      itemsPerPage={8}
       enableSearch={false}
-      enableExport={true}
+      exportFilename="companies"
       onRowClick={onCompanyClick}
     />
   )

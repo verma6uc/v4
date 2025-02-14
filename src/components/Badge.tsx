@@ -66,7 +66,7 @@ export function Badge({
     <span 
       onClick={onClick}
       className={`
-      inline-flex items-center font-medium
+      inline-flex items-center font-medium capitalize
       ${sizes[size]}
       ${roundedStyles[rounded]}
       ${variants[variant]}

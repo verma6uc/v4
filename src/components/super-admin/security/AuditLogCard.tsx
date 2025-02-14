@@ -72,8 +72,8 @@ export function AuditLogCard({
 }: AuditLogCardProps) {
   return (
     <BaseCard>
-      <h3 className="text-sm font-medium text-gray-900 mb-4">{title}</h3>
-      <div className="divide-y">
+      <div className="p-6">
+        <h3 className="text-sm font-medium text-gray-900 mb-4">{title}</h3>
         {logs.map(log => {
           const { icon: Icon, variant } = categoryConfig[log.category]
 
