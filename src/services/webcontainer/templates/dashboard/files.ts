@@ -1,5 +1,5 @@
 import { styles } from './styles';
-import { chartData, companies, auditLogs } from './data';
+import { chartData, inventoryItems, stockEvents } from './data';
 
 export const dashboardTemplate = {
   'index.html': {
@@ -9,7 +9,7 @@ export const dashboardTemplate = {
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Prototype</title>
+    <title>Inventory Manager</title>
     <style>
 ${styles}
     </style>
@@ -26,7 +26,7 @@ ${styles}
     file: {
       contents: `
 {
-  "name": "prototype",
+  "name": "inventory-manager",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -96,7 +96,7 @@ import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
 import { 
   LayoutDashboard, 
-  Building2, 
+  Package,
   ClipboardList,
   Bell,
   ChevronDown,
@@ -115,29 +115,33 @@ import {
   Trash2,
   ExternalLink,
   Shield,
-  UserPlus,
+  PackagePlus,
   FileText,
-  Key,
+  Barcode,
   Database,
   Lock,
   Globe,
   Mail,
   Phone,
-  MapPin
+  MapPin,
+  QrCode,
+  AlertTriangle,
+  Truck,
+  Box
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 // Sample data
 const chartData = ${JSON.stringify(chartData, null, 2)};
-const companies = ${JSON.stringify(companies, null, 2)};
-const auditLogs = ${JSON.stringify(auditLogs, null, 2)};
+const inventoryItems = ${JSON.stringify(inventoryItems, null, 2)};
+const stockEvents = ${JSON.stringify(stockEvents, null, 2)};
 
 function Sidebar() {
   const location = useLocation();
   
   return (
     <div className="sidebar">
-      <div className="logo">YUVI</div>
+      <div className="logo">INVENTORY</div>
       
       <nav>
         <div className="nav-group">
@@ -146,13 +150,13 @@ function Sidebar() {
             <LayoutDashboard size={20} />
             Dashboard
           </NavLink>
-          <NavLink to="/companies" className={\`nav-link \${location.pathname === '/companies' ? 'active' : ''}\`}>
-            <Building2 size={20} />
-            Companies
+          <NavLink to="/inventory" className={\`nav-link \${location.pathname === '/inventory' ? 'active' : ''}\`}>
+            <Package size={20} />
+            Inventory
           </NavLink>
-          <NavLink to="/audit-log" className={\`nav-link \${location.pathname === '/audit-log' ? 'active' : ''}\`}>
+          <NavLink to="/stock-events" className={\`nav-link \${location.pathname === '/stock-events' ? 'active' : ''}\`}>
             <ClipboardList size={20} />
-            Audit Log
+            Stock Events
           </NavLink>
         </div>
       </nav>
@@ -164,23 +168,23 @@ function NotificationsPanel({ show }) {
   return (
     <div className={\`notifications-panel \${show ? 'show' : ''}\`}>
       <div className="notifications-header">
-        Notifications
+        Stock Alerts
       </div>
       <div className="notification-item">
         <div className="notification-icon">
-          <MessageSquare size={20} className="text-primary" />
+          <AlertTriangle size={20} className="text-warning" />
         </div>
         <div className="notification-content">
-          <div className="notification-title">New message from John Doe</div>
+          <div className="notification-title">Low Stock: Office Chair Pro</div>
           <div className="notification-time">2 minutes ago</div>
         </div>
       </div>
       <div className="notification-item">
         <div className="notification-icon">
-          <AlertCircle size={20} className="text-warning" />
+          <AlertCircle size={20} className="text-danger" />
         </div>
         <div className="notification-content">
-          <div className="notification-title">System alert: High CPU usage</div>
+          <div className="notification-title">Out of Stock: Network Switch</div>
           <div className="notification-time">15 minutes ago</div>
         </div>
       </div>
@@ -189,7 +193,7 @@ function NotificationsPanel({ show }) {
           <CheckCircle2 size={20} className="text-success" />
         </div>
         <div className="notification-content">
-          <div className="notification-title">Task completed: Database backup</div>
+          <div className="notification-title">Stock Received: USB Cables</div>
           <div className="notification-time">1 hour ago</div>
         </div>
       </div>
@@ -210,8 +214,8 @@ function Header() {
       </div>
       
       <div className="user-menu" onClick={() => setShowUserMenu(!showUserMenu)}>
-        <div className="avatar">JD</div>
-        <span>John Doe</span>
+        <div className="avatar">IM</div>
+        <span>Inventory Manager</span>
         <ChevronDown size={16} />
         
         <div className={\`user-menu-dropdown \${showUserMenu ? 'show' : ''}\`}>
@@ -237,12 +241,12 @@ function Header() {
 function Dashboard() {
   return (
     <main className="main">
-      <h1>Dashboard Overview</h1>
+      <h1>Inventory Overview</h1>
       
       <div className="metric-grid">
         <div className="metric-card">
-          <div className="metric-title">Total Revenue</div>
-          <div className="metric-value">$48,574</div>
+          <div className="metric-title">Total Stock Value</div>
+          <div className="metric-value">$180,000</div>
           <div className="metric-change positive">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 4L14 10L2 10L8 4Z" fill="currentColor"/>
@@ -252,8 +256,8 @@ function Dashboard() {
         </div>
         
         <div className="metric-card">
-          <div className="metric-title">Active Users</div>
-          <div className="metric-value">2,420</div>
+          <div className="metric-title">Total Items</div>
+          <div className="metric-value">725</div>
           <div className="metric-change positive">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 4L14 10L2 10L8 4Z" fill="currentColor"/>
@@ -263,24 +267,24 @@ function Dashboard() {
         </div>
         
         <div className="metric-card">
-          <div className="metric-title">Conversion Rate</div>
-          <div className="metric-value">3.6%</div>
+          <div className="metric-title">Low Stock Items</div>
+          <div className="metric-value">12</div>
           <div className="metric-change negative">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 12L14 6L2 6L8 12Z" fill="currentColor"/>
             </svg>
-            1.2% vs last month
+            3 more than last month
           </div>
         </div>
         
         <div className="metric-card">
-          <div className="metric-title">Avg. Session Duration</div>
-          <div className="metric-value">4m 12s</div>
+          <div className="metric-title">QC Pass Rate</div>
+          <div className="metric-value">98.5%</div>
           <div className="metric-change positive">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 4L14 10L2 10L8 4Z" fill="currentColor"/>
             </svg>
-            15.3% vs last month
+            2.3% vs last month
           </div>
         </div>
       </div>
@@ -288,11 +292,11 @@ function Dashboard() {
       <div className="grid-cols-2">
         <div className="chart-card">
           <div className="chart-header">
-            <div className="chart-title">User Growth</div>
+            <div className="chart-title">Stock Level Trends</div>
             <div className="chart-legend">
               <div className="legend-item">
                 <div className="legend-dot" style={{ backgroundColor: '#4f46e5' }}></div>
-                <span>Users</span>
+                <span>Stock Level</span>
               </div>
             </div>
           </div>
@@ -303,7 +307,7 @@ function Dashboard() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Area type="monotone" dataKey="users" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.1} />
+                <Area type="monotone" dataKey="stockLevel" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.1} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -311,11 +315,11 @@ function Dashboard() {
 
         <div className="chart-card">
           <div className="chart-header">
-            <div className="chart-title">Revenue Trends</div>
+            <div className="chart-title">Stock Value Trends</div>
             <div className="chart-legend">
               <div className="legend-item">
                 <div className="legend-dot" style={{ backgroundColor: '#22c55e' }}></div>
-                <span>Revenue</span>
+                <span>Stock Value</span>
               </div>
             </div>
           </div>
@@ -326,7 +330,7 @@ function Dashboard() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#22c55e" strokeWidth={2} />
+                <Line type="monotone" dataKey="stockValue" stroke="#22c55e" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -336,26 +340,26 @@ function Dashboard() {
   );
 }
 
-function Companies() {
+function Inventory() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [industry, setIndustry] = useState('');
+  const [category, setCategory] = useState('');
   const itemsPerPage = 5;
 
-  const filteredCompanies = companies.filter(company => {
-    const matchesSearch = company.name.toLowerCase().includes(search.toLowerCase()) ||
-                         company.location.toLowerCase().includes(search.toLowerCase());
-    const matchesIndustry = !industry || company.industry === industry;
-    return matchesSearch && matchesIndustry;
+  const filteredItems = inventoryItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
+                         item.sku.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = !category || item.category === category;
+    return matchesSearch && matchesCategory;
   });
 
-  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
-  const displayedCompanies = filteredCompanies.slice(startIndex, startIndex + itemsPerPage);
+  const displayedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <main className="main">
-      <h1>Companies</h1>
+      <h1>Inventory Items</h1>
       
       <div className="table-container">
         <div className="table-filters">
@@ -363,7 +367,7 @@ function Companies() {
             <Search size={16} />
             <input
               type="text"
-              placeholder="Search companies..."
+              placeholder="Search items or SKU..."
               className="filter-input"
               style={{ flex: 1 }}
               value={search}
@@ -375,75 +379,86 @@ function Companies() {
             <Filter size={16} />
             <select 
               className="filter-input"
-              value={industry}
-              onChange={(e) => setIndustry(e.target.value)}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="">All Industries</option>
-              <option value="Technology">Technology</option>
-              <option value="Manufacturing">Manufacturing</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Energy">Energy</option>
+              <option value="">All Categories</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Networking">Networking</option>
+              <option value="Accessories">Accessories</option>
             </select>
           </div>
 
           <button className="btn btn-primary">
-            <UserPlus size={16} />
-            Add Company
+            <PackagePlus size={16} />
+            Add Item
           </button>
         </div>
         
         <table className="table">
           <thead>
             <tr>
-              <th>Company</th>
+              <th>Item Details</th>
               <th>Status</th>
               <th>Location</th>
-              <th>Revenue</th>
-              <th>Subscription</th>
-              <th>Last Active</th>
+              <th>Value</th>
+              <th>Stock Level</th>
+              <th>QC Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {displayedCompanies.map(company => (
-              <tr key={company.id}>
+            {displayedItems.map(item => (
+              <tr key={item.id}>
                 <td>
                   <div className="company-info">
                     <div className="company-logo">
-                      {company.name.charAt(0)}
+                      <Box size={20} />
                     </div>
                     <div className="company-details">
-                      <h3>{company.name}</h3>
-                      <p>{company.industry} • {company.employees} employees</p>
+                      <h3>{item.name}</h3>
+                      <p>{item.sku} • {item.category}</p>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <span className={\`badge \${company.status === 'Active' ? 'badge-success' : 'badge-warning'}\`}>
-                    {company.status}
+                  <span className={\`badge \${
+                    item.status === 'In Stock' ? 'badge-success' :
+                    item.status === 'Low Stock' ? 'badge-warning' :
+                    'badge-danger'
+                  }\`}>
+                    {item.status}
                   </span>
                 </td>
-                <td>{company.location}</td>
-                <td>{company.revenue}</td>
+                <td>{item.location}</td>
+                <td>{item.value}</td>
+                <td>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span>{item.quantity} units</span>
+                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      Reorder at {item.reorderPoint}
+                    </span>
+                  </div>
+                </td>
                 <td>
                   <span className={\`badge \${
-                    company.subscription === 'Enterprise Plus' ? 'badge-purple' :
-                    company.subscription === 'Enterprise' ? 'badge-info' :
+                    item.qcStatus === 'Passed' ? 'badge-success' :
+                    item.qcStatus === 'Pending' ? 'badge-warning' :
                     'badge-gray'
                   }\`}>
-                    {company.subscription}
+                    {item.qcStatus}
                   </span>
                 </td>
-                <td>{formatDistanceToNow(new Date(company.lastActive), { addSuffix: true })}</td>
                 <td>
                   <div className="action-buttons">
-                    <button className="btn btn-secondary">
+                    <button className="btn btn-secondary" title="Edit">
                       <Edit size={16} />
                     </button>
-                    <button className="btn btn-secondary">
-                      <ExternalLink size={16} />
+                    <button className="btn btn-secondary" title="Scan">
+                      <QrCode size={16} />
                     </button>
-                    <button className="btn btn-secondary">
+                    <button className="btn btn-secondary" title="More">
                       <MoreVertical size={16} />
                     </button>
                   </div>
@@ -455,7 +470,7 @@ function Companies() {
 
         <div className="table-pagination">
           <div className="pagination-info">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredCompanies.length)} of {filteredCompanies.length} companies
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredItems.length)} of {filteredItems.length} items
           </div>
           <div className="pagination-buttons">
             <button
@@ -488,29 +503,29 @@ function Companies() {
   );
 }
 
-function AuditLog() {
+function StockEvents() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [severity, setSeverity] = useState('');
   const [date, setDate] = useState('');
   const itemsPerPage = 5;
 
-  const filteredLogs = auditLogs.filter(log => {
-    const matchesSearch = log.event.toLowerCase().includes(search.toLowerCase()) ||
-                         log.user.toLowerCase().includes(search.toLowerCase()) ||
-                         log.details.toLowerCase().includes(search.toLowerCase());
-    const matchesSeverity = !severity || log.severity === severity;
-    const matchesDate = !date || log.timestamp.startsWith(date);
+  const filteredEvents = stockEvents.filter(event => {
+    const matchesSearch = event.event.toLowerCase().includes(search.toLowerCase()) ||
+                         event.item.toLowerCase().includes(search.toLowerCase()) ||
+                         event.details.toLowerCase().includes(search.toLowerCase());
+    const matchesSeverity = !severity || event.severity === severity;
+    const matchesDate = !date || event.timestamp.startsWith(date);
     return matchesSearch && matchesSeverity && matchesDate;
   });
 
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
-  const displayedLogs = filteredLogs.slice(startIndex, startIndex + itemsPerPage);
+  const displayedEvents = filteredEvents.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <main className="main">
-      <h1>Audit Log</h1>
+      <h1>Stock Events</h1>
       
       <div className="table-container">
         <div className="table-filters">
@@ -552,7 +567,7 @@ function AuditLog() {
           <thead>
             <tr>
               <th>Event</th>
-              <th>User</th>
+              <th>Item</th>
               <th>Category</th>
               <th>Severity</th>
               <th>Location</th>
@@ -561,56 +576,49 @@ function AuditLog() {
             </tr>
           </thead>
           <tbody>
-            {displayedLogs.map(log => (
-              <tr key={log.id}>
+            {displayedEvents.map(event => (
+              <tr key={event.id}>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {log.category === 'Authentication' && <Key size={16} />}
-                    {log.category === 'Security' && <Shield size={16} />}
-                    {log.category === 'Data' && <Database size={16} />}
-                    {log.category === 'System' && <Settings size={16} />}
-                    {log.category === 'API' && <Globe size={16} />}
-                    {log.event}
+                    {event.category === 'Stock Level' && <Package size={16} />}
+                    {event.category === 'Quality Control' && <Shield size={16} />}
+                    {event.category === 'Stock Movement' && <Truck size={16} />}
+                    {event.event}
                   </div>
                 </td>
                 <td>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span>{log.user}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{log.userType}</span>
+                    <span>{event.item}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{event.sku}</span>
                   </div>
                 </td>
                 <td>
                   <span className="badge badge-gray">
-                    {log.category}
+                    {event.category}
                   </span>
                 </td>
                 <td>
                   <span className={\`badge \${
-                    log.severity === 'error' ? 'badge-danger' :
-                    log.severity === 'warning' ? 'badge-warning' :
+                    event.severity === 'error' ? 'badge-danger' :
+                    event.severity === 'warning' ? 'badge-warning' :
                     'badge-success'
                   }\`}>
-                    {log.severity}
+                    {event.severity}
                   </span>
                 </td>
+                <td>{event.location}</td>
                 <td>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span>{log.location}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{log.ipAddress}</span>
-                  </div>
-                </td>
-                <td>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span>{format(new Date(log.timestamp), 'MMM d, yyyy')}</span>
+                    <span>{format(new Date(event.timestamp), 'MMM d, yyyy')}</span>
                     <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                      {format(new Date(log.timestamp), 'HH:mm:ss')}
+                      {format(new Date(event.timestamp), 'HH:mm:ss')}
                     </span>
                   </div>
                 </td>
                 <td>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span>{log.details}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{log.device}</span>
+                    <span>{event.details}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{event.action}</span>
                   </div>
                 </td>
               </tr>
@@ -620,7 +628,7 @@ function AuditLog() {
 
         <div className="table-pagination">
           <div className="pagination-info">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredLogs.length)} of {filteredLogs.length} events
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredEvents.length)} of {filteredEvents.length} events
           </div>
           <div className="pagination-buttons">
             <button
@@ -663,8 +671,8 @@ export default function App() {
         
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/companies" element={<Companies />} />
-          <Route path="/audit-log" element={<AuditLog />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/stock-events" element={<StockEvents />} />
         </Routes>
       </div>
     </div>
