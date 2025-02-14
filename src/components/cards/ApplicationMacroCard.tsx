@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   FileCode,
@@ -14,7 +15,11 @@ import {
   Clock,
   ListChecks,
   Bug,
-  BarChart
+  BarChart,
+  FileText,
+  FileSpreadsheet,
+  FileLineChart,
+  Monitor
 } from 'lucide-react';
 
 type ApplicationStatus = 'MEMORY' | 'BLUEPRINT' | 'VISUAL_PRD' | 'DURING_DEVELOPMENT' | 'UNDER_TESTED' | 'DEVELOPMENT_COMPLETE';
@@ -103,6 +108,7 @@ const statusConfig = {
 };
 
 export function ApplicationMacroCard({
+  id,
   title,
   description,
   status,
@@ -123,7 +129,27 @@ export function ApplicationMacroCard({
   onMarkComplete,
   onRevertToPrevious
 }: ApplicationMacroCardProps) {
+  const navigate = useNavigate();
+  
+  // Helper function to determine if a stage is accessible
+  const canAccessStage = (requiredStage: ApplicationStatus) => {
+    const stages: ApplicationStatus[] = [
+      'MEMORY',
+      'BLUEPRINT',
+      'VISUAL_PRD',
+      'DURING_DEVELOPMENT',
+      'UNDER_TESTED',
+      'DEVELOPMENT_COMPLETE'
+    ];
+    return stages.indexOf(status) >= stages.indexOf(requiredStage);
+  };
+
   const StatusIcon = statusConfig[status].icon;
+
+  const handleActionClick = (e: React.MouseEvent, path: string) => {
+    e.stopPropagation();
+    navigate(path);
+  };
 
   return (
     <div 
@@ -340,6 +366,43 @@ export function ApplicationMacroCard({
             >
               <RotateCcw className="w-4 h-4 mr-1" />
               Revert to Previous
+            </Button>
+          )}
+
+          {/* Creation flow page links */}
+          {/* Product Backlog - Available from Memory stage */}
+          {canAccessStage('MEMORY') && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => handleActionClick(e, `/creator/applications/${id}/backlog`)}
+            >
+              <FileSpreadsheet className="w-4 h-4 mr-1" />
+              Product Backlog
+            </Button>
+          )}
+
+          {/* Project Plan - Available from Blueprint stage */}
+          {canAccessStage('BLUEPRINT') && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => handleActionClick(e, `/creator/applications/${id}/plan`)}
+            >
+              <FileLineChart className="w-4 h-4 mr-1" />
+              Project Plan
+            </Button>
+          )}
+
+          {/* Prototype - Available from Visual PRD stage */}
+          {canAccessStage('VISUAL_PRD') && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => handleActionClick(e, `/creator/applications/${id}/prototype`)}
+            >
+              <Monitor className="w-4 h-4 mr-1" />
+              Prototype
             </Button>
           )}
         </div>
