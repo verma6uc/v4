@@ -7,8 +7,9 @@ import { Tabs } from '../../../components/Tabs';
 import { generateProductBacklog, Feature, UseCase, UserStory } from '../../../services/mock/productBacklog';
 import { Plus, Filter, ChevronRight, ChevronDown } from 'lucide-react';
 
-export function ProductBacklogPage() {
+export function ApplicationDetailPage() {
   const { applicationId } = useParams();
+  const [activeTab, setActiveTab] = useState('backlog');
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
   const [expandedUseCases, setExpandedUseCases] = useState<string[]>([]);
   const backlog = generateProductBacklog();
@@ -39,26 +40,8 @@ export function ProductBacklogPage() {
     }
   };
 
-  return (
+  const ProductBacklogTab = () => (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Product Backlog</h1>
-          <p className="text-gray-500">Manage your application's features and requirements</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <Filter className="w-4 h-4 mr-2" />
-            Filter
-          </Button>
-          <Button variant="primary">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Feature
-          </Button>
-        </div>
-      </div>
-
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <BaseCard>
@@ -173,6 +156,43 @@ export function ProductBacklogPage() {
             )}
           </div>
         ))}
+      </div>
+    </div>
+  );
+
+  const tabs = [
+    {
+      id: 'backlog',
+      label: 'Product Backlog',
+      content: <ProductBacklogTab />
+    },
+    {
+      id: 'plan',
+      label: 'Project Plan',
+      content: <div>Project Plan content will be implemented here</div>
+    },
+    {
+      id: 'prototype',
+      label: 'Prototype',
+      content: <div>Prototype content will be implemented here</div>
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Application Details</h1>
+          <p className="text-gray-500">View and manage your application</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow">
+        <Tabs
+          tabs={tabs}
+          defaultTab="backlog"
+          onChange={setActiveTab}
+        />
       </div>
     </div>
   );
