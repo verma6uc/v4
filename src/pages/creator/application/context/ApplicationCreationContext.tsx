@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Message, ApplicationData, ApplicationStep } from '../types';
-import { Question } from '../../../../utils/openai';
+import { Question, ConceptOption } from '../../../../utils/openai';
 
 interface ApplicationCreationContextType {
   messages: Message[];
@@ -9,8 +9,8 @@ interface ApplicationCreationContextType {
   setApplicationData: React.Dispatch<React.SetStateAction<ApplicationData>>;
   currentStep: ApplicationStep;
   setCurrentStep: React.Dispatch<React.SetStateAction<ApplicationStep>>;
-  selectedConcept: string | null;
-  setSelectedConcept: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedConcept: ConceptOption | null;
+  setSelectedConcept: React.Dispatch<React.SetStateAction<ConceptOption | null>>;
   allQuestionsAnswered: boolean;
   setAllQuestionsAnswered: React.Dispatch<React.SetStateAction<boolean>>;
   isProcessing: boolean;
@@ -33,7 +33,7 @@ export function ApplicationCreationProvider({ children }: { children: ReactNode 
     }
   });
   const [currentStep, setCurrentStep] = useState<ApplicationStep>('title');
-  const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
+  const [selectedConcept, setSelectedConcept] = useState<ConceptOption | null>(null);
   const [allQuestionsAnswered, setAllQuestionsAnswered] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [remainingQuestions, setRemainingQuestions] = useState<Question[]>([]);

@@ -48,9 +48,7 @@ export function Message({
   };
 
   const handleSubmitSelections = (questionId: string) => {
-    // Submit all selected options for the question
     handlers.onQuestionAnswer(questionId, Array.from(selectedOptions));
-    // Mark as submitted but don't reset selections
     setIsSubmitted(true);
   };
 
@@ -157,31 +155,37 @@ export function Message({
                 className={`prose prose-sm max-w-none ${isSystem ? 'text-left' : 'text-right'}`}
                 style={{ whiteSpace: 'pre-wrap' }}
               >
-                <div className={`p-4 rounded-xl bg-white shadow-sm ${isSystem ? 'mb-0' : ''}`}>
-                  {message.content.split('\n').map((line, i) => {
-                    if (line.trim().startsWith('•')) {
+                <div className={`p-4 rounded-xl ${isSystem ? 'bg-white shadow-sm' : 'bg-blue-50'}`}>
+                  {typeof message.content === 'string' ? (
+                    message.content.split('\n').map((line, i) => {
+                      if (line.trim().startsWith('•')) {
+                        return (
+                          <span key={i} className="block pl-4 -ml-2 my-1 text-gray-600">
+                            {line}
+                          </span>
+                        );
+                      }
+                      if (line.trim().match(/^\[\d+\]/)) {
+                        return (
+                          <span key={i} className="block font-medium text-gray-700 mt-4 mb-2">
+                            {line}
+                          </span>
+                        );
+                      }
+                      if (!line.trim()) {
+                        return <span key={i} className="block h-3" />;
+                      }
                       return (
-                        <span key={i} className="block pl-4 -ml-2 my-1 text-gray-600">
+                        <span key={i} className="block text-gray-800">
                           {line}
                         </span>
                       );
-                    }
-                    if (line.trim().match(/^\[\d+\]/)) {
-                      return (
-                        <span key={i} className="block font-medium text-gray-700 mt-4 mb-2">
-                          {line}
-                        </span>
-                      );
-                    }
-                    if (!line.trim()) {
-                      return <span key={i} className="block h-3" />;
-                    }
-                    return (
-                      <span key={i} className="block text-gray-800">
-                        {line}
-                      </span>
-                    );
-                  })}
+                    })
+                  ) : (
+                    <div className="space-y-4">
+                      {message.content}
+                    </div>
+                  )}
                 </div>
                 {message.options && message.optionType === 'concept' && renderConceptOptions(message.options as ConceptOption[])}
                 {message.options && message.optionType === 'question' && renderQuestionOptions(message.options as Question[])}

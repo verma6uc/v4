@@ -1,7 +1,14 @@
-import { ConceptOption, Question } from '../../../utils/openai';
+import { ConceptOption, Question } from '../../../../utils/openai';
 import { ReactNode } from 'react';
 
 export type MessageType = 'user' | 'system';
+
+export interface MessageOption {
+  id: string;
+  [key: string]: any;
+}
+
+export type MessageOptionType = ConceptOption | Question | MessageOption;
 
 export interface Message {
   type: MessageType;
@@ -10,25 +17,12 @@ export interface Message {
   optionType?: 'concept' | 'question';
 }
 
-export interface MessageHandlers {
-  onConceptSelect: (conceptId: string) => void;
-  onQuestionAnswer: (questionId: string, selectedOptionIds: string[]) => void;
-}
-
-// Steps in the chat flow
 export type ChatStep = 'title' | 'description' | 'concept-selection' | 'question-answering';
 
-// Application lifecycle stages
-export type ApplicationStatus = 
-  | 'MEMORY'
-  | 'BLUEPRINT'
-  | 'VISUAL_PRD'
-  | 'DURING_DEVELOPMENT'
-  | 'UNDER_TESTED'
-  | 'DEVELOPMENT_COMPLETE';
+export type ThemeType = 'corporate' | 'modern' | 'minimal';
 
 export interface ApplicationConfig {
-  theme: 'corporate' | 'modern' | 'minimal';
+  theme: ThemeType;
   timezone: string;
   securityPolicy: string;
 }
@@ -40,7 +34,6 @@ export interface ApplicationData {
   answers?: Record<string, string[]>;
   selectedConcept?: ConceptOption;
   config: ApplicationConfig;
-  status?: ApplicationStatus;
 }
 
 // Default config for new applications
@@ -50,5 +43,5 @@ export const DEFAULT_CONFIG: ApplicationConfig = {
   securityPolicy: 'standard'
 };
 
-// Re-export types to ensure consistency
+// Re-export the types to ensure we're using a single source
 export type { ConceptOption, Question };

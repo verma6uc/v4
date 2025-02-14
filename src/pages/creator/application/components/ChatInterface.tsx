@@ -1,9 +1,11 @@
-import React, { useRef, useEffect } from 'react';
-import { Message as MessageComponent } from '../Message';
-import { ChatInput } from '../ChatInput';
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApplicationCreation } from '../context/ApplicationCreationContext';
-import { ConceptOption, Question } from '../../../../utils/openai';
+import { Feature } from '../../../../services/mock/features';
 import { generateResponse } from '../../../../services/mock';
+import { Message } from '../Message';
+import { ChatInput } from '../ChatInput';
+import { ConceptOption } from '../../../../utils/openai';
 import { generateConcepts } from '../../../../services/api/conceptGeneration';
 import { generateQuestions } from '../../../../services/api/questionGeneration';
 
@@ -19,17 +21,22 @@ export function ChatInterface() {
     setIsProcessing,
     remainingQuestions,
     setRemainingQuestions,
-    setAllQuestionsAnswered
+    setAllQuestionsAnswered,
+    selectedConcept,
+    setSelectedConcept
   } = useApplicationCreation();
 
-  const [input, setInput] = React.useState('');
+  const navigate = useNavigate();
+  const [input, setInput] = useState('');
+  const [isProcessingConcept, setIsProcessingConcept] = useState(false);
+  const [features, setFeatures] = useState<Feature[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
@@ -138,145 +145,130 @@ export function ChatInterface() {
     }
   };
 
-  const handleConceptSelect = async (conceptId: string) => {
-    const messageWithOptions = messages.find(msg => 
-      msg.options?.some(opt => 
+  const messageHandlers = {
+    onConceptSelect: async (conceptId: string) => {
+      const messageWithOptions = messages.find(msg => 
+        msg.options?.some(opt => 
+          'id' in opt && opt.id === conceptId
+        )
+      );
+
+      if (!messageWithOptions?.options) return;
+      
+      const fullConcept = messageWithOptions.options.find(opt => 
         'id' in opt && opt.id === conceptId
-      )
-    );
+      ) as ConceptOption;
 
-    if (!messageWithOptions?.options) return;
+      if (!fullConcept) return;
+      setIsProcessingConcept(true);
+      setSelectedConcept(fullConcept);
 
-    const selectedOption = messageWithOptions.options.find(opt => 
-      'id' in opt && opt.id === conceptId
-    ) as ConceptOption | undefined;
-
-    if (!selectedOption) return;
-
-    setIsProcessing(true);
-    setApplicationData(prev => ({ ...prev, selectedConcept: conceptId }));
-
-    try {
-      // Generate questions based on selected concept
-      const questions = await generateQuestions({
-        title: applicationData.title,
-        description: applicationData.description,
-        selectedConcept: selectedOption
-      });
-
-      // Store all questions
-      setRemainingQuestions(questions.slice(1));
-
-      // Show first question
-      if (questions.length > 0) {
+      try {
         setMessages(prev => [
           ...prev,
           {
             type: 'system',
-            content: "Let's gather some specific requirements. Please select all that apply:",
-            options: [questions[0]],
+            content: `Exploring "${fullConcept.title}" in depth to understand your requirements better...`
+          }
+        ]);
+
+        const questions = await generateQuestions({
+          title: applicationData.title,
+          description: applicationData.description,
+          selectedConcept: fullConcept
+        });
+
+        setRemainingQuestions(questions.slice(1));
+
+        if (questions.length > 0) {
+          setMessages(prev => [
+            ...prev,
+            {
+              type: 'system',
+              content: "Let's gather some specific requirements. Please select all that apply:",
+              options: [questions[0]],
+              optionType: 'question'
+            }
+          ]);
+        }
+
+        setCurrentStep('question-answering');
+      } catch (error) {
+        console.error('Error generating questions:', error);
+        setMessages(prev => [...prev, {
+          type: 'system',
+          content: "I encountered an error while generating questions. Please try again."
+        }]);
+      } finally {
+        setIsProcessingConcept(false);
+      }
+    },
+    onQuestionAnswer: async (questionId: string, selectedOptionIds: string[]) => {
+      setApplicationData(prev => ({
+        ...prev,
+        answers: {
+          ...prev.answers,
+          [questionId]: selectedOptionIds
+        }
+      }));
+
+      if (remainingQuestions.length > 0) {
+        const [nextQuestion, ...rest] = remainingQuestions;
+        setRemainingQuestions(rest);
+        
+        setMessages(prev => [
+          ...prev,
+          {
+            type: 'system',
+            content: "Please select all options that apply:",
+            options: [nextQuestion],
             optionType: 'question'
           }
         ]);
+      } else {
+        setAllQuestionsAnswered(true);
+        setIsProcessing(true);
+        
+        setMessages(prev => [
+          ...prev,
+          {
+            type: 'system',
+            content: "Processing your application..."
+          }
+        ]);
       }
-
-      setCurrentStep('question-answering');
-    } catch (error) {
-      console.error('Error generating questions:', error);
-      setMessages(prev => [...prev, {
-        type: 'system',
-        content: "I encountered an error while generating questions. Please try again."
-      }]);
-    } finally {
-      setIsProcessing(false);
     }
-  };
-
-  const handleQuestionAnswers = async (questionId: string, selectedOptionIds: string[]) => {
-    const currentQuestion = messages
-      .flatMap(msg => msg.options || [])
-      .find(opt => 'id' in opt && opt.id === questionId) as Question | undefined;
-
-    if (!currentQuestion) return;
-
-    // Save the answers
-    setApplicationData(prev => ({
-      ...prev,
-      answers: {
-        ...prev.answers,
-        [questionId]: selectedOptionIds
-      }
-    }));
-
-    // Show selected answers in chat
-    const selectedOptions = currentQuestion.options
-      .filter(opt => selectedOptionIds.includes(opt.id))
-      .map(opt => opt.text);
-
-    setMessages(prev => [
-      ...prev,
-      {
-        type: 'user',
-        content: `Selected options:\n${selectedOptions.map(opt => `• ${opt}`).join('\n')}`
-      }
-    ]);
-
-    // If there are more questions, show the next one
-    if (remainingQuestions.length > 0) {
-      const [nextQuestion, ...rest] = remainingQuestions;
-      setRemainingQuestions(rest);
-      
-      setMessages(prev => [
-        ...prev,
-        {
-          type: 'system',
-          content: "Please select all options that apply:",
-          options: [nextQuestion],
-          optionType: 'question'
-        }
-      ]);
-    } else {
-      // All questions answered
-      setAllQuestionsAnswered(true);
-      setMessages(prev => [
-        ...prev,
-        {
-          type: 'system',
-          content: "Great! I have all the information I need. I'll now generate a detailed product backlog based on your responses."
-        }
-      ]);
-      setCurrentStep('backlog-generation');
-    }
-  };
-
-  const messageHandlers = {
-    onConceptSelect: handleConceptSelect,
-    onQuestionAnswer: handleQuestionAnswers
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto pb-40">
-        <div className="w-full max-w-6xl mx-auto">
+    <div className="flex flex-col h-full relative">
+      <div className="flex-1 overflow-y-auto">
+        <div className="w-full max-w-6xl mx-auto pb-40">
           {messages.map((message, index) => (
-            <MessageComponent
+            <Message
               key={index}
               message={message}
               handlers={messageHandlers}
               answeredQuestions={applicationData.answers}
+              selectedConcept={selectedConcept?.id}
+              isProcessingConcept={isProcessingConcept}
             />
           ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <ChatInput
-        value={input}
-        onChange={handleInputChange}
-        onSubmit={handleSubmit}
-        onKeyDown={handleKeyDown}
-        disabled={isProcessing}
-      />
+      <div className="absolute bottom-0 left-0 right-0">
+        <div className="max-w-6xl mx-auto px-6 pb-6">
+          <ChatInput
+            value={input}
+            onChange={handleInputChange}
+            onSubmit={handleSubmit}
+            onKeyDown={handleKeyDown}
+            disabled={isProcessing}
+          />
+        </div>
+      </div>
     </div>
   );
 }
