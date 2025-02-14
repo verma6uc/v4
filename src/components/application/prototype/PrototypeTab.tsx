@@ -1,13 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Preview } from './Preview';
 import { webContainerService } from '../../../services/webcontainer';
-import { GitBranch } from 'lucide-react';
+import { ApplicationTabWrapper } from '../ApplicationTabWrapper';
 
-interface PrototypeTabProps {
-  repoUrl?: string;
-}
-
-export function PrototypeTab({ repoUrl }: PrototypeTabProps) {
+export function PrototypeTab() {
   const [previewUrl, setPreviewUrl] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -26,7 +22,8 @@ export function PrototypeTab({ repoUrl }: PrototypeTabProps) {
 
         if (!isMounted) return;
 
-        await webContainerService.boot(repoUrl);
+        // Boot without repoUrl to use the dashboard template
+        await webContainerService.boot();
         if (!isMounted) return;
 
         const url = await webContainerService.startDevServer();
@@ -55,41 +52,35 @@ export function PrototypeTab({ repoUrl }: PrototypeTabProps) {
       // Cleanup WebContainer on unmount
       webContainerService.teardown().catch(console.error);
     };
-  }, [repoUrl]);
+  }, []);
 
-  if (error) {
-    return (
-      <div className="p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <h3 className="text-lg font-medium mb-2">Error</h3>
-          <p>{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg text-red-700 text-sm font-medium transition-colors"
-          >
-            Retry
-          </button>
-        </div>
+  const content = error ? (
+    <div className="p-4">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+        <h3 className="text-lg font-medium mb-2">Error</h3>
+        <p>{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg text-red-700 text-sm font-medium transition-colors"
+        >
+          Retry
+        </button>
       </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 p-4">
-        {repoUrl && (
-          <div className="mb-4 flex items-center gap-2 text-gray-500">
-            <GitBranch className="w-4 h-4" />
-            <span className="text-sm">Repository: {repoUrl}</span>
-          </div>
-        )}
-        <div className="h-full min-h-[820px]">
-          {/* Preview Section */}
-          <div className="w-full h-full min-h-[820px]">
-            <Preview url={previewUrl} isLoading={isLoading} />
-          </div>
+    </div>
+  ) : (
+    <div className="p-4">
+      <div className="h-full min-h-[820px]">
+        {/* Preview Section */}
+        <div className="w-full h-full min-h-[820px]">
+          <Preview url={previewUrl} isLoading={isLoading} />
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <ApplicationTabWrapper currentTab="Prototype">
+      {content}
+    </ApplicationTabWrapper>
   );
 }
