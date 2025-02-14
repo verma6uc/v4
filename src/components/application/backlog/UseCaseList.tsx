@@ -9,7 +9,7 @@ interface UseCaseListProps {
 }
 
 export function UseCaseList({ useCases }: UseCaseListProps) {
-  const [expandedUseCases, setExpandedUseCases] = useState<string[]>([]);
+  const [expandedUseCases, setExpandedUseCases] = useState<string[]>(useCases[0] ? [useCases[0].id] : []);
 
   const toggleUseCase = (useCaseId: string) => {
     setExpandedUseCases(prev => 

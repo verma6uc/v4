@@ -9,7 +9,7 @@ interface FeatureListProps {
 }
 
 export function FeatureList({ features }: FeatureListProps) {
-  const [activeFeature, setActiveFeature] = useState<string | null>(null);
+  const [activeFeature, setActiveFeature] = useState<string | null>(features[0]?.id || null);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
