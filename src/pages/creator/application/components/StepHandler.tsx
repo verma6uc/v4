@@ -40,23 +40,6 @@ export function StepHandler() {
     console.log('Application data:', applicationData);
   }, [currentStep, applicationData]);
 
-  // Handle step transitions
-  useEffect(() => {
-    if (allQuestionsAnswered && currentStep === 'question-answering') {
-      setMessages(prev => [...prev, {
-        type: 'system',
-        content: `Great! Based on your responses, I'm now generating a comprehensive product backlog that will help guide the development of your application. This will include:
-
-• Core features and functionality
-• User roles and permissions
-• Key workflows and processes
-• Integration requirements
-
-Please wait while I prepare the detailed backlog...`
-      }]);
-    }
-  }, [allQuestionsAnswered, currentStep, setMessages]);
-
   // Render nothing - this component only handles logic
   return null;
 }

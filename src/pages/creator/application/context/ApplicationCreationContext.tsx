@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Message, ApplicationData, ApplicationStep } from '../types';
+import { Message, ApplicationData, ApplicationStep, DEFAULT_CONFIG } from '../types';
 import { Question, ConceptOption } from '../../../../utils/openai';
 
 interface ApplicationCreationContextType {
@@ -26,11 +26,8 @@ export function ApplicationCreationProvider({ children }: { children: ReactNode 
   const [applicationData, setApplicationData] = useState<ApplicationData>({
     title: '',
     description: '',
-    config: {
-      theme: 'corporate',
-      timezone: 'UTC',
-      securityPolicy: 'standard'
-    }
+    config: DEFAULT_CONFIG,
+    status: 'MEMORY'
   });
   const [currentStep, setCurrentStep] = useState<ApplicationStep>('title');
   const [selectedConcept, setSelectedConcept] = useState<ConceptOption | null>(null);

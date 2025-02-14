@@ -3,6 +3,13 @@ import { ReactNode } from 'react';
 
 export type MessageType = 'user' | 'system';
 
+export interface MessageOption {
+  id: string;
+  [key: string]: any;
+}
+
+export type MessageOptionType = ConceptOption | Question | MessageOption;
+
 export interface Message {
   type: MessageType;
   content: string | ReactNode;
@@ -16,7 +23,7 @@ export interface MessageHandlers {
 }
 
 // Steps in the chat flow
-export type ChatStep = 'title' | 'description' | 'concept-selection' | 'question-answering';
+export type ApplicationStep = 'title' | 'description' | 'concept-selection' | 'question-answering';
 
 // Application lifecycle stages
 export type ApplicationStatus = 
@@ -27,8 +34,10 @@ export type ApplicationStatus =
   | 'UNDER_TESTED'
   | 'DEVELOPMENT_COMPLETE';
 
+export type ThemeType = 'corporate' | 'modern' | 'minimal';
+
 export interface ApplicationConfig {
-  theme: 'corporate' | 'modern' | 'minimal';
+  theme: ThemeType;
   timezone: string;
   securityPolicy: string;
 }
@@ -45,7 +54,7 @@ export interface ApplicationData {
 
 // Default config for new applications
 export const DEFAULT_CONFIG: ApplicationConfig = {
-  theme: 'modern',
+  theme: 'corporate',
   timezone: 'UTC',
   securityPolicy: 'standard'
 };
