@@ -56,6 +56,8 @@ class WebContainerService {
   private static instance: WebContainerService | null = null;
   private webcontainerInstance: WebContainer | null = null;
   private terminalWriters: ((data: string) => void)[] = [];
+  private isBooting = false;
+  private bootPromise: Promise<WebContainer> | null = null;
 
   private constructor() {}
 
@@ -66,19 +68,35 @@ class WebContainerService {
     return WebContainerService.instance;
   }
 
-  async boot() {
+  async boot(): Promise<WebContainer> {
+    // If already booted, return the instance
     if (this.webcontainerInstance) {
       return this.webcontainerInstance;
     }
 
-    try {
-      this.webcontainerInstance = await WebContainer.boot();
-      await this.webcontainerInstance.mount(files);
-      return this.webcontainerInstance;
-    } catch (error) {
-      console.error('Failed to boot WebContainer:', error);
-      throw error;
+    // If currently booting, return the existing promise
+    if (this.bootPromise) {
+      return this.bootPromise;
     }
+
+    // Start the boot process
+    this.bootPromise = (async () => {
+      try {
+        // Add a small delay to ensure any previous instance is cleaned up
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        this.webcontainerInstance = await WebContainer.boot();
+        await this.webcontainerInstance.mount(files);
+        return this.webcontainerInstance;
+      } catch (error) {
+        this.bootPromise = null;
+        this.webcontainerInstance = null;
+        console.error('Failed to boot WebContainer:', error);
+        throw error;
+      }
+    })();
+
+    return this.bootPromise;
   }
 
   onTerminalOutput(writer: (data: string) => void) {
@@ -93,13 +111,14 @@ class WebContainerService {
   }
 
   async startDevServer() {
-    if (!this.webcontainerInstance) {
+    const instance = await this.boot();
+    if (!instance) {
       throw new Error('WebContainer not initialized');
     }
 
     try {
       // Install dependencies
-      const installProcess = await this.webcontainerInstance.spawn('npm', ['install']);
+      const installProcess = await instance.spawn('npm', ['install']);
       
       installProcess.output.pipeTo(
         new WritableStream({
@@ -116,7 +135,7 @@ class WebContainerService {
       }
 
       // Start dev server
-      const devProcess = await this.webcontainerInstance.spawn('npm', ['run', 'dev']);
+      const devProcess = await instance.spawn('npm', ['run', 'dev']);
       
       devProcess.output.pipeTo(
         new WritableStream({
@@ -128,7 +147,7 @@ class WebContainerService {
 
       // Wait for server to be ready
       return new Promise<string>((resolve) => {
-        this.webcontainerInstance!.on('server-ready', (_, url) => {
+        instance.on('server-ready', (_, url) => {
           resolve(url);
         });
       });
@@ -140,8 +159,11 @@ class WebContainerService {
 
   async teardown() {
     this.webcontainerInstance = null;
+    this.bootPromise = null;
     this.terminalWriters = [];
     WebContainerService.instance = null;
+    // Add a small delay to ensure cleanup
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
 }
 
