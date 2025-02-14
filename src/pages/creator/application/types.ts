@@ -1,19 +1,15 @@
+import { ConceptOption, Question } from '../../../utils/openai';
+
 export type MessageType = 'system' | 'user';
 
 export interface Message {
   type: MessageType;
   content: string;
-  options?: ConceptOption[];
+  options?: ConceptOption[] | Question[];
+  optionType?: 'concept' | 'question';
 }
 
-export interface ConceptOption {
-  id: string;
-  title: string;
-  description: string;
-  features: string[];
-}
-
-export type ApplicationStep = 'title' | 'description' | 'concept-selection';
+export type ApplicationStep = 'title' | 'description' | 'concept-selection' | 'question-answering';
 
 export interface ApplicationData {
   title: string;
@@ -24,4 +20,5 @@ export interface ApplicationData {
     securityPolicy: string;
   };
   selectedConcept?: string;
+  answers?: Record<string, string>;
 }

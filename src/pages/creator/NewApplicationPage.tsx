@@ -1,13 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Message as MessageComponent } from './application/Message';
 import { ChatInput } from './application/ChatInput';
-import { Message, ApplicationData, ApplicationStep, ConceptOption } from './application/types';
-import { generateResponse, generateConcepts } from '../../services/openai';
+import { Message, ApplicationData, ApplicationStep } from './application/types';
+import { ConceptOption, Question } from '../../utils/openai';
+import { generateConcepts, generateResponse, generateFollowUpQuestions } from '../../services/openai';
+
+console.log('NewApplicationPage component loaded');
 
 const INITIAL_MESSAGES: Message[] = [
   {
     type: 'system',
     content: `Welcome to the Application Creation Process!
+
 I'll guide you through creating your application step by step. Here's what we'll do:
 
 [1] First, we'll start with the basics
@@ -23,10 +27,13 @@ Let's begin! What would you like to call your application?`
 ];
 
 export function NewApplicationPage() {
+  console.log('NewApplicationPage rendered');
+  
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState<ApplicationStep>('title');
+  const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [applicationData, setApplicationData] = useState<ApplicationData>({
     title: '',
@@ -38,6 +45,18 @@ export function NewApplicationPage() {
     }
   });
 
+  useEffect(() => {
+    console.log('Current application data:', applicationData);
+  }, [applicationData]);
+
+  useEffect(() => {
+    console.log('Current step:', currentStep);
+  }, [currentStep]);
+
+  useEffect(() => {
+    console.log('Messages updated:', messages);
+  }, [messages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -47,50 +66,70 @@ export function NewApplicationPage() {
   }, [messages]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.log('Input changed:', e.target.value);
     setInput(e.target.value);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
+      console.log('Enter key pressed');
       e.preventDefault();
       handleSubmit(e);
     }
   };
 
   const handleConceptSelect = async (optionId: string) => {
+    console.log('Selecting concept:', optionId);
+    setSelectedConcept(optionId);
+    const selectedOption = messages
+      .flatMap(msg => (msg.options || []) as (ConceptOption | Question)[])
+      .find(opt => 'title' in opt && opt.id === optionId) as ConceptOption | undefined;
+
+    if (!selectedOption) {
+      console.error('Selected concept not found:', optionId);
+      return;
+    }
+    
     setApplicationData(prev => ({ ...prev, selectedConcept: optionId }));
     
     try {
-      const response = await generateResponse([
-        {
-          role: 'user',
-          content: `I've selected the ${optionId} concept. What questions do you have to help refine this concept?`
-        }
-      ], `User has selected concept: ${optionId}`);
-
+      console.log('Generating follow-up questions for concept:', selectedOption);
+      const questions = await generateFollowUpQuestions(selectedOption);
+      console.log('Generated questions:', questions);
+      
       setMessages(prev => [
         ...prev,
         {
           type: 'system',
-          content: response
+          content: "Great choice! Let's refine this concept further. Please answer these questions:",
+          options: questions,
+          optionType: 'question'
         }
       ]);
+      setCurrentStep('question-answering');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in handleConceptSelect:', error);
       setMessages(prev => [...prev, {
         type: 'system',
         content: "I encountered an error. Please try again."
       }]);
     }
-    
-    setCurrentStep('concept-selection');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isProcessing) return;
+    console.log('Form submitted');
+    console.log('Current step:', currentStep);
+    console.log('Input:', input);
+    console.log('Is Processing:', isProcessing);
+
+    if (!input.trim() || isProcessing) {
+      console.log('Input empty or processing in progress, returning');
+      return;
+    }
 
     const userMessage = input.trim();
+    console.log('Processing user message:', userMessage);
     setInput('');
     setMessages(prev => [...prev, { type: 'user', content: userMessage }]);
     setIsProcessing(true);
@@ -98,31 +137,51 @@ export function NewApplicationPage() {
     try {
       switch (currentStep) {
         case 'title':
+          console.log('Processing title step');
           if (userMessage.length < 3 || userMessage.length > 100) {
+            console.log('Title length validation failed');
             setMessages(prev => [...prev, {
               type: 'system',
               content: "The title should be between 3 and 100 characters. Please try again."
             }]);
           } else {
+            console.log('Setting application title:', userMessage);
             setApplicationData(prev => ({ ...prev, title: userMessage }));
-            const response = await generateResponse([
-              {
-                role: 'user',
-                content: `I want to create an application called "${userMessage}". Can you help me describe it?`
+            console.log('Generating response for title');
+            try {
+              const response = await generateResponse([
+                {
+                  role: 'user',
+                  content: `I want to create an application called "${userMessage}". Can you help me describe it?`
+                }
+              ]);
+              console.log('Response received:', response);
+              setMessages(prev => [...prev, { type: 'system', content: response }]);
+              setCurrentStep('description');
+            } catch (error) {
+              console.error('Error generating response:', error);
+              if (error instanceof Error) {
+                console.error('Error details:', {
+                  name: error.name,
+                  message: error.message,
+                  stack: error.stack
+                });
               }
-            ]);
-            setMessages(prev => [...prev, { type: 'system', content: response }]);
-            setCurrentStep('description');
+              throw error;
+            }
           }
           break;
 
         case 'description':
+          console.log('Processing description step');
           if (userMessage.length > 2000) {
+            console.log('Description length validation failed');
             setMessages(prev => [...prev, {
               type: 'system',
               content: "The description is too long (max 2000 characters). Please try again."
             }]);
           } else {
+            console.log('Setting application description:', userMessage);
             setApplicationData(prev => ({ ...prev, description: userMessage }));
             
             // Show processing message
@@ -132,29 +191,63 @@ export function NewApplicationPage() {
             }]);
             
             // Generate concepts
-            const concepts = await generateConcepts(applicationData.title, userMessage);
-            
-            setMessages(prev => [...prev, {
-              type: 'system',
-              content: "Based on your description, I've generated a few concept options. Please select the one that best matches your vision:",
-              options: concepts
-            }]);
+            console.log('Generating concepts');
+            try {
+              const concepts = await generateConcepts(applicationData.title, userMessage);
+              console.log('Concepts received:', concepts);
+              
+              setMessages(prev => [
+                ...prev.slice(0, -1), // Remove processing message
+                {
+                  type: 'system',
+                  content: "Based on your description, I've generated a few concept options. Please select the one that best matches your vision:",
+                  options: concepts,
+                  optionType: 'concept'
+                }
+              ]);
+              setCurrentStep('concept-selection');
+            } catch (error) {
+              console.error('Error generating concepts:', error);
+              if (error instanceof Error) {
+                console.error('Error details:', {
+                  name: error.name,
+                  message: error.message,
+                  stack: error.stack
+                });
+              }
+              throw error;
+            }
           }
           break;
 
         case 'concept-selection':
-          const response = await generateResponse([
-            {
-              role: 'user',
-              content: userMessage
+        case 'question-answering':
+          console.log('Processing concept/question step');
+          try {
+            const response = await generateResponse([
+              {
+                role: 'user',
+                content: userMessage
+              }
+            ], `User is refining the ${applicationData.selectedConcept} concept`);
+            console.log('Response received:', response);
+            
+            setMessages(prev => [...prev, { type: 'system', content: response }]);
+          } catch (error) {
+            console.error('Error generating response:', error);
+            if (error instanceof Error) {
+              console.error('Error details:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+              });
             }
-          ], `User is refining the ${applicationData.selectedConcept} concept`);
-          
-          setMessages(prev => [...prev, { type: 'system', content: response }]);
+            throw error;
+          }
           break;
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in handleSubmit:', error);
       setMessages(prev => [...prev, {
         type: 'system',
         content: "I encountered an error. Please try again."

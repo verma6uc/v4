@@ -1,5 +1,9 @@
 import React from 'react';
-import { Message as MessageType, ConceptOption } from './types';
+import { Message as MessageType } from './types';
+import { ConceptOption, Question } from '../../../utils/openai';
+import { ConceptCard } from '../../../components/cards/ConceptCard';
+import { BaseCard } from '../../../components/base/BaseCard';
+import { Button } from '../../../components/Button';
 
 interface MessageProps {
   message: MessageType;
@@ -10,26 +14,36 @@ export function Message({ message, onSelectOption }: MessageProps) {
   const isSystem = message.type === 'system';
 
   const renderConceptOptions = (options: ConceptOption[]) => (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {options.map(option => (
-        <div 
+        <ConceptCard
           key={option.id}
-          onClick={() => onSelectOption?.(option.id)}
-          className="group p-4 bg-white hover:bg-gray-50 rounded-xl shadow-sm ring-1 ring-gray-100 hover:ring-indigo-100 hover:shadow-md transition-all duration-200 cursor-pointer"
-        >
-          <h3 className="font-medium text-gray-900 group-hover:text-indigo-600 mb-2 transition-colors duration-200">
-            {option.title}
-          </h3>
-          <p className="text-sm text-gray-600 mb-3">{option.description}</p>
+          concept={option}
+          onSelect={onSelectOption || (() => {})}
+          selected={false} // TODO: Add selected state management
+        />
+      ))}
+    </div>
+  );
+
+  const renderQuestionOptions = (questions: Question[]) => (
+    <div className="mt-4 space-y-6">
+      {questions.map(question => (
+        <BaseCard key={question.id} className="p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{question.question}</h3>
           <div className="space-y-2">
-            {option.features.map((feature, i) => (
-              <div key={i} className="text-sm text-gray-500 flex items-center gap-2">
-                <div className="w-1 h-1 bg-gray-300 rounded-full group-hover:bg-indigo-300 transition-colors duration-200"></div>
-                {feature}
-              </div>
+            {question.options.map(option => (
+              <Button
+                key={option.id}
+                variant="outline"
+                onClick={() => onSelectOption?.(option.id)}
+                className="w-full text-left justify-start h-auto py-3 px-4"
+              >
+                {option.text}
+              </Button>
             ))}
           </div>
-        </div>
+        </BaseCard>
       ))}
     </div>
   );
@@ -79,7 +93,8 @@ export function Message({ message, onSelectOption }: MessageProps) {
                     );
                   })}
                 </p>
-                {message.options && renderConceptOptions(message.options)}
+                {message.options && message.optionType === 'concept' && renderConceptOptions(message.options as ConceptOption[])}
+                {message.options && message.optionType === 'question' && renderQuestionOptions(message.options as Question[])}
               </div>
             )}
           </div>
