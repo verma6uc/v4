@@ -5,13 +5,14 @@ import { Badge } from '../../../components/Badge';
 import { Button } from '../../../components/Button';
 import { Tabs } from '../../../components/Tabs';
 import { generateProductBacklog, Feature, UseCase, UserStory } from '../../../services/mock/productBacklog';
-import { Plus, Filter, ChevronRight, ChevronDown, Clock, FileText, Tag } from 'lucide-react';
+import { Plus, Filter, ChevronRight, ChevronDown, Clock, FileText, Tag, ListChecks } from 'lucide-react';
 
 export function ApplicationDetailPage() {
   const { applicationId } = useParams();
   const [activeTab, setActiveTab] = useState('backlog');
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
   const [expandedUseCases, setExpandedUseCases] = useState<string[]>([]);
+  const [expandedStories, setExpandedStories] = useState<string[]>([]);
   const backlog = generateProductBacklog();
 
   const toggleUseCase = (useCaseId: string) => {
@@ -19,6 +20,14 @@ export function ApplicationDetailPage() {
       prev.includes(useCaseId)
         ? prev.filter(id => id !== useCaseId)
         : [...prev, useCaseId]
+    );
+  };
+
+  const toggleStory = (storyId: string) => {
+    setExpandedStories(prev => 
+      prev.includes(storyId)
+        ? prev.filter(id => id !== storyId)
+        : [...prev, storyId]
     );
   };
 
@@ -125,19 +134,18 @@ export function ApplicationDetailPage() {
                   <Clock className="w-4 h-4" />
                   {formatDate(feature.lastModified)}
                 </div>
-                {feature.owner && (
-                  <div className="flex items-center gap-1">
-                    <span>Owner: {feature.owner}</span>
-                  </div>
-                )}
-                {feature.tags && feature.tags.length > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Tag className="w-4 h-4" />
-                    {feature.tags.join(', ')}
-                  </div>
-                )}
               </div>
             </div>
+
+            {/* Feature Description */}
+            {activeFeature === feature.id && (
+              <div className="px-4 pb-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
+                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{feature.description}</p>
+                </div>
+              </div>
+            )}
 
             {/* Use Cases */}
             {activeFeature === feature.id && (
@@ -177,83 +185,152 @@ export function ApplicationDetailPage() {
                           <Clock className="w-4 h-4" />
                           {formatDate(useCase.lastModified)}
                         </div>
-                        {useCase.owner && (
-                          <div className="flex items-center gap-1">
-                            <span>Owner: {useCase.owner}</span>
-                          </div>
-                        )}
-                        {useCase.dependencies && useCase.dependencies.length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <span>Dependencies: {useCase.dependencies.join(', ')}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
+
+                    {/* Use Case Description */}
+                    {expandedUseCases.includes(useCase.id) && (
+                      <div className="px-12 pb-4">
+                        <div className="bg-white p-4 rounded-lg shadow-sm">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap">{useCase.description}</p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* User Stories */}
                     {expandedUseCases.includes(useCase.id) && (
                       <div className="bg-white border-t border-gray-200">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complexity</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Review</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sprint</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modified</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {useCase.userStories.map(story => (
-                              <tr key={story.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                  {story.identifier}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {useCase.userStories.map(story => (
+                          <div key={story.id} className="border-b border-gray-200 last:border-b-0">
+                            {/* Story Header */}
+                            <div 
+                              className="flex items-center justify-between p-4 pl-20 hover:bg-gray-50 cursor-pointer"
+                              onClick={() => toggleStory(story.id)}
+                            >
+                              <div className="flex items-center gap-4 flex-1">
+                                <div className="flex items-center gap-2">
+                                  {expandedStories.includes(story.id) ? (
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                  ) : (
+                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                  )}
+                                  <span className="font-medium">{story.identifier}</span>
+                                </div>
+                                <span className="text-gray-900">{story.title}</span>
+                                <div className="flex gap-2">
+                                  <Badge variant={getPriorityColor(story.priority)}>
+                                    {story.priority}
+                                  </Badge>
+                                  <Badge variant={getComplexityColor(story.complexity)}>
+                                    {story.complexity}
+                                  </Badge>
+                                  <Badge variant={story.status === 'Done' ? 'success' : 'default'}>
+                                    {story.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4 text-sm text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  {story.estimatedHours}h
+                                </div>
+                                {story.sprint && (
+                                  <div>Sprint {story.sprint}</div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Story Details */}
+                            {expandedStories.includes(story.id) && (
+                              <div className="px-20 pb-4">
+                                <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                                   <div>
-                                    <div>{story.title}</div>
-                                    {story.tags && (
-                                      <div className="flex gap-1 mt-1">
+                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
+                                    <p className="text-sm text-gray-600 whitespace-pre-wrap">{story.description}</p>
+                                  </div>
+
+                                  <div>
+                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Acceptance Criteria</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                      {story.acceptanceCriteria.map((criteria, index) => (
+                                        <li key={index} className="text-sm text-gray-600">{criteria}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <h4 className="text-sm font-medium text-gray-700 mb-2">Details</h4>
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Priority:</span>
+                                          <Badge variant={getPriorityColor(story.priority)}>{story.priority}</Badge>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Complexity:</span>
+                                          <Badge variant={getComplexityColor(story.complexity)}>{story.complexity}</Badge>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Status:</span>
+                                          <Badge variant={story.status === 'Done' ? 'success' : 'default'}>{story.status}</Badge>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Review Status:</span>
+                                          <Badge variant={getReviewStatusColor(story.reviewStatus)}>{story.reviewStatus}</Badge>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div>
+                                      <h4 className="text-sm font-medium text-gray-700 mb-2">Planning</h4>
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Sprint:</span>
+                                          <span>{story.sprint || '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Estimated Hours:</span>
+                                          <span>{story.estimatedHours}h</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Assigned To:</span>
+                                          <span>{story.assignedTo || '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-500">Last Modified:</span>
+                                          <span>{formatDate(story.lastModified)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {story.dependencies && story.dependencies.length > 0 && (
+                                    <div>
+                                      <h4 className="text-sm font-medium text-gray-700 mb-2">Dependencies</h4>
+                                      <div className="flex gap-2">
+                                        {story.dependencies.map(dep => (
+                                          <Badge key={dep} variant="default">{dep}</Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {story.tags && story.tags.length > 0 && (
+                                    <div>
+                                      <h4 className="text-sm font-medium text-gray-700 mb-2">Tags</h4>
+                                      <div className="flex gap-2">
                                         {story.tags.map(tag => (
                                           <Badge key={tag} variant="default" size="sm">{tag}</Badge>
                                         ))}
                                       </div>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <Badge variant={getPriorityColor(story.priority)}>{story.priority}</Badge>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <Badge variant={getComplexityColor(story.complexity)}>{story.complexity}</Badge>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <Badge variant={story.status === 'Done' ? 'success' : 'default'}>{story.status}</Badge>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <Badge variant={getReviewStatusColor(story.reviewStatus)}>{story.reviewStatus}</Badge>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {story.sprint || '-'}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {story.estimatedHours}h
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {formatDate(story.lastModified)}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {story.assignedTo || '-'}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
