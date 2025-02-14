@@ -105,7 +105,7 @@ export function ApplicationDetailPage() {
                   ) : (
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}
-                  <span className="font-medium">{feature.code}</span>
+                  <span className="font-medium">{feature.identifier}</span>
                 </div>
                 <span className="text-gray-900">{feature.name}</span>
                 <Badge variant={getPriorityColor(feature.priority)}>{feature.priority}</Badge>
@@ -156,7 +156,7 @@ export function ApplicationDetailPage() {
                           ) : (
                             <ChevronRight className="w-5 h-5 text-gray-400" />
                           )}
-                          <span className="font-medium">{useCase.id}</span>
+                          <span className="font-medium">{useCase.identifier}</span>
                         </div>
                         <span className="text-gray-900">{useCase.title}</span>
                         <Badge variant={useCase.status === 'Done' ? 'success' : 'default'}>
@@ -212,7 +212,7 @@ export function ApplicationDetailPage() {
                             {useCase.userStories.map(story => (
                               <tr key={story.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                  {story.id}
+                                  {story.identifier}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                   <div>

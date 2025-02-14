@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface UserStory {
   id: string;
+  identifier: string;  // e.g., "CPOV.CADI.US1"
+  uniquenessCheck: number;
   title: string;
   description: string;
   acceptanceCriteria: string[];
@@ -15,10 +17,13 @@ export interface UserStory {
   reviewStatus: 'Pending' | 'In Review' | 'Approved' | 'Changes Requested';
   assignedTo?: string;
   tags?: string[];
+  useCaseId: string;  // Reference to parent use case
 }
 
 export interface UseCase {
   id: string;
+  identifier: string;  // e.g., "CPOV.COCR"
+  uniquenessCheck: number;
   title: string;
   description: string;
   status: 'Planned' | 'In Progress' | 'Done';
@@ -28,11 +33,13 @@ export interface UseCase {
   userStories: UserStory[];
   owner?: string;
   version?: string;
+  featureId: string;  // Reference to parent feature
 }
 
 export interface Feature {
   id: string;
-  code: string;  // e.g., "USPM"
+  identifier: string;  // e.g., "CPOV"
+  uniquenessCheck: number;
   name: string;
   description: string;
   priority: 'High' | 'Medium' | 'Low';
@@ -48,9 +55,10 @@ export interface Feature {
 export const mockFeatures: Feature[] = [
   {
     id: uuidv4(),
-    code: 'USPM',
-    name: 'User Profile Management',
-    description: 'Core user profile and authentication features',
+    identifier: 'CPOV',
+    uniquenessCheck: 3,
+    name: 'Company Provisioning',
+    description: 'This feature enables the YuVi platform (Leucine) to onboard new companies onto the platform. Through this feature, Super Admins can create new company instances and establish their initial administrative access. The process begins with creating a company record with basic identification information. Following this, a Company Admin account is created and invited to access the platform. The feature handles the secure invitation process, allowing the Company Admin to set up their credentials and verify their access. This feature is critical as it establishes the foundation for a company\'s presence on the platform. It ensures secure initial access while maintaining proper isolation between different companies on the platform. The feature focuses solely on getting a company established and their admin activated, after which the Company Admin can begin configuring their organizational structure and other settings.',
     priority: 'High',
     status: 'Planned',
     version: '1.0.0',
@@ -59,21 +67,25 @@ export const mockFeatures: Feature[] = [
     useCases: [
       {
         id: uuidv4(),
-        title: 'User Registration',
-        description: 'Allow users to create new accounts',
+        identifier: 'CPOV.CADI',
+        uniquenessCheck: 1,
+        title: 'Company Admin Invitation',
+        description: 'This use case handles the Company Admin\'s first interaction with the platform through the invitation link. It manages the secure process of setting up the admin account credentials and validating the admin\'s email address.',
         status: 'Planned',
         reviewStatus: 'Pending',
         lastModified: new Date().toISOString(),
+        featureId: 'CPOV',
         userStories: [
           {
             id: uuidv4(),
-            title: 'Email Registration',
-            description: 'As a new user, I want to register with my email',
+            identifier: 'CPOV.CADI.US1',
+            uniquenessCheck: 1,
+            title: 'Super Admin creates Company Admin Account for a company',
+            description: 'For a selected company the Superadmin specifies the email address and name for the designated CompanyAdmin. The system verifies the email is not associated with any existing account across companies. Upon validation, the system creates an admin account record and associates it with the company. The system assigns CompanyAdmin permissions to this account, making it the primary administrator for the company.',
             acceptanceCriteria: [
-              'User can enter email and password',
-              'Password must meet security requirements',
-              'Email verification is required',
-              'Welcome email is sent'
+              'Email uniqueness verification',
+              'Account creation with proper association',
+              'CompanyAdmin permissions assignment'
             ],
             priority: 'High',
             complexity: 'Medium',
@@ -82,97 +94,69 @@ export const mockFeatures: Feature[] = [
             estimatedHours: 8,
             lastModified: new Date().toISOString(),
             reviewStatus: 'Pending',
-            tags: ['auth', 'email']
+            useCaseId: 'CPOV.CADI'
           },
           {
             id: uuidv4(),
-            title: 'Social Login',
-            description: 'As a user, I want to register using social accounts',
+            identifier: 'CPOV.CADI.US2',
+            uniquenessCheck: 1,
+            title: 'System sends Admin Invitation Email',
+            description: 'The system generates a secure, time-limited invitation link for the CompanyAdmin account. Using the provided email address, the system sends an invitation email containing this link along with initial access instructions. This invitation allows the CompanyAdmin to set up their credentials and access the system for the first time.',
             acceptanceCriteria: [
-              'Support Google login',
-              'Support GitHub login',
-              'Link social account to email'
-            ],
-            priority: 'Medium',
-            complexity: 'Complex',
-            status: 'Planned',
-            sprint: 1,
-            dependencies: ['US-1'],
-            estimatedHours: 16,
-            lastModified: new Date().toISOString(),
-            reviewStatus: 'Pending',
-            tags: ['auth', 'social']
-          }
-        ]
-      },
-      {
-        id: uuidv4(),
-        title: 'Profile Management',
-        description: 'Allow users to manage their profiles',
-        status: 'Planned',
-        reviewStatus: 'Pending',
-        lastModified: new Date().toISOString(),
-        userStories: [
-          {
-            id: uuidv4(),
-            title: 'Edit Profile',
-            description: 'As a user, I want to edit my profile information',
-            acceptanceCriteria: [
-              'Can update name',
-              'Can update avatar',
-              'Can update contact info',
-              'Changes are saved immediately'
+              'Secure invitation link generation',
+              'Email delivery with instructions',
+              'Time-limited access'
             ],
             priority: 'High',
-            complexity: 'Simple',
+            complexity: 'Medium',
             status: 'Planned',
-            sprint: 2,
+            sprint: 1,
             estimatedHours: 6,
             lastModified: new Date().toISOString(),
             reviewStatus: 'Pending',
-            tags: ['profile']
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: uuidv4(),
-    code: 'COMM',
-    name: 'Communication',
-    description: 'Team communication and collaboration features',
-    priority: 'High',
-    status: 'Planned',
-    version: '1.0.0',
-    lastModified: new Date().toISOString(),
-    reviewStatus: 'Pending',
-    useCases: [
-      {
-        id: uuidv4(),
-        title: 'Team Chat',
-        description: 'Enable team members to chat in real-time',
-        status: 'Planned',
-        reviewStatus: 'Pending',
-        lastModified: new Date().toISOString(),
-        userStories: [
+            useCaseId: 'CPOV.CADI'
+          },
           {
             id: uuidv4(),
-            title: 'Direct Messages',
-            description: 'As a user, I want to send direct messages to team members',
+            identifier: 'CPOV.CADI.US4',
+            uniquenessCheck: 1,
+            title: 'Super Admin resends Admin Invitation',
+            description: 'The Superadmin selects the unactivated company admin account and triggers a new invitation. The system invalidates any previously sent invitation links for security. The system then generates a new secure invitation link with a fresh expiration period. Using the Company Admin\'s email address, the system sends a new invitation email containing this link. The system records this resend action in the audit log, tracking both the timestamp and the Superadmin who initiated it.',
             acceptanceCriteria: [
-              'Can send text messages',
-              'Can share files',
-              'Real-time delivery',
-              'Read receipts'
+              'Previous invitation invalidation',
+              'New secure link generation',
+              'Email resend',
+              'Audit log entry'
             ],
-            priority: 'High',
-            complexity: 'Complex',
+            priority: 'Medium',
+            complexity: 'Simple',
             status: 'Planned',
-            sprint: 3,
-            estimatedHours: 20,
+            sprint: 1,
+            estimatedHours: 4,
             lastModified: new Date().toISOString(),
             reviewStatus: 'Pending',
-            tags: ['chat', 'real-time']
+            useCaseId: 'CPOV.CADI'
+          },
+          {
+            id: uuidv4(),
+            identifier: 'CPOV.CADI.US5',
+            uniquenessCheck: 1,
+            title: 'Superadmin cancels Admin Activation',
+            description: 'The Superadmin selects the unactivated admin account and initiates cancellation. The system immediately invalidates any existing invitation links sent to this admin. The system reverts the admin account to an inactive state, removing any association with the company while preserving the company record itself. The system adds this cancellation to the audit log. This allows the Superadmin to assign a different admin to the company through a new admin account creation.',
+            acceptanceCriteria: [
+              'Invitation link invalidation',
+              'Account state reversion',
+              'Company record preservation',
+              'Audit logging'
+            ],
+            priority: 'Medium',
+            complexity: 'Medium',
+            status: 'Planned',
+            sprint: 1,
+            estimatedHours: 6,
+            lastModified: new Date().toISOString(),
+            reviewStatus: 'Pending',
+            useCaseId: 'CPOV.CADI'
           }
         ]
       }
