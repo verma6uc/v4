@@ -5,7 +5,7 @@ import { CreatorSidebar } from '../components/layout/CreatorSidebar';
 
 export function CreatorLayout() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-200 to-blue-200">
       <CreatorHeader />
       <CreatorSidebar />
       

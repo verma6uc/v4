@@ -7,7 +7,7 @@ interface BaseCardProps {
 
 export function BaseCard({ children, className = '' }: BaseCardProps) {
   return (
-    <div className={`bg-white p-6 rounded-lg shadow-sm ${className}`}>
+    <div className={`bg-white p-2 rounded-lg shadow-sm ${className}`}>
       {children}
     </div>
   );

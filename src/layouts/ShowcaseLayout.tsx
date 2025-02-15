@@ -7,7 +7,7 @@ export function ShowcaseLayout() {
   const location = useLocation();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-200 to-blue-200">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-white/70 backdrop-blur-xl border-r border-white/20 pt-16">
         <nav className="p-4">

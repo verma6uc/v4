@@ -121,7 +121,7 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -139,7 +139,7 @@ export function DashboardPage() {
       </div>
 
       {/* Critical Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         <SystemHealth data={mockData.systemHealth} />
         <SecurityAlerts data={mockData.securityAlerts} />
       </div>
@@ -148,15 +148,15 @@ export function DashboardPage() {
       <GrowthMetrics data={mockData.growth} />
 
       {/* Resource & Service Health */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         <ResourceMetrics metrics={mockData.resourceUsage} />
         <ServiceHealthTable services={mockData.systemHealth.services} />
       </div>
 
       {/* Activity Feed */}
       <BaseCard>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+        <div className="p-2">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Recent Activity</h2>
           <ActivityFeed items={mockData.recentActivity} />
         </div>
       </BaseCard>
